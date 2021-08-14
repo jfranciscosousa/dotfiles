@@ -1,12 +1,5 @@
-#!/usr/bin/env ruby
+#!/usr/bin/env zsh
 
-def shell(command)
-  output = `#{command}`
+REMOTE=$(git rev-parse --abbrev-ref --symbolic-full-name @{u})
 
-  exit(-1) unless $?.success?
-
-  output
-end
-
-remote = shell("git rev-parse --abbrev-ref --symbolic-full-name @{u}")
-system("git diff #{remote}")
+git diff $REMOTE

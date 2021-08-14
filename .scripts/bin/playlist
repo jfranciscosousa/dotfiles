@@ -1,4 +1,3 @@
 #!/bin/bash
 
 youtube-dl -f 'bestvideo[ext=mp4]+bestaudio[ext=m4a]/mp4' -i -o "%(title)s.%(ext)s" $1
-
