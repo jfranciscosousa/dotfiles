@@ -43,3 +43,7 @@ bower_components/
 #binstubs
 exe/
 .vscode/
+.env
+.envrc
+.env.*
+.envrc.*
