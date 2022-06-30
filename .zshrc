@@ -14,6 +14,7 @@ eval "$(direnv hook zsh)"
 # ASDF
 source $HOME/.asdf/asdf.sh
 # Yarn global packages
+yarn config set prefix ~/.yarn
 export PATH="$HOME/.yarn/bin:$PATH"
 # Golang
 export GOPATH="$HOME/.go"
