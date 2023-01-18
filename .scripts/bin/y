@@ -2,10 +2,10 @@
 
 if [ -f "yarn.lock" ]; then
   command="yarn"
-elif [ -f "pnpm-lock.yaml" ]; then
-  command="pnpm"
-else
+elif [ -f "package-lock.json" ]; then
   command="npm"
+else
+  command="pnpm"
 fi
 
 eval "$command $@"
