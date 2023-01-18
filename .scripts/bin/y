@@ -1,0 +1,11 @@
+#!/bin/bash
+
+if [ -f "yarn.lock" ]; then
+  command="yarn"
+elif [ -f "pnpm-lock.yaml" ]; then
+  command="pnpm"
+else
+  command="npm"
+fi
+
+eval "$command $@"
