@@ -13,29 +13,39 @@ end
 
 branch=shell("git rev-parse --abbrev-ref HEAD")
 
-options = {}
+push = false
+message = "wip"
+no_edit = false
+commit = "git commit"
 
 OptionParser.new do |opts|
   opts.banner = "Usage: git work [options]"
 
-  opts.on("-f", "--force", "Force script execution on master") do |f|
-    options[:force] = f
+  opts.on("-p", "--push", "Push after commit") do |_v|
+    push = true
   end
 
-  opts.on("-p", "--push", "Push after commit") do |p|
-    options[:push] = p
+  opts.on("-m M", "--message M", String, "Commit message") do |v|
+    message = v
   end
 
-  opts.on("-m M", "--message M", String, "Commit message") do |m|
-    options[:message] = m
+  opts.on("--no-verify", "Bypass pre-commit and commig-msg hooks") do |_v|
+    commit.concat(" --no-verify")
+  end
+
+  opts.on("--no-edit", "do not edit the commit message before comitting") do |_v|
+    no_edit = true
+    commit.concat(" --no-edit")
+  end
+
+  opts.on("--amend", "amend the tip of the current branch") do |_v|
+    commit.concat(" --amend")
   end
 end.parse!
 
-if branch == "master" && !options[:force]
-  puts "Can't run this on the master branch"
-  exit(-1)
-end
+commit.concat(" -m \"#{message}\"") unless no_edit
 
 puts shell("git add --all")
-puts shell("git commit -m '#{options[:message] || 'wip'}'")
-puts shell("git push -u origin #{branch}") if options[:push]
+puts commit
+puts shell(commit)
+puts shell("git push -u origin #{branch}") if push
