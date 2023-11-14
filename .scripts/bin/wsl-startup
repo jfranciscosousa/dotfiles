@@ -1,5 +1,0 @@
-sysctl -p
-service postgresql start
-su -c "echo 200000 > /proc/sys/net/ipv4/tcp_keepalive_time" root
-su -c "echo 100 > /proc/sys/net/ipv4/tcp_keepalive_intvl" root
-su -c "echo 20 > /proc/sys/net/ipv4/tcp_keepalive_probes" root

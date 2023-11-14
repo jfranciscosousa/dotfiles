@@ -28,15 +28,12 @@ source "$HOME/.zsh/aliases.sh"
 export PATH="$PATH:$HOME/.scripts/git"
 export PATH="$PATH:$HOME/.scripts/bin"
 
-# Linux stuff
+# Linux exclusive
 if [[ "$OSTYPE" == "linux-gnu" ]]; then
-  export PATH="/home/linuxbrew/.linuxbrew/bin:$PATH"
-  export MANPATH="/home/linuxbrew/.linuxbrew/share/man:$MANPATH"
-  export INFOPATH="/home/linuxbrew/.linuxbrew/share/info:$INFOPATH"
-  test -d "/etc/profile.d/vte.sh" && . /etc/profile.d/vte.sh
+  "$HOME/.scripts/startup/linux.sh"
 fi
 
+# WSL exclusive
 if grep -q WSL /proc/version; then
-    keychain $HOME/.ssh/github_rsa
-    source $HOME/.keychain/$HOST-sh
+  "$HOME/.scripts/startup/wsl.sh"
 fi
