@@ -1,0 +1,65 @@
+#!/usr/bin/env ruby
+# This scripts adds all changes and commits with a 'wip' message
+# For safety this script refuses to run on master
+require 'optparse'
+
+def shell(command)
+  output = `#{command}`
+
+  exit(-1) unless $?.success?
+
+  output
+end
+
+branch = shell("git rev-parse --abbrev-ref HEAD").strip
+
+push = false
+force = false
+message = "wip"
+no_edit = false
+commit_command = "git commit"
+
+OptionParser.new do |opts|
+  opts.banner = "Usage: git work [options]"
+
+  opts.on("-p", "--push", "Push after commit") do |_v|
+    push = true
+  end
+
+  opts.on("-f", "--force", "Force push") do |_v|
+    force = true
+  end
+
+  opts.on("-m M", "--message M", String, "Commit message") do |v|
+    message = v
+  end
+
+  opts.on("--no-verify", "Bypass pre-commit and commig-msg hooks") do |_v|
+    commit_command.concat(" --no-verify")
+  end
+
+  opts.on("--no-edit", "do not edit the commit message before comitting") do |_v|
+    no_edit = true
+    commit_command.concat(" --no-edit")
+  end
+
+  opts.on("--amend", "amend the tip of the current branch") do |_v|
+    commit_command.concat(" --amend")
+  end
+end.parse!
+
+commit_command.concat(" -m \"#{message}\"") unless no_edit
+
+if (branch == 'master' || branch == 'main') && push && !force
+  puts "Cannot use push flag on #{branch}. Please run with the --force flag if you are 100% sure of what you are doing."
+  exit(-1)
+end
+
+puts shell("git add --all")
+puts commit_command
+puts shell(commit_command)
+
+push_command = "git push -u origin #{branch}"
+push_command.concat(" --force-with-lease") if force
+
+puts shell(push_command)

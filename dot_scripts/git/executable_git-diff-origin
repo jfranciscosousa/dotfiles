@@ -1,0 +1,5 @@
+#!/usr/bin/env zsh
+
+REMOTE=$(git rev-parse --abbrev-ref --symbolic-full-name @{u})
+
+git diff $REMOTE

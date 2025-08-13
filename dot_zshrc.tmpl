@@ -1,0 +1,40 @@
+if [ -n "${ZSH_DEBUGRC+1}" ]; then
+    zmodload zsh/zprof
+fi
+
+source "${HOME}/.zgen/zgen.zsh"
+{{ if eq .chezmoi.os "darwin" }}
+eval "$(/opt/homebrew/bin/brew shellenv)"
+{{ end }}
+
+if ! zgen saved; then
+  zgen prezto
+  zgen load geometry-zsh/geometry
+  zgen load kiurchv/asdf.plugin.zsh
+
+  zgen save
+fi
+
+# direnv
+eval "$(direnv hook zsh)"
+# Geometry stuff
+GEOMETRY_PROMPT_PREFIX="%F{$GEOMETRY_COLOR_DIR}$USER"
+# Custom aliases
+source "$HOME/.zsh/aliases.sh"
+# Add my custom scripts to path
+export PATH="$PATH:$HOME/.scripts/git"
+export PATH="$PATH:$HOME/.scripts/bin"
+export PATH=/usr/local/bin:$PATH
+# ASDF
+export PATH="${ASDF_DATA_DIR:-$HOME/.asdf}/shims:$PATH"
+
+{{ if eq .chezmoi.os "darwin" }}
+"$HOME/.scripts/startup/macos.sh"
+{{ else if eq .chezmoi.os "linux" }}
+"$HOME/.scripts/startup/linux.sh"
+{{ end }}
+
+# Custom non-git tracked scripts
+if [[ -f "$HOME/.zsh/custom.sh" ]]; then
+  source "$HOME/.zsh/custom.sh"
+fi

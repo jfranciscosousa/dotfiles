@@ -1,0 +1,15 @@
+#!/usr/bin/env zsh
+
+printf "This will fully reset the repo to the match the remote. YOU CAN LOSE DATA\n"
+if read -q "REPLY?Are you sure you want to continue? <y/N> "; then
+  git pull
+
+  remote=$(git rev-parse --abbrev-ref --symbolic-full-name @{u})
+
+  git reset --hard $remote
+  printf "\nSynced everything o the remote\n"
+else
+  printf "\nAaaand nothing happened, I swear\n"
+
+  exit 0
+fi
