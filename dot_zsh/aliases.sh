@@ -1,7 +1,9 @@
 #!/bin/sh
 
 alias vim="nvim"
-alias update_arch_system="yay -Syyu"
+alias arch-update="yay -Syyu"
+alias arch-install="yay -S $1"
+alias arch-uninstall="yay -Rcuns $1"
 alias ga="git add"
 alias gaa="git add --all"
 alias gb="git branch"
