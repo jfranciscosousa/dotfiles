@@ -1,7 +1,7 @@
 #!/bin/sh
 
 alias vim="nvim"
-alias update_arch_system="sudo yay -Syyu"
+alias update_arch_system="yay -Syyu"
 alias ga="git add"
 alias gaa="git add --all"
 alias gb="git branch"
