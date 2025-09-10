@@ -36,6 +36,12 @@ export PATH=/usr/local/bin:$PATH
 export PATH="$PATH:$HOME/.local/bin"
 # ASDF
 export PATH="${ASDF_DATA_DIR:-$HOME/.asdf}/shims:$PATH"
+# PNPM
+export PNPM_HOME="$HOME/.local/share/pnpm"
+case ":$PATH:" in
+  *":$PNPM_HOME:"*) ;;
+  *) export PATH="$PNPM_HOME:$PATH" ;;
+esac
 
 {{ if eq .chezmoi.os "darwin" }}
 "$HOME/.scripts/startup/macos.sh"
@@ -47,3 +53,4 @@ export PATH="${ASDF_DATA_DIR:-$HOME/.asdf}/shims:$PATH"
 if [[ -f "$HOME/.zsh/custom.sh" ]]; then
   source "$HOME/.zsh/custom.sh"
 fi
+
