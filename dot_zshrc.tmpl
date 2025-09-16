@@ -44,9 +44,9 @@ case ":$PATH:" in
 esac
 
 {{ if eq .chezmoi.os "darwin" }}
-"$HOME/.scripts/startup/macos.sh"
+source "$HOME/.scripts/startup/macos.sh"
 {{ else if eq .chezmoi.os "linux" }}
-"$HOME/.scripts/startup/linux.sh"
+source "$HOME/.scripts/startup/linux.sh"
 {{ end }}
 
 # Custom non-git tracked scripts
