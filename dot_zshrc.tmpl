@@ -38,10 +38,7 @@ export PATH="$PATH:$HOME/.local/bin"
 export PATH="${ASDF_DATA_DIR:-$HOME/.asdf}/shims:$PATH"
 # PNPM
 export PNPM_HOME="$HOME/.local/share/pnpm"
-case ":$PATH:" in
-  *":$PNPM_HOME:"*) ;;
-  *) export PATH="$PNPM_HOME:$PATH" ;;
-esac
+export PATH="$PNPM_HOME:$PATH"
 
 {{ if eq .chezmoi.os "darwin" }}
 source "$HOME/.scripts/startup/macos.sh"
