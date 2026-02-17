@@ -22,4 +22,5 @@ gitlab-merge-request() {
         --yes
 }
 
-gitlab-merge-request &
+gitlab-merge-request
+
