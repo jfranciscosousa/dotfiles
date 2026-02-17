@@ -48,3 +48,4 @@ exe/
 .env.*
 .envrc.*
 .tool-versions.local
+.claude/settings.local.json
