@@ -1,0 +1,25 @@
+#!/usr/bin/env zsh
+
+gitlab-merge-request() {
+    # 1. Get the repository root and origin url
+    local repo_root=$(git rev-parse --show-toplevel)
+    local origin_url=$(git remote get-url origin)
+
+    # 2. Define reviewers based on the project
+    local reviewers=""
+    if [[ "$origin_url" == "git@gitlab.com:remote-com/employ-starbase/dragon.git" ]]; then
+        reviewers="aleksandermaj"
+    elif [[ "$origin_url" == "git@gitlab.com:remote-com/employ-starbase/tiger.git" ]]; then
+        reviewers="aleksandermaj"
+    fi
+
+    # 3. Create the MR with the default template
+    glab mr create \
+        --fill \
+        --description "$(COMMITS=`git log master..HEAD --pretty=format:"- %s"` perl -pe 's/%\{all_commits\}/$ENV{COMMITS}/g' "$repo_root/.gitlab/merge_request_templates/default.md")" \
+        --assignee "@me" \
+        --reviewer "$reviewers" \
+        --yes
+}
+
+gitlab-merge-request &
