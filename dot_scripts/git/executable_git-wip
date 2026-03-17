@@ -61,7 +61,7 @@ end
 puts shell("git add --all")
 
 if ai_message
-  prompt = "Analyze the staged git changes and write a concise commit message. Output ONLY the commit message, nothing else."
+  prompt = "Analyze the staged git changes and write a detailed commit message. Output ONLY the commit message, nothing else."
   message = IO.popen(["claude", "--print", "-"], "r+") do |io|
     io.write(prompt)
     io.close_write
