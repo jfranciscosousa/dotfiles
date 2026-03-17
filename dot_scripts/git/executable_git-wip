@@ -17,6 +17,7 @@ push = false
 force = false
 message = "wip"
 no_edit = false
+ai_message = false
 commit_command = "git commit"
 
 OptionParser.new do |opts|
@@ -46,9 +47,11 @@ OptionParser.new do |opts|
   opts.on("--amend", "amend the tip of the current branch") do |_v|
     commit_command.concat(" --amend")
   end
-end.parse!
 
-commit_command.concat(" -m \"#{message}\"") unless no_edit
+  opts.on("--ai", "Use Claude to auto-generate commit message from staged changes") do |_v|
+    ai_message = true
+  end
+end.parse!
 
 if (branch == 'master' || branch == 'main') && push && !force
   puts "Cannot use push flag on #{branch}. Please run with the --force flag if you are 100% sure of what you are doing."
@@ -56,8 +59,22 @@ if (branch == 'master' || branch == 'main') && push && !force
 end
 
 puts shell("git add --all")
-puts commit_command
-puts shell(commit_command)
+
+if ai_message
+  diff = shell("git diff --cached")
+  prompt = "Analyze these staged git changes and write a concise commit message (1 sentence, no quotes, no markdown). Output ONLY the commit message, nothing else.\n\n#{diff}"
+  message = IO.popen(["claude", "--print", "-"], "r+") do |io|
+    io.write(prompt)
+    io.close_write
+    io.read
+  end.strip
+  if message.empty? || !$?.success?
+    puts "Warning: Claude failed to generate a message, falling back to 'wip'"
+    message = "wip"
+  end
+end
+
+commit_command.concat(" -m \"#{message}\"") unless no_edit
 
 push_command = "git push -u origin #{branch}"
 push_command.concat(" --force-with-lease") if force
