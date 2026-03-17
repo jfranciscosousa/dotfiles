@@ -77,6 +77,8 @@ commit_command.concat(" -m \"#{message}\"") unless no_edit
 
 puts shell(commit_command)
 
+return unless push
+
 push_command = "git push -u origin #{branch}"
 push_command.concat(" --force-with-lease") if force
 
