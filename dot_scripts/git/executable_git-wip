@@ -61,8 +61,7 @@ end
 puts shell("git add --all")
 
 if ai_message
-  diff = shell("git diff --cached")
-  prompt = "Analyze these staged git changes and write a concise commit message (1 sentence, no quotes, no markdown). Output ONLY the commit message, nothing else.\n\n#{diff}"
+  prompt = "Analyze the staged git changes and write a concise commit message. Output ONLY the commit message, nothing else."
   message = IO.popen(["claude", "--print", "-"], "r+") do |io|
     io.write(prompt)
     io.close_write
@@ -75,6 +74,8 @@ if ai_message
 end
 
 commit_command.concat(" -m \"#{message}\"") unless no_edit
+
+puts shell(commit_command)
 
 push_command = "git push -u origin #{branch}"
 push_command.concat(" --force-with-lease") if force
