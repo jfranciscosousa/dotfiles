@@ -61,7 +61,7 @@ end
 puts shell("git add --all")
 
 if ai_message
-  prompt = "Analyze the staged git changes and write a detailed commit message, feel free to use markdown and make it multiline. Output ONLY the commit message, nothing else."
+  prompt = "Analyze the staged git changes and write a detailed commit message. Rules: wrap all lines at 72 characters, use a short subject line (max 72 chars), leave a blank line after the subject, then a body with details. No markdown, plain text only. Output ONLY the commit message, nothing else."
   message = IO.popen(["claude", "--print", "-"], "r+") do |io|
     io.write(prompt)
     io.close_write

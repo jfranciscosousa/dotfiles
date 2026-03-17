@@ -4,6 +4,7 @@
 [core]
   editor = nvim
   excludesfile = ~/.global_gitignore
+  pager = less -+S
 [credential]
   helper = cache --timeout=3600
 [push]
