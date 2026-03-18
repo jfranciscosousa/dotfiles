@@ -4,9 +4,13 @@
 require 'optparse'
 
 def shell(command)
-  output = `#{command}`
+  output = `#{command} 2>&1`
 
-  exit(-1) unless $?.success?
+  unless $?.success?
+    $stderr.puts "Error running: #{command}"
+    $stderr.puts output unless output.strip.empty?
+    exit(-1)
+  end
 
   output
 end
@@ -61,19 +65,51 @@ end
 puts shell("git add --all")
 
 if ai_message
-  prompt = "Analyze the staged git changes and write a detailed commit message. Rules: wrap all lines at 72 characters, use a short subject line (max 72 chars), leave a blank line after the subject, then a body with details. No markdown, plain text only. Output ONLY the commit message, nothing else."
-  message = IO.popen(["claude", "--print", "-"], "r+") do |io|
+  diff = `git diff --cached --stat`.strip
+  diff_full = `git diff --cached`
+
+  prompt = <<~PROMPT
+    Write a git commit message for these changes. Output ONLY the message, no explanation.
+
+    Format: subject line (max 72 chars), blank line, body wrapped at 72 chars. Plain text only.
+
+    Files changed:
+    #{diff}
+
+    Diff:
+    #{diff_full}
+  PROMPT
+
+  claude_output = IO.popen(["claude", "--print", "--no-session-persistence", "--tools", "", "--disable-slash-commands", "--strict-mcp-config", "-"], "r+", err: [:child, :out]) do |io|
     io.write(prompt)
     io.close_write
     io.read
-  end.strip
-  if message.empty? || !$?.success?
-    puts "Warning: Claude failed to generate a message, falling back to 'wip'"
+  end
+  claude_status = $?
+
+  if !claude_status.success?
+    $stderr.puts "Warning: Claude exited with status #{claude_status.exitstatus}"
+    $stderr.puts claude_output unless claude_output.strip.empty?
+    $stderr.puts "Falling back to 'wip' message"
     message = "wip"
+  elsif claude_output.strip.empty?
+    $stderr.puts "Warning: Claude returned empty output, falling back to 'wip'"
+    message = "wip"
+  else
+    message = claude_output.strip
   end
 end
 
-commit_command.concat(" -m \"#{message}\"") unless no_edit
+if no_edit
+  # --no-edit means we skip -m (used with --amend)
+else
+  # Write message to a temp file to avoid shell escaping issues
+  require 'tempfile'
+  msgfile = Tempfile.new('git-commit-msg')
+  msgfile.write(message)
+  msgfile.close
+  commit_command.concat(" -F #{msgfile.path}")
+end
 
 puts shell(commit_command)
 
