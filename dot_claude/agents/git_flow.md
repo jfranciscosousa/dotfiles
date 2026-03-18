@@ -46,7 +46,7 @@ When the user asks to open/create an MR or when it's part of the workflow:
 3. **If MR does not exist — create it**:
    - Generate a clear MR title from the branch name and changes.
    - Write a comprehensive MR description covering: what changed, why, and any notable details from the diff.
-   - Run `glab mr create --fill` or with explicit `--title` and `--description` flags.
+   - Run `glab mr create --fill` or with explicit `--title` and `--description` flags. `--body` does NOT exist.
    - Target `master` or `main` (detect which exists in the remote).
 
 ## Commit Message Quality Standards
