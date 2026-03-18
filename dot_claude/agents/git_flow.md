@@ -66,3 +66,4 @@ When the user asks to open/create an MR or when it's part of the workflow:
 - Never rebase or alter history unless explicitly asked.
 - Use `glab` (not `gh`) for all GitLab operations.
 - When on master/main without explicit permission to push there, ALWAYS create a feature branch first.
+- Do not describe commits and MRs with testing plans. Just document the changes to the code. Why and what.
