@@ -64,19 +64,15 @@ end
 
 puts shell("git add --all")
 
+def wrap(text, width = 72)
+  text.gsub(/(.{1,#{width}})(\s+|\z)/, "\\1\n").rstrip
+end
+
 if ai_message
-  diff = `git diff --cached --stat`.strip
   diff_full = `git diff --cached`
 
   prompt = <<~PROMPT
-    Write a git commit message for these changes. Output ONLY the message, no explanation.
-
-    Format: subject line (max 72 chars), blank line, body wrapped at 72 chars. Plain text only.
-
-    Files changed:
-    #{diff}
-
-    Diff:
+    Summarize this diff as: one subject line, then a blank line, then the commit description. Use bullet points for different subjects.
     #{diff_full}
   PROMPT
 
@@ -96,7 +92,11 @@ if ai_message
     $stderr.puts "Warning: Claude returned empty output, falling back to 'wip'"
     message = "wip"
   else
-    message = claude_output.strip
+    lines = claude_output.strip.lines.map(&:rstrip)
+    subject = lines.first[0, 50]
+    body = lines.drop(1).drop_while(&:empty?)
+    formatted_body = body.map { |l| wrap(l, 72) }.join("\n")
+    message = formatted_body.empty? ? subject : "#{subject}\n\n#{formatted_body}"
   end
 end
 
