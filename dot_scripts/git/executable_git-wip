@@ -1,6 +1,18 @@
 #!/usr/bin/env ruby
-# This scripts adds all changes and commits with a 'wip' message
-# For safety this script refuses to run on master
+# git-wip - Quick commit all changes with a default "wip" message.
+#
+# Usage: git wip [options]
+#
+# Options:
+#   -m, --message M     Commit message (default: "wip")
+#   -p, --push          Push after commit
+#   -f, --force         Force push with --force-with-lease (requires -p)
+#   --ai                Auto-generate commit message with Claude
+#   --amend             Amend the last commit
+#   --no-edit           Don't edit the commit message (useful with --amend)
+#   --no-verify         Bypass pre-commit and commit-msg hooks
+#
+# Refuses to push to master/main unless --force is given.
 require 'optparse'
 
 def shell(command)
@@ -25,7 +37,7 @@ ai_message = false
 commit_command = "git commit"
 
 OptionParser.new do |opts|
-  opts.banner = "Usage: git work [options]"
+  opts.banner = "Usage: git wip [options]\n\nQuick commit all changes with a default \"wip\" message.\nRefuses to push to master/main unless --force is given.\n\n"
 
   opts.on("-p", "--push", "Push after commit") do |_v|
     push = true

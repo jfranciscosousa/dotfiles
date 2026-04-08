@@ -1,4 +1,5 @@
 #!/usr/bin/env zsh
+# git-squash-feature - Soft reset all commits since branching from a base branch into one.
 
 set -e
 

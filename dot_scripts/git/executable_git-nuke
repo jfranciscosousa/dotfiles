@@ -1,7 +1,5 @@
 #!/usr/bin/env zsh
-#
-# KUDOS TO MESTRE MENDES, PUT SOME RESPEK
-# https://github.com/fribmendes/dotfiles/blob/master/bin/git-nuke
+# git-nuke - Prune remotes and delete all local branches with no remote counterpart.
 #
 # # # # # # # # # # # # # # # # # #
 # CAUTION: BEWARE OF THIS SCRIPT! #
@@ -18,8 +16,6 @@
 # Beware that this script DELETES LOCAL BRANCHES
 # WHICH HAVEN'T BEEN PUSHED YET.
 # TODO: Add a --safe flag to avoid this
-#
-# For a lighter version see bin/git-bomb
 
 # Prune origin
 echo "[git]: pruning..."
@@ -38,9 +34,4 @@ git branch -avv \
   | awk '/: gone\]/ { print $1 }' \
   | xargs git branch -D
 
-if which cowsay &> /dev/null; then
-  (echo "I AM BECOME DEATH,\n\nDESTROYER OF WORLDS") \
-  | cowsay
-else
-  echo "\n\nI AM BECOME DEATH,\nDESTROYER OF WORLDS"
-fi
+echo "\n\nI AM BECOME DEATH,\nDESTROYER OF WORLDS"

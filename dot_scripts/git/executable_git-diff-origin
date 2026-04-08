@@ -1,4 +1,5 @@
 #!/usr/bin/env zsh
+# git-diff-origin - Show diff between HEAD and its upstream tracking branch.
 
 REMOTE=$(git rev-parse --abbrev-ref --symbolic-full-name @{u})
 

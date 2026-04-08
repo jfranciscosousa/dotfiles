@@ -1,4 +1,5 @@
 #!/usr/bin/env zsh
+# git-reset-remote - Hard reset the current branch to match its upstream remote.
 
 printf "This will fully reset the repo to the match the remote. YOU CAN LOSE DATA\n"
 if read -q "REPLY?Are you sure you want to continue? <y/N> "; then
