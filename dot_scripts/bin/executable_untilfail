@@ -1,3 +1,4 @@
 #!/bin/bash
+# untilfail - Repeat a command until it fails.
 
 while $@; do :; done

@@ -1,4 +1,5 @@
 #!/bin/bash
+# y - Universal JS package manager. Delegates to yarn, npm, or pnpm based on lockfile.
 
 if [ -f "yarn.lock" ]; then
   command="yarn"

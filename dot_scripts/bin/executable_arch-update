@@ -1,4 +1,5 @@
 #!/usr/bin/env bash
+# arch-update - Check and apply Arch Linux updates (official + AUR via yay).
 set -euo pipefail
 
 echo "==> Checking for updates..."

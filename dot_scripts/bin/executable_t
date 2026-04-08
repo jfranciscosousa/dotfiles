@@ -1,4 +1,5 @@
 #!/bin/bash
+# t - Touch with mkdir. Creates parent directories and the file in one step.
 
 # Check if a filename was provided
 if [ $# -eq 0 ]; then

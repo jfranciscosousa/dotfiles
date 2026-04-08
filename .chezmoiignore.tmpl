@@ -1,0 +1,8 @@
+{{ if ne .chezmoi.os "linux" }}
+.scripts/bin/arch-update
+.scripts/startup/linux.sh
+{{ end }}
+
+{{ if ne .chezmoi.os "darwin" }}
+.scripts/startup/macos.sh
+{{ end }}
