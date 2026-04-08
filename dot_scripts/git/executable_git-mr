@@ -1,0 +1,148 @@
+#!/usr/bin/env ruby
+# git-mr - Create a GitLab merge request with an AI-generated description.
+#
+# Usage: git mr [options]
+#
+# Options:
+#   -t, --target BRANCH   Target branch (default: auto-detect main/master)
+#   -h                    Show this help
+#
+# Looks for an MR template in .gitlab/merge_request_templates/Default.md,
+# fills it in with Claude based on the branch diff, then creates the MR via glab.
+require 'optparse'
+require 'shellwords'
+
+def shell(command)
+  output = `#{command} 2>&1`
+
+  unless $?.success?
+    $stderr.puts "Error running: #{command}"
+    $stderr.puts output unless output.strip.empty?
+    exit(-1)
+  end
+
+  output
+end
+
+def detect_default_branch
+  remotes = `git branch -r 2>/dev/null`.strip
+  if remotes.include?("origin/main")
+    "main"
+  else
+    "master"
+  end
+end
+
+def find_mr_template
+  dir = ".gitlab/merge_request_templates"
+  return [nil, nil] unless Dir.exist?(dir)
+
+  # Look for Default.md (case-insensitive), fall back to first template
+  templates = Dir.glob("#{dir}/*.md")
+  default = templates.find { |f| File.basename(f).downcase == "default.md" }
+  path = default || templates.first
+  path ? [File.read(path), path] : [nil, nil]
+end
+
+target = nil
+
+OptionParser.new do |opts|
+  opts.banner = "Usage: git mr [options]\n\nCreate a GitLab merge request with an AI-generated description.\n\n"
+
+  opts.on("-t", "--target BRANCH", "Target branch (default: auto-detect)") do |v|
+    target = v
+  end
+end.parse!
+
+remote_url = `git remote get-url origin 2>/dev/null`.strip
+unless remote_url.include?("gitlab")
+  $stderr.puts "Remote origin does not point to GitLab: #{remote_url}"
+  exit(1)
+end
+
+branch = shell("git rev-parse --abbrev-ref HEAD").strip
+target ||= detect_default_branch
+
+if branch == target
+  $stderr.puts "Already on #{target}, nothing to merge."
+  exit(1)
+end
+
+# Make sure we have the latest remote state
+shell("git fetch origin #{target}")
+
+diff = shell("git diff origin/#{target}...HEAD")
+log = shell("git log origin/#{target}..HEAD --oneline")
+
+if diff.strip.empty?
+  $stderr.puts "No changes between #{branch} and #{target}."
+  exit(1)
+end
+
+template, template_path = find_mr_template
+
+if template
+  puts "Using MR template: #{template_path}"
+else
+  puts "No MR template found, using default format."
+end
+
+if template
+  prompt = <<~PROMPT
+    Fill in this merge request template based on the changes below.
+    Output ONLY the filled template, nothing else. Plain text with markdown.
+
+    Template:
+    #{template}
+
+    Commits:
+    #{log}
+
+    Diff:
+    #{diff}
+  PROMPT
+else
+  prompt = <<~PROMPT
+    Write a GitLab merge request description for these changes.
+    Include a summary section and a short test plan. Use markdown.
+    Output ONLY the description, nothing else.
+
+    Commits:
+    #{log}
+
+    Diff:
+    #{diff}
+  PROMPT
+end
+
+puts "Generating MR description with Claude..."
+
+claude_output = IO.popen(["claude", "--print", "--no-session-persistence", "--tools", "", "--disable-slash-commands", "--strict-mcp-config", "-"], "r+", err: [:child, :out]) do |io|
+  io.write(prompt)
+  io.close_write
+  io.read
+end
+claude_status = $?
+
+if !claude_status.success? || claude_output.strip.empty?
+  $stderr.puts "Warning: Claude failed, using commit log as description."
+  description = log
+else
+  description = claude_output.strip
+end
+
+# Extract first line of log as MR title
+title = log.lines.first&.strip&.sub(/^[a-f0-9]+\s+/, "") || branch
+
+puts "Creating MR: #{title}"
+
+# Push branch if needed
+shell("git push -u origin #{branch}")
+
+mr_output = `glab mr create --title #{title.shellescape} --description #{description.shellescape} --target-branch #{target} 2>&1`
+unless $?.success?
+  $stderr.puts "Error creating MR:"
+  $stderr.puts mr_output
+  exit(-1)
+end
+puts mr_output
