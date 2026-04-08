@@ -105,7 +105,7 @@ if ai_message
     message = "wip"
   else
     lines = claude_output.strip.lines.map(&:rstrip)
-    subject = lines.first[0, 50]
+    subject = wrap(lines.first, 72)
     body = lines.drop(1).drop_while(&:empty?)
     formatted_body = body.map { |l| wrap(l, 72) }.join("\n")
     message = formatted_body.empty? ? subject : "#{subject}\n\n#{formatted_body}"
