@@ -1,14 +1,14 @@
 #!/usr/bin/env ruby
-# git-mr - Create a GitLab merge request with an AI-generated description.
+# git-pr - Create a GitHub pull request with an AI-generated description.
 #
-# Usage: git mr [options]
+# Usage: git pr [options]
 #
 # Options:
 #   -t, --target BRANCH   Target branch (default: auto-detect main/master)
 #   -h                    Show this help
 #
-# Looks for an MR template in .gitlab/merge_request_templates/Default.md,
-# fills it in with Claude based on the branch diff, then creates the MR via glab.
+# Looks for a PR template in .github/pull_request_template.md,
+# fills it in with Claude based on the branch diff, then creates the PR via gh.
 require 'optparse'
 require 'shellwords'
 
@@ -27,28 +27,46 @@ end
 def detect_default_branch
   ref = `git symbolic-ref refs/remotes/origin/HEAD 2>/dev/null`.strip
   if ref.empty?
-    # origin/HEAD not set, try fetching it
     `git remote set-head origin --auto 2>/dev/null`
     ref = `git symbolic-ref refs/remotes/origin/HEAD 2>/dev/null`.strip
   end
-  ref.empty? ? "master" : ref.sub("refs/remotes/origin/", "")
+  ref.empty? ? "main" : ref.sub("refs/remotes/origin/", "")
 end
 
-def find_mr_template
-  dir = ".gitlab/merge_request_templates"
-  return [nil, nil] unless Dir.exist?(dir)
+def find_pr_template
+  candidates = [
+    ".github/pull_request_template.md",
+    ".github/PULL_REQUEST_TEMPLATE.md",
+    "pull_request_template.md",
+    "PULL_REQUEST_TEMPLATE.md",
+    "docs/pull_request_template.md",
+  ]
 
-  # Look for Default.md (case-insensitive), fall back to first template
-  templates = Dir.glob("#{dir}/*.md")
-  default = templates.find { |f| File.basename(f).downcase == "default.md" }
-  path = default || templates.first
-  path ? [File.read(path), path] : [nil, nil]
+  # Check exact candidates first
+  candidates.each do |path|
+    return [File.read(path), path] if File.exist?(path)
+  end
+
+  # Check for templates directory (case-insensitive)
+  dir = ".github/PULL_REQUEST_TEMPLATE"
+  unless Dir.exist?(dir)
+    dir = ".github/pull_request_template"
+  end
+
+  if Dir.exist?(dir)
+    templates = Dir.glob("#{dir}/*.md")
+    default = templates.find { |f| File.basename(f).downcase == "default.md" }
+    path = default || templates.first
+    return [File.read(path), path] if path
+  end
+
+  [nil, nil]
 end
 
 target = nil
 
 OptionParser.new do |opts|
-  opts.banner = "Usage: git mr [options]\n\nCreate a GitLab merge request with an AI-generated description.\n\n"
+  opts.banner = "Usage: git pr [options]\n\nCreate a GitHub pull request with an AI-generated description.\n\n"
 
   opts.on("-t", "--target BRANCH", "Target branch (default: auto-detect)") do |v|
     target = v
@@ -56,8 +74,8 @@ OptionParser.new do |opts|
 end.parse!
 
 remote_url = `git remote get-url origin 2>/dev/null`.strip
-unless remote_url.include?("gitlab")
-  $stderr.puts "Remote origin does not point to GitLab: #{remote_url}"
+unless remote_url.include?("github")
+  $stderr.puts "Remote origin does not point to GitHub: #{remote_url}"
   exit(1)
 end
 
@@ -80,17 +98,17 @@ if diff.strip.empty?
   exit(1)
 end
 
-template, template_path = find_mr_template
+template, template_path = find_pr_template
 
 if template
-  puts "Using MR template: #{template_path}"
+  puts "Using PR template: #{template_path}"
 else
-  puts "No MR template found, using default format."
+  puts "No PR template found, using default format."
 end
 
 if template
   prompt = <<~PROMPT
-    Fill in this merge request template based on the changes below.
+    Fill in this pull request template based on the changes below.
     Output ONLY the filled template, nothing else. Plain text with markdown.
 
     Template:
@@ -104,7 +122,7 @@ if template
   PROMPT
 else
   prompt = <<~PROMPT
-    Write a GitLab merge request description for these changes.
+    Write a GitHub pull request description for these changes.
     Include a summary section and a short test plan. Use markdown.
     Output ONLY the description, nothing else.
 
@@ -116,7 +134,7 @@ else
   PROMPT
 end
 
-puts "Generating MR description with Claude..."
+puts "Generating PR description with Claude..."
 
 claude_output = IO.popen(["claude", "--print", "--no-session-persistence", "--tools", "", "--disable-slash-commands", "--strict-mcp-config", "-"], "r+", err: [:child, :out]) do |io|
   io.write(prompt)
@@ -132,18 +150,18 @@ else
   description = claude_output.strip
 end
 
-# Extract first line of log as MR title
+# Extract first line of log as PR title
 title = log.lines.first&.strip&.sub(/^[a-f0-9]+\s+/, "") || branch
 
-puts "Creating MR: #{title}"
+puts "Creating PR: #{title}"
 
 # Push branch if needed
 shell("git push -u origin #{branch}")
 
-mr_output = `glab mr create --title #{title.shellescape} --description #{description.shellescape} --target-branch #{target} 2>&1`
+pr_output = `gh pr create --title #{title.shellescape} --body #{description.shellescape} --base #{target} 2>&1`
 unless $?.success?
-  $stderr.puts "Error creating MR:"
-  $stderr.puts mr_output
+  $stderr.puts "Error creating PR:"
+  $stderr.puts pr_output
   exit(-1)
 end
-puts mr_output
+puts pr_output
