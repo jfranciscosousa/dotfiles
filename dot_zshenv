@@ -2,3 +2,19 @@
 if [[ ( "$SHLVL" -eq 1 && ! -o LOGIN ) && -s "${ZDOTDIR:-$HOME}/.zprofile" ]]; then
   source "${ZDOTDIR:-$HOME}/.zprofile"
 fi
+
+# PATH exports here so they're available to all shells (interactive and non-interactive).
+# This is needed for tools like Claude Code that spawn non-interactive shells.
+#
+# Add my custom scripts to path
+export PATH="$PATH:$HOME/.scripts/git"
+export PATH="$PATH:$HOME/.scripts/bin"
+export PATH=/usr/local/bin:$PATH
+export PATH="$PATH:$HOME/.local/bin"
+# ASDF
+export PATH="${ASDF_DATA_DIR:-$HOME/.asdf}/shims:$PATH"
+# PNPM
+export PNPM_HOME="$HOME/.local/share/pnpm"
+export PATH="$PNPM_HOME:$PATH"
+# Opencode
+export PATH=$HOME/.opencode/bin:$PATH
