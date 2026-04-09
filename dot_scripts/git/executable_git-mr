@@ -91,7 +91,7 @@ end
 if template
   prompt = <<~PROMPT
     Fill in this merge request template based on the changes below.
-    Output ONLY the filled template, nothing else. Plain text with markdown.
+    Output ONLY the filled template, nothing else. Plain text with markdown. Do not wrap in a code block.
 
     Template:
     #{template}
@@ -106,7 +106,7 @@ else
   prompt = <<~PROMPT
     Write a GitLab merge request description for these changes.
     Include a summary section and a short test plan. Use markdown.
-    Output ONLY the description, nothing else.
+    Output ONLY the description, nothing else. Do not wrap in a code block.
 
     Commits:
     #{log}
@@ -130,6 +130,8 @@ if !claude_status.success? || claude_output.strip.empty?
   description = log
 else
   description = claude_output.strip
+  # Strip wrapping code fences if Claude wrapped the output in one
+  description = description.sub(/\A```[^\n]*\n/, "").sub(/\n```\z/, "").strip
 end
 
 # Extract first line of log as MR title
