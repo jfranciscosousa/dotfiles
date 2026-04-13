@@ -85,6 +85,9 @@ if ai_message
 
   prompt = <<~PROMPT
     Summarize this diff as: one subject line, then a blank line, then the commit description. Use bullet points for different subjects.
+
+    Do not wrap the output in a code block.
+
     #{diff_full}
   PROMPT
 
