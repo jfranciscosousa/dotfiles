@@ -34,6 +34,9 @@ def detect_default_branch
 end
 
 def find_pr_template
+  root = `git rev-parse --show-toplevel 2>/dev/null`.strip
+  return [nil, nil] if root.empty?
+
   candidates = [
     ".github/pull_request_template.md",
     ".github/PULL_REQUEST_TEMPLATE.md",
@@ -43,14 +46,15 @@ def find_pr_template
   ]
 
   # Check exact candidates first
-  candidates.each do |path|
+  candidates.each do |rel|
+    path = File.join(root, rel)
     return [File.read(path), path] if File.exist?(path)
   end
 
   # Check for templates directory (case-insensitive)
-  dir = ".github/PULL_REQUEST_TEMPLATE"
+  dir = File.join(root, ".github/PULL_REQUEST_TEMPLATE")
   unless Dir.exist?(dir)
-    dir = ".github/pull_request_template"
+    dir = File.join(root, ".github/pull_request_template")
   end
 
   if Dir.exist?(dir)
@@ -109,7 +113,9 @@ end
 if template
   prompt = <<~PROMPT
     Fill in this pull request template based on the changes below.
-    Output ONLY the filled template, nothing else. Plain text with markdown. Do not wrap in a code block.
+    The FIRST line of your output must be the PR title (short, under 72 chars).
+    The SECOND line must be blank.
+    Everything after that is the filled template body. Plain text with markdown. Do not wrap in a code block.
 
     Template:
     #{template}
@@ -123,8 +129,9 @@ if template
 else
   prompt = <<~PROMPT
     Write a GitHub pull request description for these changes.
-    Include a summary section and a short test plan. Use markdown.
-    Output ONLY the description, nothing else. Do not wrap in a code block.
+    The FIRST line of your output must be the PR title (short, under 72 chars).
+    The SECOND line must be blank.
+    Everything after that is the description body with a summary section and a short test plan. Use markdown. Do not wrap in a code block.
 
     Commits:
     #{log}
@@ -145,15 +152,17 @@ claude_status = $?
 
 if !claude_status.success? || claude_output.strip.empty?
   $stderr.puts "Warning: Claude failed, using commit log as description."
+  title = log.lines.first&.strip&.sub(/^[a-f0-9]+\s+/, "") || branch
   description = log
 else
-  description = claude_output.strip
+  output = claude_output.strip
   # Strip wrapping code fences if Claude wrapped the output in one
-  description = description.sub(/\A```[^\n]*\n/, "").sub(/\n```\z/, "").strip
+  output = output.sub(/\A```[^\n]*\n/, "").sub(/\n```\z/, "").strip
+  # First line is the title, rest is the description
+  lines = output.lines
+  title = lines.first&.strip || branch
+  description = lines.drop(1).join.strip
 end
-
-# Extract first line of log as PR title
-title = log.lines.first&.strip&.sub(/^[a-f0-9]+\s+/, "") || branch
 
 puts "Creating PR: #{title}"
 

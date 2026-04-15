@@ -35,7 +35,10 @@ def detect_default_branch
 end
 
 def find_mr_template
-  dir = ".gitlab/merge_request_templates"
+  root = `git rev-parse --show-toplevel 2>/dev/null`.strip
+  return [nil, nil] if root.empty?
+
+  dir = File.join(root, ".gitlab/merge_request_templates")
   return [nil, nil] unless Dir.exist?(dir)
 
   # Look for Default.md (case-insensitive), fall back to first template
@@ -91,7 +94,9 @@ end
 if template
   prompt = <<~PROMPT
     Fill in this merge request template based on the changes below.
-    Output ONLY the filled template, nothing else. Plain text with markdown. Do not wrap in a code block.
+    The FIRST line of your output must be the MR title (short, under 72 chars).
+    The SECOND line must be blank.
+    Everything after that is the filled template body. Plain text with markdown. Do not wrap in a code block.
 
     Template:
     #{template}
@@ -105,8 +110,9 @@ if template
 else
   prompt = <<~PROMPT
     Write a GitLab merge request description for these changes.
-    Include a summary section and a short test plan. Use markdown.
-    Output ONLY the description, nothing else. Do not wrap in a code block.
+    The FIRST line of your output must be the MR title (short, under 72 chars).
+    The SECOND line must be blank.
+    Everything after that is the description body with a summary section and a short test plan. Use markdown. Do not wrap in a code block.
 
     Commits:
     #{log}
@@ -127,15 +133,17 @@ claude_status = $?
 
 if !claude_status.success? || claude_output.strip.empty?
   $stderr.puts "Warning: Claude failed, using commit log as description."
+  title = log.lines.first&.strip&.sub(/^[a-f0-9]+\s+/, "") || branch
   description = log
 else
-  description = claude_output.strip
+  output = claude_output.strip
   # Strip wrapping code fences if Claude wrapped the output in one
-  description = description.sub(/\A```[^\n]*\n/, "").sub(/\n```\z/, "").strip
+  output = output.sub(/\A```[^\n]*\n/, "").sub(/\n```\z/, "").strip
+  # First line is the title, rest is the description
+  lines = output.lines
+  title = lines.first&.strip || branch
+  description = lines.drop(1).join.strip
 end
-
-# Extract first line of log as MR title
-title = log.lines.first&.strip&.sub(/^[a-f0-9]+\s+/, "") || branch
 
 puts "Creating MR: #{title}"
 
