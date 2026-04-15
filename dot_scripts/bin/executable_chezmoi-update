@@ -1,0 +1,38 @@
+#!/bin/bash
+
+# Directory where chezmoi is located
+CHEZMOI_DIR="$HOME/.local/share/chezmoi"
+
+# Store current directory
+PREV_DIR=$(pwd)
+
+# Function to handle error logging
+log_error() {
+    echo "[ERROR] $1" >&2
+}
+
+# Attempt to update chezmu
+# We capture stderr to a temporary file to show the original error if it fails
+ERR_LOG=$(mktemp)
+trap 'rm -f "$ERR_LOG"' EXIT
+
+(
+    cd "$CHEZMOI_DIR" || { log_error "Could not cd to $CHEZMOI_DIR"; exit 1; }
+    if ! git pull >/dev/null 2>"$ERR_LOG"; then
+        log_error "git pull failed. Original error: $(cat "$ERR_LOG")"
+        exit 1
+    fi
+) || exit 1
+
+# Apply chezmoi changes
+if chezmoi apply >/dev/null 2>"$ERR_LOG"; then
+    echo "✅ Chezmoi updated and applied successfully!"
+    # Return to previous directory if needed (though exec zsh will replace the shell)
+    cd "$PREV_DIR"
+    # Restart shell
+    exec zsh
+else
+    log_error "chezmoi apply failed. Original error: $(cat "$ERR_LOG")"
+    cd "$PREV_DIR"
+    exit 1
+fi
