@@ -11,32 +11,12 @@
 # fills it in with Claude based on the branch diff, then creates the MR via glab.
 require 'optparse'
 require 'shellwords'
-
-def shell(command)
-  output = `#{command} 2>&1`
-
-  unless $?.success?
-    $stderr.puts "Error running: #{command}"
-    $stderr.puts output unless output.strip.empty?
-    exit(-1)
-  end
-
-  output
-end
-
-def detect_default_branch
-  ref = `git symbolic-ref refs/remotes/origin/HEAD 2>/dev/null`.strip
-  if ref.empty?
-    # origin/HEAD not set, try fetching it
-    `git remote set-head origin --auto 2>/dev/null`
-    ref = `git symbolic-ref refs/remotes/origin/HEAD 2>/dev/null`.strip
-  end
-  ref.empty? ? "master" : ref.sub("refs/remotes/origin/", "")
-end
+require_relative 'git_utils'
+include GitUtils
 
 def find_mr_template
-  root = `git rev-parse --show-toplevel 2>/dev/null`.strip
-  return [nil, nil] if root.empty?
+  root = GitUtils.repo_root
+  return [nil, nil] unless root
 
   dir = File.join(root, ".gitlab/merge_request_templates")
   return [nil, nil] unless Dir.exist?(dir)
@@ -124,22 +104,14 @@ end
 
 puts "Generating MR description with Claude..."
 
-claude_output = IO.popen(["claude", "--print", "--no-session-persistence", "--tools", "", "--disable-slash-commands", "--strict-mcp-config", "-"], "r+", err: [:child, :out]) do |io|
-  io.write(prompt)
-  io.close_write
-  io.read
-end
-claude_status = $?
+success, claude_output = GitUtils.claude_generate(prompt)
 
-if !claude_status.success? || claude_output.strip.empty?
+if !success
   $stderr.puts "Warning: Claude failed, using commit log as description."
   title = log.lines.first&.strip&.sub(/^[a-f0-9]+\s+/, "") || branch
   description = log
 else
-  output = claude_output.strip
-  # Strip wrapping code fences if Claude wrapped the output in one
-  output = output.sub(/\A```[^\n]*\n/, "").sub(/\n```\z/, "").strip
-  # First line is the title, rest is the description
+  output = GitUtils.strip_code_fences(claude_output)
   lines = output.lines
   title = lines.first&.strip || branch
   description = lines.drop(1).join.strip

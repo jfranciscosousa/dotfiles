@@ -14,18 +14,8 @@
 #
 # Refuses to push to master/main unless --force is given.
 require 'optparse'
-
-def shell(command)
-  output = `#{command} 2>&1`
-
-  unless $?.success?
-    $stderr.puts "Error running: #{command}"
-    $stderr.puts output unless output.strip.empty?
-    exit(-1)
-  end
-
-  output
-end
+require_relative 'git_utils'
+include GitUtils
 
 branch = shell("git rev-parse --abbrev-ref HEAD").strip
 
@@ -76,10 +66,6 @@ end
 
 puts shell("git add --all")
 
-def wrap(text, width = 72)
-  text.gsub(/(.{1,#{width}})(\s+|\z)/, "\\1\n").rstrip
-end
-
 if ai_message
   diff_full = `git diff --cached`
 
@@ -91,26 +77,16 @@ if ai_message
     #{diff_full}
   PROMPT
 
-  claude_output = IO.popen(["claude", "--print", "--no-session-persistence", "--tools", "", "--disable-slash-commands", "--strict-mcp-config", "-"], "r+", err: [:child, :out]) do |io|
-    io.write(prompt)
-    io.close_write
-    io.read
-  end
-  claude_status = $?
+  success, claude_output = GitUtils.claude_generate(prompt)
 
-  if !claude_status.success?
-    $stderr.puts "Warning: Claude exited with status #{claude_status.exitstatus}"
-    $stderr.puts claude_output unless claude_output.strip.empty?
-    $stderr.puts "Falling back to 'wip' message"
-    message = "wip"
-  elsif claude_output.strip.empty?
-    $stderr.puts "Warning: Claude returned empty output, falling back to 'wip'"
+  if !success
+    $stderr.puts "Warning: Claude failed, falling back to 'wip' message"
     message = "wip"
   else
-    lines = claude_output.strip.lines.map(&:rstrip)
-    subject = wrap(lines.first, 72)
+    lines = claude_output.lines.map(&:rstrip)
+    subject = GitUtils.wrap(lines.first, 72)
     body = lines.drop(1).drop_while(&:empty?)
-    formatted_body = body.map { |l| wrap(l, 72) }.join("\n")
+    formatted_body = body.map { |l| GitUtils.wrap(l, 72) }.join("\n")
     message = formatted_body.empty? ? subject : "#{subject}\n\n#{formatted_body}"
   end
 end
