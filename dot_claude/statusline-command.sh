@@ -3,6 +3,7 @@ input=$(cat)
 
 model=$(echo "$input" | jq -r '.model.display_name // "Unknown"')
 used=$(echo "$input" | jq -r '.context_window.used_percentage // empty')
+cost=$(echo "$input" | jq -r '.cost.total_cost_usd // empty')
 
 # Git info
 branch=$(git rev-parse --abbrev-ref HEAD 2>/dev/null)
@@ -12,13 +13,18 @@ if [ -n "$branch" ] && [ -n "$repo" ]; then
   git_info="  ${repo}:${branch}"
 fi
 
+cost_str=""
+if [ -n "$cost" ]; then
+  cost_str=$(printf "  \$%.4f" "$cost")
+fi
+
 if [ -n "$used" ]; then
   filled=$(printf "%.0f" "$(echo "$used * 10 / 100" | bc -l)")
   empty=$((10 - filled))
   bar=""
   for i in $(seq 1 "$filled"); do bar="${bar}█"; done
   for i in $(seq 1 "$empty"); do bar="${bar}░"; done
-  printf "%s  [%s] %.0f%%%s" "$model" "$bar" "$used" "$git_info"
+  printf "%s  [%s] %.0f%%%s%s" "$model" "$bar" "$used" "$git_info" "$cost_str"
 else
-  printf "%s  [░░░░░░░░░░] -%s" "$model" "$git_info"
+  printf "%s  [░░░░░░░░░░] -%s%s" "$model" "$git_info" "$cost_str"
 fi
