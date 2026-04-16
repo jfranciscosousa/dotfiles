@@ -1,7 +1,7 @@
 # Shared utilities for git-* Ruby scripts.
-# Usage: require_relative 'git_utils'
+# Usage: require_relative 'utils'
 
-module GitUtils
+module Utils
   # Run a shell command, exit on failure.
   def self.shell(command)
     output = `#{command} 2>&1`

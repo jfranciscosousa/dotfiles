@@ -11,11 +11,10 @@
 # fills it in with Claude based on the branch diff, then creates the PR via gh.
 require 'optparse'
 require 'shellwords'
-require_relative 'git_utils'
-include GitUtils
+require_relative 'utils'
 
 def find_pr_template
-  root = GitUtils.repo_root
+  root = Utils.repo_root
   return [nil, nil] unless root
 
   candidates = [
@@ -64,8 +63,8 @@ unless remote_url.include?("github")
   exit(1)
 end
 
-branch = shell("git rev-parse --abbrev-ref HEAD").strip
-target ||= detect_default_branch
+branch = Utils.shell("git rev-parse --abbrev-ref HEAD").strip
+target ||= Utils.detect_default_branch
 
 if branch == target
   $stderr.puts "Already on #{target}, nothing to merge."
@@ -73,10 +72,10 @@ if branch == target
 end
 
 # Make sure we have the latest remote state
-shell("git fetch origin #{target}")
+Utils.shell("git fetch origin #{target}")
 
-diff = shell("git diff origin/#{target}...HEAD")
-log = shell("git log origin/#{target}..HEAD --oneline")
+diff = Utils.shell("git diff origin/#{target}...HEAD")
+log = Utils.shell("git log origin/#{target}..HEAD --oneline")
 
 if diff.strip.empty?
   $stderr.puts "No changes between #{branch} and #{target}."
@@ -124,14 +123,14 @@ end
 
 puts "Generating PR description with Claude..."
 
-success, claude_output = GitUtils.claude_generate(prompt)
+success, claude_output = Utils.claude_generate(prompt)
 
 if !success
   $stderr.puts "Warning: Claude failed, using commit log as description."
   title = log.lines.first&.strip&.sub(/^[a-f0-9]+\s+/, "") || branch
   description = log
 else
-  output = GitUtils.strip_code_fences(claude_output)
+  output = Utils.strip_code_fences(claude_output)
   lines = output.lines
   title = lines.first&.strip || branch
   description = lines.drop(1).join.strip
@@ -140,7 +139,7 @@ end
 puts "Creating PR: #{title}"
 
 # Push branch if needed
-shell("git push -u origin #{branch}")
+Utils.shell("git push -u origin #{branch}")
 
 pr_output = `gh pr create --title #{title.shellescape} --body #{description.shellescape} --base #{target} 2>&1`
 unless $?.success?

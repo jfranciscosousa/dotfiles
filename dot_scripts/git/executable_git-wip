@@ -14,10 +14,9 @@
 #
 # Refuses to push to master/main unless --force is given.
 require 'optparse'
-require_relative 'git_utils'
-include GitUtils
+require_relative 'utils'
 
-branch = shell("git rev-parse --abbrev-ref HEAD").strip
+branch = Utils.shell("git rev-parse --abbrev-ref HEAD").strip
 
 push = false
 force = false
@@ -64,7 +63,7 @@ if (branch == 'master' || branch == 'main') && push && !force
   exit(-1)
 end
 
-puts shell("git add --all")
+puts Utils.shell("git add --all")
 
 if ai_message
   diff_full = `git diff --cached`
@@ -77,16 +76,16 @@ if ai_message
     #{diff_full}
   PROMPT
 
-  success, claude_output = GitUtils.claude_generate(prompt)
+  success, claude_output = Utils.claude_generate(prompt)
 
   if !success
     $stderr.puts "Warning: Claude failed, falling back to 'wip' message"
     message = "wip"
   else
     lines = claude_output.lines.map(&:rstrip)
-    subject = GitUtils.wrap(lines.first, 72)
+    subject = Utils.wrap(lines.first, 72)
     body = lines.drop(1).drop_while(&:empty?)
-    formatted_body = body.map { |l| GitUtils.wrap(l, 72) }.join("\n")
+    formatted_body = body.map { |l| Utils.wrap(l, 72) }.join("\n")
     message = formatted_body.empty? ? subject : "#{subject}\n\n#{formatted_body}"
   end
 end
@@ -102,11 +101,11 @@ else
   commit_command.concat(" -F #{msgfile.path}")
 end
 
-puts shell(commit_command)
+puts Utils.shell(commit_command)
 
 return unless push
 
 push_command = "git push -u origin #{branch}"
 push_command.concat(" --force-with-lease") if force
 
-puts shell(push_command)
+puts Utils.shell(push_command)
