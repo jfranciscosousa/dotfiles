@@ -1,5 +1,9 @@
 [user]
+{{- if hasPrefix "Remote-" .chezmoi.hostname }}
+	email = francisco@remote.com
+{{- else }}
 	email = francisco.sousa@hey.com
+{{- end }}
 	name = Francisco Sousa
 [core]
   editor = nvim
