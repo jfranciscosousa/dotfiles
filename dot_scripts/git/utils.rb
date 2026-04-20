@@ -34,7 +34,7 @@ module Utils
   # Run Claude in print mode with a prompt, return [success, output].
   def self.claude_generate(prompt)
     output = IO.popen(
-      ["claude", "--print", "--no-session-persistence", "--tools", "", "--disable-slash-commands", "--strict-mcp-config", "-"],
+      ["claude", "--print", "--model", "haiku", "--no-session-persistence", "--tools", "", "--disable-slash-commands", "--strict-mcp-config", "-"],
       "r+", err: [:child, :out]
     ) do |io|
       io.write(prompt)
