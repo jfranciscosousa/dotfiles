@@ -32,9 +32,15 @@ module Utils
   end
 
   # Run Claude in print mode with a prompt, return [success, output].
-  def self.claude_generate(prompt)
+  #
+  # The `model` argument is passed through to `claude --model`. Accepted values
+  # (see `claude --help`):
+  #   - Aliases: "haiku", "sonnet", "opus" (resolve to the latest of each tier)
+  #   - Full IDs: "claude-haiku-4-5", "claude-sonnet-4-6", "claude-opus-4-7"
+  # Default is "haiku" to keep these scripts fast and cheap.
+  def self.claude_generate(prompt, model: "haiku")
     output = IO.popen(
-      ["claude", "--print", "--model", "haiku", "--no-session-persistence", "--tools", "", "--disable-slash-commands", "--strict-mcp-config", "-"],
+      ["claude", "--print", "--model", model, "--no-session-persistence", "--tools", "", "--disable-slash-commands", "--strict-mcp-config", "-"],
       "r+", err: [:child, :out]
     ) do |io|
       io.write(prompt)
