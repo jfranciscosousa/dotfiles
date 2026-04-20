@@ -1,0 +1,18 @@
+#!/bin/bash
+
+# Check if a filename was provided
+if [ $# -eq 0 ]; then
+    echo "Usage: $0 <filename>"
+    exit 1
+fi
+
+# Get the directory part of the file path
+dir=$(dirname "$1")
+
+# Create required subdirectories if they don't exist
+if [ ! -d "$dir" ]; then
+    mkdir -p "$dir"
+fi
+
+# Create the file (or update its timestamp if it exists)
+touch "$1"

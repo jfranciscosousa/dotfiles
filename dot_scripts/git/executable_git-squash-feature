@@ -1,0 +1,30 @@
+#!/usr/bin/env zsh
+
+set -e
+
+function not_merged() {
+  merge_destination_branch=$1
+  merge_source_branch=$2
+
+  merge_base=$(git merge-base $merge_destination_branch $merge_source_branch)
+  merge_source_current_commit=$(git rev-parse $merge_source_branch)
+  if [[ $merge_base = $merge_source_current_commit ]]
+  then
+    return 1
+  else
+    return 0
+  fi
+}
+
+BASE=$(git merge-base HEAD $1)
+CURRENT_BRANCH=$(git branch | grep \* | cut -d ' ' -f2)
+
+if not_merged $CURRENT_BRANCH $1; then
+    echo "$1 is not merged with this branch, fix that please"
+
+    exit -1
+fi
+
+git reset --soft $BASE
+
+echo "squashed everything, ready to commit"

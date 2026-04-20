@@ -1,0 +1,13 @@
+zstyle ':prezto:*:*' color 'yes'
+zstyle ':prezto:load' pmodule \
+  'environment' \
+  'terminal' \
+  'editor' \
+  'history' \
+  'spectrum' \
+  'utility' \
+  'completion' \
+  'syntax-highlighting' \
+  'history-substring-search' \
+
+zstyle ':prezto:module:editor' key-bindings 'vi'

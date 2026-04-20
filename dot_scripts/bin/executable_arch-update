@@ -1,0 +1,21 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+echo "==> Checking for updates..."
+official=$(checkupdates 2>/dev/null || true)
+aur=$(yay -Qua 2>/dev/null || true)
+updates="${official}${aur}"
+
+if [[ -z "$updates" ]]; then
+  echo "System is already up to date."
+  exit 0
+fi
+
+echo "$updates"
+
+echo ""
+read -r -p "==> Proceed with update? [y/N] " confirm
+[[ "$confirm" =~ ^[Yy]$ ]] || exit 0
+
+echo "==> Updating system..."
+yay -Syu --noconfirm

@@ -1,0 +1,8 @@
+# Ghostty Configuration
+# Place this in ~/.config/ghostty/config
+
+# Tab management
+keybind = ctrl+w=close_tab
+keybind = ctrl+t=new_tab
+keybind = alt+left=previous_tab
+keybind = alt+right=next_tab
