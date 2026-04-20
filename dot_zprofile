@@ -12,3 +12,8 @@ fi
 
 # Ensure path arrays do not contain duplicates.
 typeset -gU cdpath fpath mailpath path
+
+# Re-prepend paths that must take precedence over /usr/bin.
+# macOS path_helper (in /etc/zprofile) runs before this file and reorders PATH,
+# pushing system dirs ahead of what we set in .zshenv.
+export PATH="$HOME/.opencode/bin:$PNPM_HOME:${ASDF_DATA_DIR:-$HOME/.asdf}/shims:$PATH"

@@ -1,0 +1,245 @@
+#!/usr/bin/env ruby
+# frozen_string_literal: true
+
+require "bundler/inline"
+
+gemfile(false) do
+  source "https://rubygems.org"
+  gem "chronic"
+  gem "pastel"
+  gem "tty-table"
+end
+
+require "json"
+require "date"
+require "pathname"
+require "open-uri"
+require "tmpdir"
+
+# Formats a token count as a human-readable string (e.g. 1_500_000 → "1.5M").
+def format_tokens(count)
+  case
+  when count >= 1_000_000_000 then "%.1fB" % (count / 1_000_000_000.0)
+  when count >= 1_000_000     then "%.1fM" % (count / 1_000_000.0)
+  when count >= 1_000         then "%.1fK" % (count / 1_000.0)
+  else count.to_s
+  end
+end
+
+# Fetches Claude model pricing ($/1M tokens) from LiteLLM's public JSON, cached for 24h in the
+# system temp dir. Normalizes model keys by stripping provider prefixes and version suffixes.
+LITELLM_URL       = "https://raw.githubusercontent.com/BerriAI/litellm/main/model_prices_and_context_window.json"
+PRICING_CACHE     = Pathname.new(Dir.tmpdir).join("claude-cost-pricing.json")
+PRICING_CACHE_TTL = 86_400
+
+def fetch_pricing
+  raw =
+    if PRICING_CACHE.exist? && (Time.now - PRICING_CACHE.mtime) < PRICING_CACHE_TTL
+      JSON.parse(PRICING_CACHE.read)
+    else
+      body = URI.open(LITELLM_URL, open_timeout: 5, read_timeout: 10).read
+      PRICING_CACHE.write(body)
+      JSON.parse(body)
+    end
+
+  pricing = {}
+  raw.each do |key, data|
+    model = key
+      .sub(/\Aanthropic\./, "")
+      .sub(/-v\d+:\d+\z/, "")
+      .sub(/-v\d+\z/, "")
+      .sub(/@.+\z/, "")
+    next unless model.start_with?("claude-")
+
+    input       = ((data["input_cost_per_token"]            || 0) * 1_000_000).round(4)
+    output      = ((data["output_cost_per_token"]           || 0) * 1_000_000).round(4)
+    cache_write = ((data["cache_creation_input_token_cost"] || 0) * 1_000_000).round(4)
+    cache_read  = ((data["cache_read_input_token_cost"]     || 0) * 1_000_000).round(4)
+    next if input.zero? && output.zero?
+
+    pricing[model] = { input: input, output: output, cache_write: cache_write, cache_read: cache_read }
+  end
+  abort "No Claude pricing found in response" if pricing.empty?
+  pricing
+end
+
+PRICING = fetch_pricing
+
+# Computes the dollar cost for a single assistant message given its model and usage stats.
+# Falls back to prefix matching (e.g. "claude-opus-4-7" → "claude-opus-4") when the exact
+# model ID isn't in the pricing table.
+def cost_for(model, usage)
+  rates = PRICING[model]
+
+  unless rates
+    # Try progressively shorter prefixes: "claude-opus-4-7" → "claude-opus-4" → "claude-opus"
+    parts = model.split("-")
+    (parts.length - 1).downto(2) do |len|
+      prefix = parts.first(len).join("-")
+      found  = PRICING.find { |pricing_key, _| pricing_key.start_with?(prefix) }
+      rates  = found.last and break if found
+    end
+  end
+
+  return 0.0 unless rates
+
+  input       = usage["input_tokens"] || 0
+  output      = usage["output_tokens"] || 0
+  cache_write = usage["cache_creation_input_tokens"] || 0
+  cache_read  = usage["cache_read_input_tokens"] || 0
+
+  (input * rates[:input] +
+   output * rates[:output] +
+   cache_write * rates[:cache_write] +
+   cache_read * rates[:cache_read]) / 1_000_000.0
+end
+
+# Converts a chezmoi-encoded project dir name (e.g. "-Users-francisco-code-myapp") to a
+# readable path ("~/code/myapp").
+def project_label(dir_name)
+  dir_name
+    .sub(/\A-Users-[^-]+-/, "~/")
+    .gsub("-", "/")
+    .gsub("//", "/.")
+end
+
+# Parses a natural-language date string ("2 weeks ago", "last monday") into a Date using Chronic.
+def parse_since(arg)
+  parsed = Chronic.parse(arg, context: :past)
+  abort "Couldn't parse '#{arg}' as a date.\n\nExamples: '2 weeks ago', 'last monday', 'april 1st', 'yesterday'" unless parsed
+  parsed.to_date
+end
+
+since = parse_since(ARGV[0] || "30 days ago")
+projects_dir = Pathname.new(File.expand_path("~/.claude/projects"))
+
+unless projects_dir.directory?
+  abort "No Claude projects found at #{projects_dir}"
+end
+
+# Session index: pid => {sessionId, cwd, startedAt}
+sessions_dir = Pathname.new(File.expand_path("~/.claude/sessions"))
+session_meta = {}
+if sessions_dir.directory?
+  sessions_dir.glob("*.json").each do |session_file|
+    data = JSON.parse(session_file.read) rescue next
+    session_meta[data["sessionId"]] = data
+  end
+end
+
+# Aggregate: { project => { date => { model => {input:, output:, cache_write:, cache_read:, cost:} } } }
+stats = Hash.new { |by_project, project| by_project[project] = Hash.new { |by_date, date| by_date[date] = Hash.new { |by_model, model| by_model[model] = { input: 0, output: 0, cache_write: 0, cache_read: 0, cost: 0.0 } } } }
+total_files = 0
+total_messages = 0
+
+projects_dir.each_child do |project_dir|
+  next unless project_dir.directory?
+
+  project_dir.glob("**/*.jsonl").each do |jsonl|
+    total_files += 1
+    File.foreach(jsonl) do |line|
+      record = JSON.parse(line) rescue next
+      next unless record["type"] == "assistant"
+
+      msg = record["message"] || next
+      model = msg["model"]
+      usage = msg["usage"]
+      next unless model && usage
+      next if model == "<synthetic>"
+
+      timestamp = record["timestamp"] || next
+      date = Date.parse(timestamp) rescue next
+      next if date < since
+
+      total_messages += 1
+      project_name = project_dir.basename.to_s
+      cost = cost_for(model, usage)
+
+      bucket = stats[project_name][date.to_s][model]
+      bucket[:input]       += usage["input_tokens"] || 0
+      bucket[:output]      += usage["output_tokens"] || 0
+      bucket[:cache_write] += usage["cache_creation_input_tokens"] || 0
+      bucket[:cache_read]  += usage["cache_read_input_tokens"] || 0
+      bucket[:cost]        += cost
+    end
+  end
+end
+
+p = Pastel.new
+
+if stats.empty?
+  puts p.yellow("No Claude Code sessions found since #{since}.")
+  exit
+end
+
+grand_total = 0.0
+
+puts
+puts p.bold.cyan("Claude Code") + p.dim("  ·  since #{since}")
+puts p.dim("─" * 64)
+
+stats.sort_by { |proj, _| proj }.each do |project_name, dates|
+  proj_cost = 0.0
+
+  dates.sort.each do |_date, models|
+    models.each do |_model, bucket|
+      proj_cost += bucket[:cost]
+    end
+  end
+
+  puts
+  puts "  " + p.bold(project_label(project_name).ljust(44)) + p.yellow("$%.4f" % proj_cost)
+
+  dates.sort.each do |date, models|
+    models.sort_by { |model_name, _| model_name }.each do |model, bucket|
+      short_model = model.sub("claude-", "").sub(/-\d{8}\z/, "")
+      token_in    = format_tokens(bucket[:input] + bucket[:cache_write] + bucket[:cache_read])
+      token_out   = format_tokens(bucket[:output])
+      puts "    " + p.dim(date) + "  " + p.cyan("%-24s" % short_model) +
+           p.green("$%.4f" % bucket[:cost]) + p.dim("  (#{token_in} in / #{token_out} out)")
+    end
+  end
+
+  grand_total += proj_cost
+end
+
+# Per-model totals
+model_totals = Hash.new { |by_model, model| by_model[model] = { cost: 0.0, input: 0, output: 0, cache_write: 0, cache_read: 0 } }
+stats.each do |_, dates|
+  dates.each do |_, models|
+    models.each do |model, bucket|
+      model_total = model_totals[model]
+      model_total[:cost]        += bucket[:cost]
+      model_total[:input]       += bucket[:input]
+      model_total[:output]      += bucket[:output]
+      model_total[:cache_write] += bucket[:cache_write]
+      model_total[:cache_read]  += bucket[:cache_read]
+    end
+  end
+end
+
+puts
+puts p.dim("─" * 64)
+puts p.bold("  By model")
+puts
+
+table = TTY::Table.new(
+  header: ["Model", "Cost", "Input", "Cache write", "Cache read", "Output"],
+  rows: model_totals.sort_by { |_, totals| -totals[:cost] }.map do |model, totals|
+    [
+      model.sub("claude-", "").sub(/-\d{8}\z/, ""),
+      "$%.4f" % totals[:cost],
+      format_tokens(totals[:input]),
+      format_tokens(totals[:cache_write]),
+      format_tokens(totals[:cache_read]),
+      format_tokens(totals[:output])
+    ]
+  end
+)
+puts table.render(:unicode, padding: [0, 1], alignments: [:left, :right, :right, :right, :right, :right], indent: 2)
+
+puts
+puts "  " + p.bold("TOTAL  ") + p.bold.green("$%.4f" % grand_total)
+puts p.dim("  #{since} – #{Date.today}  ·  #{total_messages} messages · #{total_files} session files")
+puts
+
