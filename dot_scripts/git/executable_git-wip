@@ -76,7 +76,7 @@ if ai_message
     #{diff_full}
   PROMPT
 
-  success, claude_output = Utils.claude_generate(prompt)
+  success, claude_output = Utils.claude_generate(prompt, model: "sonnet")
 
   if !success
     $stderr.puts "Warning: Claude failed, falling back to 'wip' message"

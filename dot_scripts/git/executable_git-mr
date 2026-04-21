@@ -103,7 +103,7 @@ end
 
 puts "Generating MR description with Claude..."
 
-success, claude_output = Utils.claude_generate(prompt)
+success, claude_output = Utils.claude_generate(prompt, model: "sonnet")
 
 if !success
   $stderr.puts "Warning: Claude failed, using commit log as description."
