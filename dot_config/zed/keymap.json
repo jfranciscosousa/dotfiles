@@ -1,0 +1,26 @@
+[
+  {
+    "context": "Editor",
+    "bindings": {
+      "alt-left": "pane::ActivatePreviousItem",
+      "alt-right": "pane::ActivateNextItem",
+      "f12": "terminal_panel::ToggleFocus",
+    },
+  },
+  {
+    "context": "Terminal",
+    "bindings": {
+      "f12": "workspace::ToggleBottomDock",
+      "cmd-t": "workspace::NewTerminal",
+      "alt-left": "pane::ActivatePreviousItem",
+      "alt-right": "pane::ActivateNextItem",
+    },
+  },
+  {
+    "context": "Workspace",
+    "bindings": {
+      "secondary-e": "project_panel::ToggleFocus",
+      "f12": "terminal_panel::ToggleFocus",
+    },
+  },
+]
