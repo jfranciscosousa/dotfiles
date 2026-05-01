@@ -26,6 +26,10 @@
     "context": "Workspace",
     "bindings": {
       "secondary-e": "project_panel::ToggleFocus",
+      "secondary-shift-v": "outline_panel::Toggle",
+      "secondary-shift-b": "git_panel::Toggle",
+      "secondary-shift-n": "agent::Toggle",
+      "secondary-shift-m": "multi_workspace::ToggleWorkspaceSidebar",
       "f12": "terminal_panel::ToggleFocus",
     },
   },
