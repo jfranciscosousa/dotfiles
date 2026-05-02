@@ -18,8 +18,11 @@
     "bindings": {
       "f12": "workspace::ToggleBottomDock",
       "cmd-t": "workspace::NewTerminal",
+      "secondary-t": "workspace::NewTerminal",
       "alt-left": "pane::ActivatePreviousItem",
       "alt-right": "pane::ActivateNextItem",
+      "secondary-d": "pane::SplitRight",
+      "secondary-w": "pane::CloseActiveItem",
     },
   },
   {
