@@ -1,4 +1,6 @@
 #!/usr/bin/env ruby
+# frozen_string_literal: true
+
 # git-wip - Quick commit all changes with a default "wip" message.
 #
 # Usage: git wip [options]
@@ -23,7 +25,7 @@ force = false
 message = "wip"
 no_edit = false
 ai_message = false
-commit_command = "git commit"
+commit_command = +"git commit"
 
 OptionParser.new do |opts|
   opts.banner = "Usage: git wip [options]\n\nQuick commit all changes with a default \"wip\" message.\nRefuses to push to master/main unless --force is given.\n\n"
@@ -58,7 +60,7 @@ OptionParser.new do |opts|
   end
 end.parse!
 
-if (branch == 'master' || branch == 'main') && push && !force
+if %w[master main].include?(branch) && push && !force
   puts "Cannot use push flag on #{branch}. Please run with the --force flag if you are 100% sure of what you are doing."
   exit(-1)
 end
@@ -78,15 +80,15 @@ if ai_message
 
   success, claude_output = Utils.claude_generate(prompt, model: "sonnet")
 
-  if !success
-    $stderr.puts "Warning: Claude failed, falling back to 'wip' message"
-    message = "wip"
-  else
-    lines = claude_output.lines.map(&:rstrip)
+  if success
+    lines = ai_output.lines.map(&:rstrip)
     subject = Utils.wrap(lines.first, 72)
     body = lines.drop(1).drop_while(&:empty?)
     formatted_body = body.map { |l| Utils.wrap(l, 72) }.join("\n")
     message = formatted_body.empty? ? subject : "#{subject}\n\n#{formatted_body}"
+  else
+    warn "Warning: Claude failed, falling back to 'wip' message"
+    message = "wip"
   end
 end
 

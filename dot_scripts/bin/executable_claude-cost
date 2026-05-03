@@ -12,17 +12,19 @@ end
 
 require "json"
 require "date"
-require "pathname"
 require "open-uri"
 require "tmpdir"
 
 # Formats a token count as a human-readable string (e.g. 1_500_000 → "1.5M").
 def format_tokens(count)
-  case
-  when count >= 1_000_000_000 then "%.1fB" % (count / 1_000_000_000.0)
-  when count >= 1_000_000     then "%.1fM" % (count / 1_000_000.0)
-  when count >= 1_000         then "%.1fK" % (count / 1_000.0)
-  else count.to_s
+  if count >= 1_000_000_000
+    format("%.1fB", count / 1_000_000_000.0)
+  elsif count >= 1_000_000
+    format("%.1fM", count / 1_000_000.0)
+  elsif count >= 1_000
+    format("%.1fK", count / 1_000.0)
+  else
+    count.to_s
   end
 end
 
@@ -45,10 +47,10 @@ def fetch_pricing
   pricing = {}
   raw.each do |key, data|
     model = key
-      .sub(/\Aanthropic\./, "")
-      .sub(/-v\d+:\d+\z/, "")
-      .sub(/-v\d+\z/, "")
-      .sub(/@.+\z/, "")
+            .sub(/\Aanthropic\./, "")
+            .sub(/-v\d+:\d+\z/, "")
+            .sub(/-v\d+\z/, "")
+            .sub(/@.+\z/, "")
     next unless model.start_with?("claude-")
 
     input       = ((data["input_cost_per_token"]            || 0) * 1_000_000).round(4)
@@ -88,10 +90,10 @@ def cost_for(model, usage)
   cache_write = usage["cache_creation_input_tokens"] || 0
   cache_read  = usage["cache_read_input_tokens"] || 0
 
-  (input * rates[:input] +
-   output * rates[:output] +
-   cache_write * rates[:cache_write] +
-   cache_read * rates[:cache_read]) / 1_000_000.0
+  ((input * rates[:input]) +
+   (output * rates[:output]) +
+   (cache_write * rates[:cache_write]) +
+   (cache_read * rates[:cache_read])) / 1_000_000.0
 end
 
 # Converts a chezmoi-encoded project dir name (e.g. "-Users-francisco-code-myapp") to a
@@ -113,22 +115,30 @@ end
 since = parse_since(ARGV[0] || "30 days ago")
 projects_dir = Pathname.new(File.expand_path("~/.claude/projects"))
 
-unless projects_dir.directory?
-  abort "No Claude projects found at #{projects_dir}"
-end
+abort "No Claude projects found at #{projects_dir}" unless projects_dir.directory?
 
 # Session index: pid => {sessionId, cwd, startedAt}
 sessions_dir = Pathname.new(File.expand_path("~/.claude/sessions"))
 session_meta = {}
 if sessions_dir.directory?
   sessions_dir.glob("*.json").each do |session_file|
-    data = JSON.parse(session_file.read) rescue next
+    data = begin
+      JSON.parse(session_file.read)
+    rescue StandardError
+      next
+    end
     session_meta[data["sessionId"]] = data
   end
 end
 
 # Aggregate: { project => { date => { model => {input:, output:, cache_write:, cache_read:, cost:} } } }
-stats = Hash.new { |by_project, project| by_project[project] = Hash.new { |by_date, date| by_date[date] = Hash.new { |by_model, model| by_model[model] = { input: 0, output: 0, cache_write: 0, cache_read: 0, cost: 0.0 } } } }
+stats = Hash.new do |by_project, project|
+  by_project[project] = Hash.new do |by_date, date|
+    by_date[date] = Hash.new do |by_model, model|
+      by_model[model] = { input: 0, output: 0, cache_write: 0, cache_read: 0, cost: 0.0 }
+    end
+  end
+end
 total_files = 0
 total_messages = 0
 
@@ -138,7 +148,11 @@ projects_dir.each_child do |project_dir|
   project_dir.glob("**/*.jsonl").each do |jsonl|
     total_files += 1
     File.foreach(jsonl) do |line|
-      record = JSON.parse(line) rescue next
+      record = begin
+        JSON.parse(line)
+      rescue StandardError
+        next
+      end
       next unless record["type"] == "assistant"
 
       msg = record["message"] || next
@@ -148,7 +162,11 @@ projects_dir.each_child do |project_dir|
       next if model == "<synthetic>"
 
       timestamp = record["timestamp"] || next
-      date = Date.parse(timestamp) rescue next
+      date = begin
+        Date.parse(timestamp)
+      rescue StandardError
+        next
+      end
       next if date < since
 
       total_messages += 1
@@ -182,21 +200,20 @@ stats.sort_by { |proj, _| proj }.each do |project_name, dates|
   proj_cost = 0.0
 
   dates.sort.each do |_date, models|
-    models.each do |_model, bucket|
+    models.each_value do |bucket|
       proj_cost += bucket[:cost]
     end
   end
 
   puts
-  puts "  " + p.bold(project_label(project_name).ljust(44)) + p.yellow("$%.4f" % proj_cost)
+  puts "  #{p.bold(project_label(project_name).ljust(44))}#{p.yellow(format('$%.4f', proj_cost))}"
 
   dates.sort.each do |date, models|
     models.sort_by { |model_name, _| model_name }.each do |model, bucket|
       short_model = model.sub("claude-", "").sub(/-\d{8}\z/, "")
       token_in    = format_tokens(bucket[:input] + bucket[:cache_write] + bucket[:cache_read])
       token_out   = format_tokens(bucket[:output])
-      puts "    " + p.dim(date) + "  " + p.cyan("%-24s" % short_model) +
-           p.green("$%.4f" % bucket[:cost]) + p.dim("  (#{token_in} in / #{token_out} out)")
+      puts "    #{p.dim(date)}  #{p.cyan(format('%-24s', short_model))}#{p.green(format('$%.4f', bucket[:cost]))}#{p.dim("  (#{token_in} in / #{token_out} out)")}"
     end
   end
 
@@ -204,9 +221,11 @@ stats.sort_by { |proj, _| proj }.each do |project_name, dates|
 end
 
 # Per-model totals
-model_totals = Hash.new { |by_model, model| by_model[model] = { cost: 0.0, input: 0, output: 0, cache_write: 0, cache_read: 0 } }
-stats.each do |_, dates|
-  dates.each do |_, models|
+model_totals = Hash.new do |by_model, model|
+  by_model[model] = { cost: 0.0, input: 0, output: 0, cache_write: 0, cache_read: 0 }
+end
+stats.each_value do |dates|
+  dates.each_value do |models|
     models.each do |model, bucket|
       model_total = model_totals[model]
       model_total[:cost]        += bucket[:cost]
@@ -228,7 +247,7 @@ table = TTY::Table.new(
   rows: model_totals.sort_by { |_, totals| -totals[:cost] }.map do |model, totals|
     [
       model.sub("claude-", "").sub(/-\d{8}\z/, ""),
-      "$%.4f" % totals[:cost],
+      format("$%.4f", totals[:cost]),
       format_tokens(totals[:input]),
       format_tokens(totals[:cache_write]),
       format_tokens(totals[:cache_read]),
@@ -236,10 +255,9 @@ table = TTY::Table.new(
     ]
   end
 )
-puts table.render(:unicode, padding: [0, 1], alignments: [:left, :right, :right, :right, :right, :right], indent: 2)
+puts table.render(:unicode, padding: [0, 1], alignments: %i[left right right right right right], indent: 2)
 
 puts
-puts "  " + p.bold("TOTAL  ") + p.bold.green("$%.4f" % grand_total)
+puts "  #{p.bold('TOTAL  ')}#{p.bold.green(format('$%.4f', grand_total))}"
 puts p.dim("  #{since} – #{Date.today}  ·  #{total_messages} messages · #{total_files} session files")
 puts
-

@@ -1,14 +1,20 @@
+# frozen_string_literal: true
+
 # Shared utilities for git-* Ruby scripts.
 # Usage: require_relative 'utils'
 
+require 'English'
+
 module Utils
+  extend self
+
   # Run a shell command, exit on failure.
-  def self.shell(command)
+  def shell(command)
     output = `#{command} 2>&1`
 
-    unless $?.success?
-      $stderr.puts "Error running: #{command}"
-      $stderr.puts output unless output.strip.empty?
+    unless $CHILD_STATUS.success?
+      warn "Error running: #{command}"
+      warn output unless output.strip.empty?
       exit(-1)
     end
 
@@ -16,7 +22,7 @@ module Utils
   end
 
   # Detect the default branch (main/master) from origin.
-  def self.detect_default_branch
+  def detect_default_branch
     ref = `git symbolic-ref refs/remotes/origin/HEAD 2>/dev/null`.strip
     if ref.empty?
       `git remote set-head origin --auto 2>/dev/null`
@@ -26,38 +32,70 @@ module Utils
   end
 
   # Return the git repo root directory.
-  def self.repo_root
+  def repo_root
     root = `git rev-parse --show-toplevel 2>/dev/null`.strip
     root.empty? ? nil : root
   end
 
-  # Run Claude in print mode with a prompt, return [success, output].
+  # Run an AI model with a prompt, return [success, output].
   #
-  # The `model` argument is passed through to `claude --model`. Accepted values
-  # (see `claude --help`):
-  #   - Aliases: "haiku", "sonnet", "opus" (resolve to the latest of each tier)
-  #   - Full IDs: "claude-haiku-4-5", "claude-sonnet-4-6", "claude-opus-4-7"
-  # Default is "haiku" to keep these scripts fast and cheap.
-  def self.claude_generate(prompt, model: "haiku")
+  # provider: :claude (default) or :opencode
+  #
+  # For :claude, model accepts aliases ("haiku", "sonnet", "opus") or full IDs.
+  # Defaults to "haiku" to keep scripts fast and cheap.
+  #
+  # For :opencode, model uses "provider/model" format (e.g. "anthropic/claude-sonnet-4-6").
+  # Defaults to "opencode/big-pickle".
+  def ai_generate(prompt, model: nil, provider: :claude)
+    case provider
+    when :claude
+      ai_generate_claude(prompt, model: model || "haiku")
+    when :opencode
+      ai_generate_opencode(prompt, model: model || "opencode/big-pickle")
+    else
+      raise ArgumentError, "Unknown provider: #{provider}"
+    end
+  end
+
+  private
+
+  def ai_generate_claude(prompt, model:)
     output = IO.popen(
       ["claude", "--print", "--model", model, "--no-session-persistence", "--tools", "", "--disable-slash-commands", "--strict-mcp-config", "-"],
-      "r+", err: [:child, :out]
+      "r+", err: %i[child out]
     ) do |io|
       io.write(prompt)
       io.close_write
       io.read
     end
 
-    [$?.success? && !output.strip.empty?, output.strip]
+    [$CHILD_STATUS.success? && !output.strip.empty?, output.strip]
   end
 
+  def ai_generate_opencode(prompt, model:)
+    cmd = %w[opencode run]
+    cmd += ["--model", model] if model
+    cmd << prompt
+
+    output = IO.popen(cmd, err: %i[child out], &:read)
+    output = output.gsub(/\e\[[0-9;]*m/, "")
+                   .lines
+                   .reject { |l| l.strip.start_with?(">") }
+                   .join
+                   .strip
+
+    [$CHILD_STATUS.success? && !output.empty?, output]
+  end
+
+  public
+
   # Strip wrapping code fences from AI output.
-  def self.strip_code_fences(text)
+  def strip_code_fences(text)
     text.sub(/\A```[^\n]*\n/, "").sub(/\n```\z/, "").strip
   end
 
   # Wrap text to a given width.
-  def self.wrap(text, width = 72)
+  def wrap(text, width = 72)
     text.gsub(/(.{1,#{width}})(\s+|\z)/, "\\1\n").rstrip
   end
 end

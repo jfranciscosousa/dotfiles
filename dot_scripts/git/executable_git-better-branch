@@ -1,4 +1,6 @@
 #!/usr/bin/env ruby
+# frozen_string_literal: true
+
 # git-better-branch - Better `git branch` listing.
 #
 # Lists local branches starting with the default branch (main/master),
@@ -7,6 +9,7 @@
 # open PR (GitHub) or MR (GitLab) URL for each branch.
 #
 # Usage: git better-branch [-r]
+require 'English'
 require 'json'
 require 'cgi'
 require 'optparse'
@@ -34,17 +37,21 @@ def fetch_github_urls(branches)
   branches.each_slice(16) do |chunk|
     threads = chunk.map do |branch|
       Thread.new do
-        begin
-          out = `gh pr list --head #{branch.shellescape} --state open --json url,author --limit 1 2>/dev/null`
-          next unless $?.success?
-          parsed = JSON.parse(out) rescue nil
-          next unless parsed.is_a?(Array) && !parsed.empty?
-          pr = parsed.first
-          author = pr.dig("author", "login")
-          mutex.synchronize { urls[branch] = { url: pr["url"], author: author } }
+        out = `gh pr list --head #{branch.shellescape} --state open --json url,author --limit 1 2>/dev/null`
+        next unless $CHILD_STATUS.success?
+
+        parsed = begin
+          JSON.parse(out)
         rescue StandardError
-          # Per-branch failure shouldn't abort the whole listing.
+          nil
         end
+        next unless parsed.is_a?(Array) && !parsed.empty?
+
+        pr = parsed.first
+        author = pr.dig("author", "login")
+        mutex.synchronize { urls[branch] = { url: pr["url"], author: author } }
+      rescue StandardError
+        # Per-branch failure shouldn't abort the whole listing.
       end
     end
     threads.each(&:join)
@@ -64,18 +71,22 @@ def fetch_gitlab_urls(branches)
   branches.each_slice(16) do |chunk|
     threads = chunk.map do |branch|
       Thread.new do
-        begin
-          encoded = CGI.escape(branch)
-          out = `glab api "projects/:fullpath/merge_requests?state=opened&source_branch=#{encoded}&per_page=1" 2>/dev/null`
-          next unless $?.success?
-          parsed = JSON.parse(out) rescue nil
-          next unless parsed.is_a?(Array) && !parsed.empty?
-          mr = parsed.first
-          author = mr.dig("author", "username")
-          mutex.synchronize { urls[branch] = { url: mr["web_url"], author: author } }
+        encoded = CGI.escape(branch)
+        out = `glab api "projects/:fullpath/merge_requests?state=opened&source_branch=#{encoded}&per_page=1" 2>/dev/null`
+        next unless $CHILD_STATUS.success?
+
+        parsed = begin
+          JSON.parse(out)
         rescue StandardError
-          # Per-branch failure shouldn't abort the whole listing.
+          nil
         end
+        next unless parsed.is_a?(Array) && !parsed.empty?
+
+        mr = parsed.first
+        author = mr.dig("author", "username")
+        mutex.synchronize { urls[branch] = { url: mr["web_url"], author: author } }
+      rescue StandardError
+        # Per-branch failure shouldn't abort the whole listing.
       end
     end
     threads.each(&:join)
@@ -97,11 +108,16 @@ end
 def fetch_me(remote_url)
   if remote_url.include?("github")
     out = `gh api user --jq .login 2>/dev/null`
-    return $?.success? ? out.strip : nil
+    $CHILD_STATUS.success? ? out.strip : nil
   elsif remote_url.include?("gitlab")
     out = `glab api user 2>/dev/null`
-    return nil unless $?.success?
-    (JSON.parse(out)["username"] rescue nil)
+    return nil unless $CHILD_STATUS.success?
+
+    begin
+      JSON.parse(out)["username"]
+    rescue StandardError
+      nil
+    end
   end
 end
 
@@ -110,10 +126,10 @@ current = `git rev-parse --abbrev-ref HEAD`.strip
 
 format = '%(refname:short)|%(committerdate:relative)'
 rows = `git for-each-ref --sort=-committerdate refs/heads/ --format='#{format}'`
-  .each_line.map do |line|
-    name, rel = line.strip.split("|", 2)
-    { name: name, rel: rel || "" }
-  end
+       .each_line.map do |line|
+  name, rel = line.strip.split("|", 2)
+  { name: name, rel: rel || "" }
+end
 
 default_row = rows.find { |r| r[:name] == default_branch }
 # Only treat the default-branch name as "the default" if it actually exists
@@ -130,7 +146,7 @@ me = nil
 if load_remotes
   remote_url = `git remote get-url origin 2>/dev/null`.strip
   if remote_url.empty?
-    $stderr.puts "git-better-branch: no 'origin' remote; skipping PR/MR fetch."
+    warn "git-better-branch: no 'origin' remote; skipping PR/MR fetch."
   else
     branches_to_fetch = ordered.map { |r| r[:name] }
     branches_to_fetch -= [default_name] if default_name

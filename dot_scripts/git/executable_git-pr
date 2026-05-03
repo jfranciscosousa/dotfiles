@@ -1,4 +1,6 @@
 #!/usr/bin/env ruby
+# frozen_string_literal: true
+
 # git-pr - Create a GitHub pull request with an AI-generated description.
 #
 # Usage: git pr [options]
@@ -9,6 +11,7 @@
 #
 # Looks for a PR template in .github/pull_request_template.md,
 # fills it in with Claude based on the branch diff, then creates the PR via gh.
+require 'English'
 require 'optparse'
 require 'shellwords'
 require_relative 'utils'
@@ -22,7 +25,7 @@ def find_pr_template
     ".github/PULL_REQUEST_TEMPLATE.md",
     "pull_request_template.md",
     "PULL_REQUEST_TEMPLATE.md",
-    "docs/pull_request_template.md",
+    "docs/pull_request_template.md"
   ]
 
   # Check exact candidates first
@@ -33,9 +36,7 @@ def find_pr_template
 
   # Check for templates directory (case-insensitive)
   dir = File.join(root, ".github/PULL_REQUEST_TEMPLATE")
-  unless Dir.exist?(dir)
-    dir = File.join(root, ".github/pull_request_template")
-  end
+  dir = File.join(root, ".github/pull_request_template") unless Dir.exist?(dir)
 
   if Dir.exist?(dir)
     templates = Dir.glob("#{dir}/*.md")
@@ -59,7 +60,7 @@ end.parse!
 
 remote_url = `git remote get-url origin 2>/dev/null`.strip
 unless remote_url.include?("github")
-  $stderr.puts "Remote origin does not point to GitHub: #{remote_url}"
+  warn "Remote origin does not point to GitHub: #{remote_url}"
   exit(1)
 end
 
@@ -67,7 +68,7 @@ branch = Utils.shell("git rev-parse --abbrev-ref HEAD").strip
 target ||= Utils.detect_default_branch
 
 if branch == target
-  $stderr.puts "Already on #{target}, nothing to merge."
+  warn "Already on #{target}, nothing to merge."
   exit(1)
 end
 
@@ -78,7 +79,7 @@ diff = Utils.shell("git diff origin/#{target}...HEAD")
 log = Utils.shell("git log origin/#{target}..HEAD --oneline")
 
 if diff.strip.empty?
-  $stderr.puts "No changes between #{branch} and #{target}."
+  warn "No changes between #{branch} and #{target}."
   exit(1)
 end
 
@@ -90,50 +91,50 @@ else
   puts "No PR template found, using default format."
 end
 
-if template
-  prompt = <<~PROMPT
-    Fill in this pull request template based on the changes below.
-    The FIRST line of your output must be the PR title (short, under 72 chars).
-    The SECOND line must be blank.
-    Everything after that is the filled template body. Plain text with markdown. Do not wrap in a code block.
+prompt = if template
+           <<~PROMPT
+             Fill in this pull request template based on the changes below.
+             The FIRST line of your output must be the PR title (short, under 72 chars).
+             The SECOND line must be blank.
+             Everything after that is the filled template body. Plain text with markdown. Do not wrap in a code block.
 
-    Template:
-    #{template}
+             Template:
+             #{template}
 
-    Commits:
-    #{log}
+             Commits:
+             #{log}
 
-    Diff:
-    #{diff}
-  PROMPT
-else
-  prompt = <<~PROMPT
-    Write a GitHub pull request description for these changes.
-    The FIRST line of your output must be the PR title (short, under 72 chars).
-    The SECOND line must be blank.
-    Everything after that is the description body with a summary section and a short test plan. Use markdown. Do not wrap in a code block.
+             Diff:
+             #{diff}
+           PROMPT
+         else
+           <<~PROMPT
+             Write a GitHub pull request description for these changes.
+             The FIRST line of your output must be the PR title (short, under 72 chars).
+             The SECOND line must be blank.
+             Everything after that is the description body with a summary section and a short test plan. Use markdown. Do not wrap in a code block.
 
-    Commits:
-    #{log}
+             Commits:
+             #{log}
 
-    Diff:
-    #{diff}
-  PROMPT
-end
+             Diff:
+             #{diff}
+           PROMPT
+         end
 
 puts "Generating PR description with Claude..."
 
-success, claude_output = Utils.claude_generate(prompt, model: "sonnet")
+success, ai_output = Utils.ai_generate(prompt, model: "sonnet")
 
-if !success
-  $stderr.puts "Warning: Claude failed, using commit log as description."
-  title = log.lines.first&.strip&.sub(/^[a-f0-9]+\s+/, "") || branch
-  description = log
-else
-  output = Utils.strip_code_fences(claude_output)
+if success
+  output = Utils.strip_code_fences(ai_output)
   lines = output.lines
   title = lines.first&.strip || branch
   description = lines.drop(1).join.strip
+else
+  warn "Warning: Claude failed, using commit log as description."
+  title = log.lines.first&.strip&.sub(/^[a-f0-9]+\s+/, "") || branch
+  description = log
 end
 
 puts "Creating PR: #{title}"
@@ -142,9 +143,9 @@ puts "Creating PR: #{title}"
 Utils.shell("git push -u origin #{branch}")
 
 pr_output = `gh pr create --title #{title.shellescape} --body #{description.shellescape} --base #{target} 2>&1`
-unless $?.success?
-  $stderr.puts "Error creating PR:"
-  $stderr.puts pr_output
+unless $CHILD_STATUS.success?
+  warn "Error creating PR:"
+  warn pr_output
   exit(-1)
 end
 puts pr_output

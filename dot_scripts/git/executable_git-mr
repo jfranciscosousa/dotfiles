@@ -1,4 +1,6 @@
 #!/usr/bin/env ruby
+# frozen_string_literal: true
+
 # git-mr - Create a GitLab merge request with an AI-generated description.
 #
 # Usage: git mr [options]
@@ -9,6 +11,7 @@
 #
 # Looks for an MR template in .gitlab/merge_request_templates/Default.md,
 # fills it in with Claude based on the branch diff, then creates the MR via glab.
+require 'English'
 require 'optparse'
 require 'shellwords'
 require_relative 'utils'
@@ -39,7 +42,7 @@ end.parse!
 
 remote_url = `git remote get-url origin 2>/dev/null`.strip
 unless remote_url.include?("gitlab")
-  $stderr.puts "Remote origin does not point to GitLab: #{remote_url}"
+  warn "Remote origin does not point to GitLab: #{remote_url}"
   exit(1)
 end
 
@@ -47,7 +50,7 @@ branch = Utils.shell("git rev-parse --abbrev-ref HEAD").strip
 target ||= Utils.detect_default_branch
 
 if branch == target
-  $stderr.puts "Already on #{target}, nothing to merge."
+  warn "Already on #{target}, nothing to merge."
   exit(1)
 end
 
@@ -58,7 +61,7 @@ diff = Utils.shell("git diff origin/#{target}...HEAD")
 log = Utils.shell("git log origin/#{target}..HEAD --oneline")
 
 if diff.strip.empty?
-  $stderr.puts "No changes between #{branch} and #{target}."
+  warn "No changes between #{branch} and #{target}."
   exit(1)
 end
 
@@ -70,50 +73,50 @@ else
   puts "No MR template found, using default format."
 end
 
-if template
-  prompt = <<~PROMPT
-    Fill in this merge request template based on the changes below.
-    The FIRST line of your output must be the MR title (short, under 72 chars).
-    The SECOND line must be blank.
-    Everything after that is the filled template body. Plain text with markdown. Do not wrap in a code block.
+prompt = if template
+           <<~PROMPT
+             Fill in this merge request template based on the changes below.
+             The FIRST line of your output must be the MR title (short, under 72 chars).
+             The SECOND line must be blank.
+             Everything after that is the filled template body. Plain text with markdown. Do not wrap in a code block.
 
-    Template:
-    #{template}
+             Template:
+             #{template}
 
-    Commits:
-    #{log}
+             Commits:
+             #{log}
 
-    Diff:
-    #{diff}
-  PROMPT
-else
-  prompt = <<~PROMPT
-    Write a GitLab merge request description for these changes.
-    The FIRST line of your output must be the MR title (short, under 72 chars).
-    The SECOND line must be blank.
-    Everything after that is the description body with a summary section and a short test plan. Use markdown. Do not wrap in a code block.
+             Diff:
+             #{diff}
+           PROMPT
+         else
+           <<~PROMPT
+             Write a GitLab merge request description for these changes.
+             The FIRST line of your output must be the MR title (short, under 72 chars).
+             The SECOND line must be blank.
+             Everything after that is the description body with a summary section and a short test plan. Use markdown. Do not wrap in a code block.
 
-    Commits:
-    #{log}
+             Commits:
+             #{log}
 
-    Diff:
-    #{diff}
-  PROMPT
-end
+             Diff:
+             #{diff}
+           PROMPT
+         end
 
 puts "Generating MR description with Claude..."
 
-success, claude_output = Utils.claude_generate(prompt, model: "sonnet")
+success, ai_output = Utils.ai_generate(prompt, model: "sonnet")
 
-if !success
-  $stderr.puts "Warning: Claude failed, using commit log as description."
-  title = log.lines.first&.strip&.sub(/^[a-f0-9]+\s+/, "") || branch
-  description = log
-else
-  output = Utils.strip_code_fences(claude_output)
+if success
+  output = Utils.strip_code_fences(ai_output)
   lines = output.lines
   title = lines.first&.strip || branch
   description = lines.drop(1).join.strip
+else
+  warn "Warning: Claude failed, using commit log as description."
+  title = log.lines.first&.strip&.sub(/^[a-f0-9]+\s+/, "") || branch
+  description = log
 end
 
 puts "Creating MR: #{title}"
@@ -122,9 +125,9 @@ puts "Creating MR: #{title}"
 Utils.shell("git push -u origin #{branch}")
 
 mr_output = `glab mr create --title #{title.shellescape} --description #{description.shellescape} --target-branch #{target} 2>&1`
-unless $?.success?
-  $stderr.puts "Error creating MR:"
-  $stderr.puts mr_output
+unless $CHILD_STATUS.success?
+  warn "Error creating MR:"
+  warn mr_output
   exit(-1)
 end
 puts mr_output
