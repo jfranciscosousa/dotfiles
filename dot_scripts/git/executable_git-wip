@@ -78,7 +78,7 @@ if ai_message
     #{diff_full}
   PROMPT
 
-  success, claude_output = Utils.claude_generate(prompt, model: "sonnet")
+  success, ai_output = Utils.ai_generate(prompt, model: "sonnet")
 
   if success
     lines = ai_output.lines.map(&:rstrip)
