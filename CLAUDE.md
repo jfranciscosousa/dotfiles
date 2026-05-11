@@ -67,7 +67,6 @@ Key template files:
 - **Prompt**: geometry-zsh/geometry
 - **Load order**: `dot_zshenv` → `dot_zprofile` → `dot_zshrc.tmpl` → `dot_zlogin`
 - Custom aliases live in `dot_zsh/aliases.sh.tmpl`
-- Machine-local (untracked) overrides can go in `~/.zsh/custom.sh`
 - Startup hooks in `dot_scripts/startup/` are sourced per-OS at the end of `.zshrc`
 
 ### Custom Scripts

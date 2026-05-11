@@ -11,52 +11,53 @@
   "auto_install_extensions": {
     "catppuccin-icons": true,
     "elixir": true,
+    "mdx": false
   },
   "icon_theme": "Catppuccin Mocha",
   "project_panel": {
-    "dock": "left",
+    "dock": "left"
   },
   "agent": {
     "sidebar_side": "right",
     "dock": "right",
     "default_model": {
       "provider": "claude-acp",
-      "model": "",
-    },
+      "model": ""
+    }
   },
   "collaboration_panel": {
-    "button": false,
+    "button": false
   },
   "search": {
-    "button": false,
+    "button": false
   },
   "telemetry": {
     "diagnostics": false,
-    "metrics": false,
+    "metrics": false
   },
   "terminal": {
-    "max_scroll_history_lines": 10000,
+    "max_scroll_history_lines": 10000
   },
   "multi_cursor_modifier": "alt",
   "minimap": {
-    "show": "never",
+    "show": "never"
   },
   "buffer_font_family": "Fira Mono",
   "file_types": {
     "markdown": ["*.mdx"],
     "scss": ["*.css"],
     "javascript": ["*.jsx"],
-    "html": ["*.liquid", "*.njk"],
+    "html": ["*.liquid", "*.njk"]
   },
   "linked_edits": true,
   "tab_size": 2,
   "agent_servers": {
     "claude-acp": {
-      "type": "registry",
+      "type": "registry"
     },
     "cursor": {
-      "type": "registry",
-    },
+      "type": "registry"
+    }
   },
   "base_keymap": "VSCode",
   "ui_font_size": 16,
@@ -64,7 +65,7 @@
   "theme": {
     "mode": "system",
     "light": "One Light",
-    "dark": "Ayu Mirage",
+    "dark": "Ayu Mirage"
   },
   // Elixir stuff
   "languages": {
@@ -72,21 +73,73 @@
       "language_servers": [
         "dexter",
         "!expert",
-        "!next-ls",
-        "!lexical",
         "!elixir-ls",
-      ],
+        "!next-ls",
+        "!lexical"
+      ]
     },
+    "EEx": {
+      "language_servers": [
+        "dexter",
+        "!expert",
+        "!elixir-ls",
+        "!next-ls",
+        "!lexical"
+      ]
+    },
+    "HEEx": {
+      "language_servers": [
+        "dexter",
+        "!expert",
+        "!elixir-ls",
+        "!next-ls",
+        "!lexical"
+      ]
+    },
+    "TypeScript": {
+      "language_servers": [
+        "tsgo",
+        "!vtsls",
+        "!typescript-language-server",
+        "eslint"
+      ]
+    },
+    "TSX": {
+      "language_servers": [
+        "tsgo",
+        "!vtsls",
+        "!typescript-language-server",
+        "eslint"
+      ]
+    },
+    "JavaScript": {
+      "language_servers": [
+        "tsgo",
+        "!vtsls",
+        "!typescript-language-server",
+        "eslint"
+      ]
+    },
+    "JSX": {
+      "language_servers": [
+        "tsgo",
+        "!vtsls",
+        "!typescript-language-server",
+        "eslint"
+      ]
+    },
+    "MDX": {
+      "language_servers": ["!mdx-analyzer"]
+    }
   },
   "lsp": {
     "dexter": {
       "binary": {
-        "path": "~/.asdf/shims/dexter",
-        "arguments": ["lsp"],
+        "arguments": ["lsp"]
       },
       "initialization_options": {
-        "followDelegates": true,
-      },
-    },
-  },
+        "followDelegates": true
+      }
+    }
+  }
 }

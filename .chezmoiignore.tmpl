@@ -7,6 +7,10 @@
 .scripts/startup/macos.sh
 {{ end }}
 
+{{ if not (hasPrefix "Remote-" .chezmoi.hostname) }}
+.zsh/remote.sh
+{{ end }}
+
 CLAUDE.md
 README.md
 .rubocop.yml

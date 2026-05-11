@@ -36,7 +36,6 @@ source "$HOME/.scripts/startup/macos.sh"
 source "$HOME/.scripts/startup/linux.sh"
 {{ end }}
 
-# Custom non-git tracked scripts
-if [[ -f "$HOME/.zsh/custom.sh" ]]; then
-  source "$HOME/.zsh/custom.sh"
+if [[ -f "$HOME/.zsh/remote.sh" ]]; then
+  source "$HOME/.zsh/remote.sh"
 fi
