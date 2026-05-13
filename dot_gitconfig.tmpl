@@ -9,6 +9,14 @@
   editor = nvim
   excludesfile = ~/.global_gitignore
   pager = less -+S
+  # Built-in filesystem monitor daemon — skips scanning unchanged files on `git status`.
+  # Biggest single speedup for large worktrees on macOS/Windows (requires Git >= 2.37).
+  fsmonitor = true
+  # Cache the list of untracked files between runs so `git status` doesn't re-stat everything.
+  untrackedCache = true
+[feature]
+  # Umbrella switch that enables index v4, commit-graph, and other tuned defaults for big repos.
+  manyFiles = true
 [credential]
   helper = cache --timeout=3600
 [push]
@@ -16,3 +24,19 @@
   autoSetupRemote = true
 [pull]
 	rebase = true
+[fetch]
+  # Keep the commit-graph file up to date on every fetch — speeds up `git log --graph`,
+  # `merge-base`, ahead/behind counts on repos with millions of commits.
+  writeCommitGraph = true
+  # Smarter negotiation when many branches exist; fewer round-trips to the server.
+  negotiationAlgorithm = skipping
+  # Skip the "is this a force-push?" check on fetch. With thousands of refs this alone
+  # saves several seconds per fetch.
+  showForcedUpdates = false
+[pack]
+  # Use the sparse reachability algorithm when packing — faster on partial/sparse checkouts.
+  useSparse = true
+[diff]
+  # Histogram tends to produce cleaner hunks than the default myers algorithm, often faster
+  # on large files too.
+  algorithm = histogram

@@ -5,6 +5,7 @@
       "alt-left": "pane::ActivatePreviousItem",
       "alt-right": "pane::ActivateNextItem",
       "f12": "terminal_panel::ToggleFocus",
+      "secondary-shift-c": "workspace::CopyRelativePath",
     },
   },
   {
