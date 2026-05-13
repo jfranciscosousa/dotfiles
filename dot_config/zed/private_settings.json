@@ -25,6 +25,9 @@
       "model": ""
     }
   },
+  "git": {
+    "worktree_directory": "~/.git-worktrees"
+  },
   "collaboration_panel": {
     "button": false
   },
