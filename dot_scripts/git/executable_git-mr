@@ -104,7 +104,7 @@ prompt = if template
            PROMPT
          end
 
-puts "Generating MR description with Claude..."
+puts "Generating MR description with AI..."
 
 success, ai_output = Utils.ai_generate(prompt, model: "sonnet")
 
@@ -114,7 +114,8 @@ if success
   title = lines.first&.strip || branch
   description = lines.drop(1).join.strip
 else
-  warn "Warning: Claude failed, using commit log as description."
+  warn "Warning: AI generation failed, using commit log as description."
+  warn ai_output unless ai_output.empty?
   title = log.lines.first&.strip&.sub(/^[a-f0-9]+\s+/, "") || branch
   description = log
 end

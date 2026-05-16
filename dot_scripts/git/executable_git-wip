@@ -87,7 +87,8 @@ if ai_message
     formatted_body = body.map { |l| Utils.wrap(l, 72) }.join("\n")
     message = formatted_body.empty? ? subject : "#{subject}\n\n#{formatted_body}"
   else
-    warn "Warning: Claude failed, falling back to 'wip' message"
+    warn "Warning: AI generation failed, falling back to 'wip' message" unless ai_output.empty?
+    warn ai_output unless ai_output.empty?
     message = "wip"
   end
 end

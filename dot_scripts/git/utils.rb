@@ -45,13 +45,15 @@ module Utils
   # Defaults to "haiku" to keep scripts fast and cheap.
   #
   # For :opencode, model uses "provider/model" format (e.g. "anthropic/claude-sonnet-4-6").
-  # Defaults to "opencode/big-pickle".
+  # Defaults to "opencode/deepseek-v4-flash-free".
   def ai_generate(prompt, model: nil, provider: :claude)
+    model = ENV.fetch("DOTFILES_MODEL", model)
+    provider = ENV.fetch("DOTFILES_PROVIDER", provider.to_s).to_sym
     case provider
     when :claude
       ai_generate_claude(prompt, model: model || "haiku")
     when :opencode
-      ai_generate_opencode(prompt, model: model || "opencode/big-pickle")
+      ai_generate_opencode(prompt, model: model || "opencode/deepseek-v4-flash-free")
     else
       raise ArgumentError, "Unknown provider: #{provider}"
     end
@@ -59,9 +61,15 @@ module Utils
 
   private
 
+  def debug(msg)
+    warn "[DEBUG] #{msg}" if ENV["DEBUG"]
+  end
+
   def ai_generate_claude(prompt, model:)
-    output = IO.popen(
-      ["claude", "--print", "--model", model, "--no-session-persistence", "--tools", "", "--disable-slash-commands", "--strict-mcp-config", "-"],
+    cmd = ["claude", "--print", "--model", model, "--no-session-persistence", "--tools", "", "--disable-slash-commands", "--strict-mcp-config", "-"]
+    debug "model=#{model}"
+    debug "command=#{cmd.join(" ")}"
+    output = IO.popen(cmd,
       "r+", err: %i[child out]
     ) do |io|
       io.write(prompt)
@@ -77,6 +85,8 @@ module Utils
     cmd += ["--model", model] if model
     cmd << prompt
 
+    debug "model=#{model}"
+    debug "command=#{cmd.join(" ")}"
     output = IO.popen(cmd, err: %i[child out], &:read)
     output = output.gsub(/\e\[[0-9;]*m/, "")
                    .lines
