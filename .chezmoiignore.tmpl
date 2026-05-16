@@ -9,6 +9,8 @@
 
 {{ if not (hasPrefix "Remote-" .chezmoi.hostname) }}
 .zsh/remote.sh
+{{ else }}
+.zsh/personal.sh
 {{ end }}
 
 AGENTS.md
