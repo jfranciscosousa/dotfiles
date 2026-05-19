@@ -81,7 +81,7 @@ module Utils
   end
 
   def ai_generate_opencode(prompt, model:)
-    cmd = %w[opencode run]
+    cmd = %w[opencode run --dir /tmp]
     cmd += ["--model", model] if model
     cmd << prompt
 
