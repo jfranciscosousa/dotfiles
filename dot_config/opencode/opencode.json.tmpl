@@ -10,7 +10,8 @@
     }
   },
 {{- else }}
-  "model": "opencode/deepseek-v4-flash-free"
+  "model": "opencode/deepseek-v4-flash-free",
 {{- end }}
+  "instructions": ["{{ .chezmoi.homeDir }}/.brains/RTK.md"],
   "plugin": ["oh-my-openagent@latest"]
 }
