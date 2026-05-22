@@ -52,3 +52,6 @@ exe/
 
 # Dexter elixir lsp
 .dexter.db*
+
+# oh-my-openagent runtime state (per-session continuation tracking)
+.omo/

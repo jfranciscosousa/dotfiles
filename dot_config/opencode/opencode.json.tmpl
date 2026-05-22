@@ -8,8 +8,9 @@
       "model": "anthropic/claude-opus-4-7",
       "variant": "high"
     }
-  }
+  },
 {{- else }}
   "model": "opencode/deepseek-v4-flash-free"
 {{- end }}
+  "plugin": ["oh-my-openagent@latest"]
 }

@@ -11,3 +11,5 @@ Only do this if there's a way to lint, verify, or equivalent for specific files 
 ### Git
 
 Never perform git, gitlab or github operations unless I specifically specify it.
+
+And if you do, any branch you create should be prefixed with fs/

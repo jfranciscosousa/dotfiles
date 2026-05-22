@@ -60,11 +60,19 @@
       "type": "registry"
     },
     "cursor": {
-      "type": "registry",
+      "type": "registry"
     },
     "opencode": {
       "type": "registry",
-    },
+      "favorite_config_option_values": {
+{{- if hasPrefix "Remote-" .chezmoi.hostname }}
+        "model": ["anthropic/claude-opus-4-7"],
+        "effort": ["high"]
+{{- else }}
+        "model": ["opencode/deepseek-v4-flash-free"]
+{{- end }}
+      }
+    }
   },
   "base_keymap": "VSCode",
   "ui_font_size": 16,
