@@ -13,5 +13,10 @@
   "model": "opencode/deepseek-v4-flash-free",
 {{- end }}
   "instructions": ["{{ .chezmoi.homeDir }}/.brains/RTK.md"],
-  "plugin": ["oh-my-openagent@latest", ".\/plugins\/cmux-session.js"]
+  "plugin": [
+    "oh-my-openagent@latest",
+    ".\/plugins\/rtk.ts",
+    ".\/plugins\/cmux-session.js",
+    ".\/plugins\/cmux-feed.js"
+  ]
 }
