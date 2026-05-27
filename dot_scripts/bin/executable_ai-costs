@@ -42,7 +42,16 @@ def truncate_title(title)
   "#{words.first(TITLE_WORD_LIMIT).join(' ')}…"
 end
 
-# Fetches Claude model pricing ($/1M tokens) from LiteLLM's public JSON, cached for 24h in the
+# Strips provider-specific prefixes from a model ID so it matches the pricing table.
+# e.g. "eu.anthropic.claude-opus-4-7" → "claude-opus-4-7".
+def normalize_model(model)
+  model.to_s
+       .sub(/\A(?:us|eu|apac)\./, "")
+       .sub(/\Aanthropic[.\/]/, "")
+       .sub(%r{\A(?:openai|azure|azure_ai)/}, "")
+end
+
+# Fetches model pricing ($/1M tokens) from LiteLLM's public JSON, cached for 24h in the
 # system temp dir. Normalizes model keys by stripping provider prefixes and version suffixes.
 LITELLM_URL       = "https://raw.githubusercontent.com/BerriAI/litellm/main/model_prices_and_context_window.json"
 PRICING_CACHE     = Pathname.new(Dir.tmpdir).join("ai-costs-pricing.json")
@@ -60,12 +69,11 @@ def fetch_pricing
 
   pricing = {}
   raw.each do |key, data|
-    model = key
-            .sub(/\Aanthropic\./, "")
+    model = normalize_model(key)
             .sub(/-v\d+:\d+\z/, "")
             .sub(/-v\d+\z/, "")
             .sub(/@.+\z/, "")
-    next unless model.start_with?("claude-")
+    next unless model.start_with?("claude-", "gpt-")
 
     input       = ((data["input_cost_per_token"]            || 0) * 1_000_000).round(4)
     output      = ((data["output_cost_per_token"]           || 0) * 1_000_000).round(4)
@@ -75,17 +83,11 @@ def fetch_pricing
 
     pricing[model] = { input: input, output: output, cache_write: cache_write, cache_read: cache_read }
   end
-  abort "No Claude pricing found in response" if pricing.empty?
+  abort "No supported model pricing found in response" if pricing.empty?
   pricing
 end
 
 PRICING = fetch_pricing
-
-# Strips provider-specific prefixes from a model ID so it matches the pricing table.
-# e.g. "eu.anthropic.claude-opus-4-7" → "claude-opus-4-7".
-def normalize_model(model)
-  model.sub(/\A(?:us|eu|apac)\./, "").sub(/\Aanthropic\./, "")
-end
 
 # Computes the dollar cost for a single assistant message given its model and usage stats.
 # Falls back to prefix matching (e.g. "claude-opus-4-7" → "claude-opus-4") when the exact

@@ -7,7 +7,9 @@ description: Use Linear and Figma MCPs to breakdown designs into linear tasks
 
 You are a frankensteined version of a project manager / product manager / engineer.
 
-Create simple Linear issues with the following format. Be concise.
+Create simple Linear issues with the following format. Be concise. When presenting to the user via the prompt, prettify it as you see fit, but use the markdown when creating on linear.
+
+When presenting Linear IDs to users on the prompts always use the URLs so users can easily check them.
 
 ```
 # Title
