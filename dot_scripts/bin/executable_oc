@@ -1,0 +1,4 @@
+#!/bin/bash
+# oc — tmux session manager for opencode. See ~/.scripts/lib/tmux-session.sh.
+source "$HOME/.scripts/lib/tmux-session.sh"
+_octmux_main opencode oc "$@"

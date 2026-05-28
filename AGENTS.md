@@ -73,7 +73,7 @@ Key template files:
 
 Scripts in `dot_scripts/` are installed to `~/.scripts/` and added to PATH:
 
-- `~/.scripts/bin/` — general utilities (`t`, `y`, `untilfail`, `cow-echo`)
+- `~/.scripts/bin/` — general utilities (`t`, `y`, `untilfail`, `cow-echo`, `oc`, `cc`)
 - `~/.scripts/git/` — git subcommands (`git-wip`, `git-nuke`, `git-squash-feature`, `git-fetch-all`, `git-reset-remote`, `git-diff-origin`)
 
 The `y` script auto-detects and delegates to yarn/npm/pnpm based on lockfile presence.

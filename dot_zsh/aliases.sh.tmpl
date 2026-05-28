@@ -44,4 +44,5 @@ alias gmr="git mr"
 alias gpr="git pr"
 alias chezmoi-update="exec ~/.scripts/bin/chezmoi-update"
 alias chezmoi-code="code ~/.local/share/chezmoi"
-alias oc="opencode"
+# cc shadows /usr/bin/cc (C compiler) so the tmux session manager takes priority
+cc() { "$HOME/.scripts/bin/cc" "$@"; }
