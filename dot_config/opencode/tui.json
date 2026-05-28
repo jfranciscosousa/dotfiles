@@ -1,3 +1,4 @@
 {
-  "plugin": ["oh-my-openagent/tui"]
+  "plugin": ["oh-my-openagent/tui"],
+  "mouse": false
 }
