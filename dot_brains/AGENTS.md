@@ -13,3 +13,10 @@ Only do this if there's a way to lint, verify, or equivalent for specific files 
 Never perform git, gitlab or github operations unless I specifically specify it.
 
 And if you do, any branch you create should be prefixed with fs/
+
+### Terminal file links
+
+When referencing files in terminal-facing responses, format them for editor
+cmd-click detection: prefer short repo-relative `path:line` references, put
+important file references on their own line when possible, and avoid tree
+decorations or long prose around the path that can wrap in narrow terminals.
