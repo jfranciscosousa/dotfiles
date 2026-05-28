@@ -57,6 +57,7 @@ _octmux_main() {
 
   local session="${prefix}_${name}"
   local label="$name"
+  local status_left='[#{?#{==:#{@octmux_label},},#S,#{@octmux_label}}]'
 
   if [ "$delete" -eq 1 ]; then
     if tmux has-session -t "=${session}" 2>/dev/null; then
@@ -68,9 +69,16 @@ _octmux_main() {
     return 1
   fi
 
+  tmux set-option -gq status-left "${status_left}"
+  tmux set-option -gq status-right ""
+  tmux set-option -gq status-left-length 50
+
   if tmux has-session -t "=${session}" 2>/dev/null; then
+    tmux set-option -t "${session}" -q @octmux_label "${label}"
     exec tmux attach-session -t "=${session}"
   fi
 
-  exec tmux new-session -s "${session}" -c "$PWD" "${TOOL}" "$@"
+  tmux new-session -d -s "${session}" -c "$PWD" "${TOOL}" "$@"
+  tmux set-option -t "${session}" -q @octmux_label "${label}"
+  exec tmux attach-session -t "=${session}"
 }
