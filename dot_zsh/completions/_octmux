@@ -1,0 +1,52 @@
+#compdef cc oc
+
+_octmux_pathkey() {
+  local key
+  key="$(print -r -- "$PWD" | tr -cs 'a-zA-Z0-9-' '-' | sed 's/^-//;s/-$//')"
+  print -r -- "${key:-root}"
+}
+
+_octmux_session_labels() {
+  local short="$1"
+  local prefix="${short}--$(_octmux_pathkey)_"
+  local session
+
+  command tmux list-sessions -F '#S' 2>/dev/null | while IFS= read -r session; do
+    [[ "$session" == "${prefix}"* ]] && print -r -- "${session#$prefix}"
+  done
+}
+
+_octmux_complete_sessions() {
+  local short="$1"
+  local -a sessions
+  sessions=("${(@f)$(_octmux_session_labels "$short")}")
+
+  if (( ${#sessions} )); then
+    _describe -t sessions 'existing session' sessions
+  else
+    _message 'no existing sessions for this directory'
+  fi
+}
+
+_octmux() {
+  local short="${words[1]}"
+  local context state state_descr line
+  typeset -A opt_args
+
+  _arguments -C -s \
+    '(-d)-l[list sessions for this directory]' \
+    '(-l)-d[delete a named session]' \
+    '1:existing session:->session' \
+    '*::wrapped tool argument:->wrapped' && return
+
+  case "$state" in
+    session)
+      _octmux_complete_sessions "$short"
+      ;;
+    wrapped)
+      _message 'arguments after the session name are passed to the wrapped tool'
+      ;;
+  esac
+}
+
+_octmux "$@"

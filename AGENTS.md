@@ -2,6 +2,12 @@
 
 This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
 
+## Key guidelines you must respect at all times
+
+- Do not write to my home directory ever. You can read, but not write. All edits need to go through chezmoi
+- Do not apply or test commands manually unless I give you permission. By default, never chezmoi apply and tell me to test things manually
+- All changes you make to a config must be made on my dotfiles repo, not to me home directory directly, ever
+
 ## What This Repo Is
 
 A personal dotfiles repository managed by [chezmoi](https://www.chezmoi.io/). Chezmoi manages dotfiles by maintaining a source directory (this repo) and applying them to the home directory.
