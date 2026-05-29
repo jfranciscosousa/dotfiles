@@ -3,10 +3,36 @@
 {{- if hasPrefix "Remote-" .chezmoi.hostname }}
   "enabled_providers": ["anthropic", "openai"],
   "model": "anthropic/claude-opus-4-8",
+  "provider": {
+    "anthropic": {
+      "models": {
+        "claude-opus-4-8": {
+          "options": {
+            "thinking": { "type": "adaptive" },
+            "output_config": { "effort": "high" }
+          }
+        }
+      }
+    }
+  },
   "agent": {
     "build": {
+      "model": "anthropic/claude-opus-4-8"
+    },
+    "build-deep": {
+      "mode": "primary",
+      "description": "Like build, but uses GPT-5.5",
+      "model": "openai/gpt-5.5"
+    },
+    "build-fast": {
+      "mode": "primary",
+      "description": "Guided, low-exploration flow on Opus 4.8 fast mode",
       "model": "anthropic/claude-opus-4-8",
-      "variant": "high"
+      "prompt": "{file:./prompts/build-fast.md}",
+      "options": {
+        "thinking": { "type": "adaptive" },
+        "output_config": { "effort": "low" }
+      }
     }
   },
 {{- else }}
