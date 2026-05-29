@@ -1,4 +1,4 @@
-#compdef cc oc
+#compdef cc oc tiger-dev dragon-dev
 
 _octmux_pathkey() {
   local key

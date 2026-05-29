@@ -1,17 +1,35 @@
 # shellcheck shell=bash
 
+_octmux_quote_arg() {
+  local arg="$1"
+  printf "'%s'" "${arg//\'/\'\\\'\'}"
+}
+
+_octmux_shell_command() {
+  local command="$1"
+  shift
+
+  local arg
+  for arg in "$@"; do
+    command+=" $(_octmux_quote_arg "$arg")"
+  done
+
+  printf '%s' "$command"
+}
+
 _octmux_main() {
   local TOOL="$1"
   local TOOL_SHORT="$2"
   shift 2
 
-  if ! command -v "$TOOL" >/dev/null 2>&1; then
-    echo "oc/cc: error: '$TOOL' not found in PATH" >&2
+  local TOOL_BIN="${TOOL%% *}"
+  if ! command -v "$TOOL_BIN" >/dev/null 2>&1; then
+    echo "${TOOL_SHORT}: error: '$TOOL_BIN' not found in PATH" >&2
     return 1
   fi
 
   if ! command -v tmux >/dev/null 2>&1; then
-    echo "oc/cc: error: tmux not found in PATH" >&2
+    echo "${TOOL_SHORT}: error: tmux not found in PATH" >&2
     return 1
   fi
 
@@ -41,7 +59,7 @@ _octmux_main() {
   fi
 
   if [ "$delete" -eq 0 ] && [ -n "${TMUX:-}" ]; then
-    echo "oc/cc: looks like you're already inside tmux." >&2
+    echo "${TOOL_SHORT}: looks like you're already inside tmux." >&2
     echo "To switch to an existing session, run:" >&2
     echo "    tmux switch-client -t \"=<session-name>\"" >&2
     echo "To list sessions: tmux list-sessions" >&2
@@ -62,10 +80,10 @@ _octmux_main() {
   if [ "$delete" -eq 1 ]; then
     if tmux has-session -t "=${session}" 2>/dev/null; then
       tmux kill-session -t "=${session}"
-      echo "oc/cc: killed session '${label}'"
+      echo "${TOOL_SHORT}: killed session '${label}'"
       return 0
     fi
-    echo "oc/cc: no session named '${label}'" >&2
+    echo "${TOOL_SHORT}: no session named '${label}'" >&2
     return 1
   fi
 
@@ -78,7 +96,10 @@ _octmux_main() {
     exec tmux attach-session -t "=${session}"
   fi
 
-  tmux new-session -d -s "${session}" -c "$PWD" "${TOOL}" "$@"
+  local shell_command
+  shell_command="$(_octmux_shell_command "$TOOL" "$@")"
+
+  tmux new-session -d -s "${session}" -c "$PWD" "${shell_command}"
   tmux set-option -t "${session}" -q @octmux_label "${label}"
   exec tmux attach-session -t "=${session}"
 }

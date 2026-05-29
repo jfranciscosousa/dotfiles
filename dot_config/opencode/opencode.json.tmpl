@@ -35,14 +35,20 @@
       }
     }
   },
+  "mcp": {
+    "linear": {
+      "type": "remote",
+      "url": "https://mcp.linear.app/mcp",
+      "enabled": true
+    }
+  },
 {{- else }}
   "model": "opencode/deepseek-v4-flash-free",
 {{- end }}
   "instructions": ["{{ .chezmoi.homeDir }}/.brains/RTK.md"],
   "plugin": [
     ".\/plugins\/rtk.ts",
-    ".\/plugins\/cmux-session.js",
-    ".\/plugins\/cmux-feed.js",
-    ".\/plugins\/zed-bell.js"
+    ".\/plugins\/zed-bell.js",
+    "opencode-websearch"
   ]
 }

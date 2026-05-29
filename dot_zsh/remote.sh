@@ -13,14 +13,14 @@ alias remotectl-update="asdf install remotectl latest && asdf set -u remotectl l
 alias dexter-update="asdf install dexter latest && asdf set -u dexter latest"
 
 # Dragon aliases
-alias dragon-dev="yarn workspace @remote-com/employ dev"
+# dragon-dev: tmux session manager -> ~/.scripts/bin/dragon-dev
 function dragon-test() {
   yarn workspace @remote-com/employ jest --maxWorkers=4 "$@" --selectProjects test
 }
 
 # Tiger aliases
 alias tiger-console="iex -S mix"
-alias tiger-dev="iex -S mix phx.server"
+# tiger-dev: tmux session manager -> ~/.scripts/bin/tiger-dev
 alias tiger-test-server="MIX_ENV=test iex --sname test_server -S mix"
 function tiger-test() {
   mix test "$@"
