@@ -8,6 +8,11 @@
 // session and skipping it when `parentID` is set, so the bell only fires
 // when the top-level session needs the user's attention.
 export const ZedBell = async ({ client }) => {
+  const ring = () => {
+    if (!process.stderr.isTTY) return;
+    process.stderr.write("\x07");
+  };
+
   const isSubAgentSession = async (sessionID) => {
     if (!sessionID) return false;
     try {
@@ -25,11 +30,11 @@ export const ZedBell = async ({ client }) => {
       if (event.type === "session.idle") {
         const sessionID = event.properties?.sessionID;
         if (await isSubAgentSession(sessionID)) return;
-        process.stdout.write("\x07");
+        ring();
         return;
       }
       if (event.type === "permission.asked") {
-        process.stdout.write("\x07");
+        ring();
       }
     },
   };
