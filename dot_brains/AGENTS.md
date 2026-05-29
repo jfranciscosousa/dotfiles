@@ -2,6 +2,10 @@
 
 These are my personal styles. They bypass anything specific on project-level guidelines.
 
+### ast-grep
+
+Avoid grep and use faster and better ast-grep
+
 ### Typechecks and builds
 
 On very large projects, do not run type checks, lints, or compiles. 

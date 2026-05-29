@@ -33,7 +33,65 @@
         "thinking": { "type": "adaptive" },
         "output_config": { "effort": "low" }
       }
+    },
+    "mcp-god": {
+      "mode": "primary",
+      "description": "Exclusive gateway to the remote-work MCP servers (Linear, Snowflake, Sentry, Honeycomb, Notion, Slack). The only agent allowed to call these tools.",
+      "prompt": "You are the MCP gateway. You alone can call the Linear, Snowflake, Sentry, Honeycomb, Notion, and Slack MCP tools. Use them to fulfill requests against those services and report results concisely.",
+      "permission": {
+        "linear_*": "allow",
+        "snowflake_*": "allow",
+        "sentry_*": "allow",
+        "honeycomb_*": "allow",
+        "notion_*": "allow",
+        "slack_*": "allow"
+      }
     }
+  },
+  "mcp": {
+    "linear": {
+      "type": "remote",
+      "url": "https://mcp.linear.app/mcp",
+      "enabled": true
+    },
+    "snowflake": {
+      "type": "remote",
+      "url": "https://mcp-gateway.eu-west-1.data.remote.com/snowflake/mcp",
+      "enabled": true
+    },
+    "sentry": {
+      "type": "remote",
+      "url": "https://mcp.sentry.dev/mcp",
+      "enabled": true
+    },
+    "honeycomb": {
+      "type": "remote",
+      "url": "https://mcp.eu1.honeycomb.io/mcp",
+      "enabled": true
+    },
+    "notion": {
+      "type": "remote",
+      "url": "https://mcp.notion.com/mcp",
+      "enabled": true
+    },
+    "slack": {
+      "type": "remote",
+      "url": "https://mcp.slack.com/mcp",
+      "oauth": {
+        "clientId": "1601185624273.8899143856786",
+        "callbackPort": 3118,
+        "redirectUri": "http://localhost:3118/callback"
+      },
+      "enabled": true
+    }
+  },
+  "permission": {
+    "linear_*": "deny",
+    "snowflake_*": "deny",
+    "sentry_*": "deny",
+    "honeycomb_*": "deny",
+    "notion_*": "deny",
+    "slack_*": "deny"
   },
 {{- else }}
   "model": "opencode/deepseek-v4-flash-free",
