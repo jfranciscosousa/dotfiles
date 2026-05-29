@@ -34,8 +34,9 @@ _octmux() {
   typeset -A opt_args
 
   _arguments -C -s \
-    '(-d)-l[list sessions for this directory]' \
-    '(-l)-d[delete a named session]' \
+    '(-d -da)-l[list sessions for this directory]' \
+    '(-l -da)-d[delete a named session]' \
+    '(-l -d)-da[delete all sessions for this directory]' \
     '1:existing session:->session' \
     '*::wrapped tool argument:->wrapped' && return
 

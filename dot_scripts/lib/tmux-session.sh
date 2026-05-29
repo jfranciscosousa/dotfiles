@@ -34,9 +34,13 @@ _octmux_main() {
   fi
 
   local delete=0
+  local delete_all=0
   local list=0
   if [ "${1:-}" = "-d" ]; then
     delete=1
+    shift
+  elif [ "${1:-}" = "-da" ]; then
+    delete_all=1
     shift
   elif [ "${1:-}" = "-l" ]; then
     list=1
@@ -56,6 +60,22 @@ _octmux_main() {
       fi
     done
     return 0
+  fi
+
+  if [ "$delete_all" -eq 1 ]; then
+    local killed=0
+    local s
+    while IFS= read -r s; do
+      if [[ "$s" == "${prefix}_"* ]]; then
+        tmux kill-session -t "=${s}" 2>/dev/null && killed=$((killed + 1))
+      fi
+    done < <(tmux list-sessions -F '#S' 2>/dev/null)
+    if [ "$killed" -gt 0 ]; then
+      echo "${TOOL_SHORT}: killed ${killed} session(s) for this folder"
+      return 0
+    fi
+    echo "${TOOL_SHORT}: no sessions for this folder" >&2
+    return 1
   fi
 
   if [ "$delete" -eq 0 ] && [ -n "${TMUX:-}" ]; then
