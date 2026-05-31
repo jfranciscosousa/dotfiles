@@ -11,7 +11,8 @@
   "auto_install_extensions": {
     "catppuccin-icons": true,
     "elixir": true,
-    "mdx": false
+    "mdx": false,
+    "ruby": true
   },
   "icon_theme": "Catppuccin Mocha",
   "project_panel": {
@@ -19,14 +20,10 @@
   },
   "agent": {
     "sidebar_side": "right",
-    "dock": "right",
-    "default_model": {
-      "provider": "claude-acp",
-      "model": ""
-    }
+    "dock": "right"
   },
   "git": {
-    "worktree_directory": "{{ .chezmoi.homeDir }}/.git-worktrees"
+    "worktree_directory": "/home/jfranciscosousa/.git-worktrees"
   },
   "collaboration_panel": {
     "button": false
@@ -56,25 +53,6 @@
   },
   "linked_edits": true,
   "tab_size": 2,
-  "agent_servers": {
-    "claude-acp": {
-      "type": "registry"
-    },
-    "cursor": {
-      "type": "registry"
-    },
-    "opencode": {
-      "type": "registry",
-      "favorite_config_option_values": {
-{{- if hasPrefix "Remote-" .chezmoi.hostname }}
-        "model": ["anthropic/claude-opus-4-8"],
-        "effort": ["high"]
-{{- else }}
-        "model": ["opencode/deepseek-v4-flash-free"]
-{{- end }}
-      }
-    }
-  },
   "base_keymap": "VSCode",
   "ui_font_size": 16,
   "buffer_font_size": 16.0,
@@ -159,6 +137,11 @@
       },
       "initialization_options": {
         "followDelegates": true
+      }
+    },
+    "solargraph": {
+      "settings": {
+        "use_bundler": false
       }
     }
   }

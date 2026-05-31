@@ -45,7 +45,7 @@ module Utils
   # Defaults to "haiku" to keep scripts fast and cheap.
   #
   # For :opencode, model uses "provider/model" format (e.g. "anthropic/claude-sonnet-4-6").
-  # Defaults to "opencode/deepseek-v4-flash-free".
+  # Defaults to "openai/gpt-5.4-mini".
   def ai_generate(prompt, model: nil, provider: :claude)
     model = ENV.fetch("DOTFILES_MODEL", model)
     provider = ENV.fetch("DOTFILES_PROVIDER", provider.to_s).to_sym
@@ -53,7 +53,7 @@ module Utils
     when :claude
       ai_generate_claude(prompt, model: model || "haiku")
     when :opencode
-      ai_generate_opencode(prompt, model: model || "opencode/deepseek-v4-flash-free")
+      ai_generate_opencode(prompt, model: model || "openai/gpt-5.4-mini")
     else
       raise ArgumentError, "Unknown provider: #{provider}"
     end
