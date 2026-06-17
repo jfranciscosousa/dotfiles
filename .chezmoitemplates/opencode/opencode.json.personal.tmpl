@@ -1,6 +1,18 @@
 {
   "$schema": "https://opencode.ai/config.json",
   "model": "openai/gpt-5.5",
+  "agent": {
+    "research-fast": {
+      "mode": "primary",
+      "description": "Read-only explorer: fuzzy-finds files, reads code, and checks assumptions. Implements nothing.",
+      "model": "openai/gpt-5.4-mini",
+      "prompt": "{file:./prompts/research-fast.md}",
+      "permission": {
+        "edit": "deny",
+        "bash": "ask"
+      }
+    }
+  },
   "instructions": ["{{ .chezmoi.homeDir }}/.brains/RTK.md"],
   "plugin": [
     ".\/plugins\/rtk.ts",

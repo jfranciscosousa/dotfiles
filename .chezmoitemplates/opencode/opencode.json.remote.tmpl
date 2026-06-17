@@ -33,6 +33,16 @@
         "output_config": { "effort": "low" }
       }
     },
+    "research-fast": {
+      "mode": "primary",
+      "description": "Read-only explorer: fuzzy-finds files, reads code, and checks assumptions. Implements nothing.",
+      "model": "openai/gpt-5.4-mini",
+      "prompt": "{file:./prompts/research-fast.md}",
+      "permission": {
+        "edit": "deny",
+        "bash": "ask"
+      }
+    },
     "mcp-god": {
       "mode": "primary",
       "description": "Exclusive gateway to the remote-work MCP servers (Linear, Snowflake, Sentry, Honeycomb, Notion, Slack). The only agent allowed to call these tools.",

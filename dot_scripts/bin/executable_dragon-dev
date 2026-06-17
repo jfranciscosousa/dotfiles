@@ -1,5 +1,5 @@
 #!/bin/bash
 # dragon-dev - tmux session manager for the Dragon dev server. See ~/.scripts/lib/tmux-session.sh.
 source "$HOME/.scripts/lib/tmux-session.sh"
-cd "$HOME/Projects/work/employ/dragon" || exit
+cd "$HOME/Projects/dragon" || exit
 _octmux_main "yarn workspace @remote-com/employ dev" dragon-dev "$@"
