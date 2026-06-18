@@ -48,9 +48,13 @@ module Utils
   #
   # For :opencode, model uses "provider/model" format (e.g. "anthropic/claude-sonnet-4-6").
   # Defaults to "openai/gpt-5.4-mini".
-  def ai_generate(prompt, model: nil, provider: :claude)
-    model = ENV.fetch("DOTFILES_MODEL", model)
-    provider = ENV.fetch("DOTFILES_PROVIDER", provider.to_s).to_sym
+  #
+  # env_prefix selects which override vars are read (default "DOTFILES" ->
+  # DOTFILES_MODEL / DOTFILES_PROVIDER). The triage pass passes "DOTFILES_TRIAGE"
+  # so it can run a cheaper model independently of the main one.
+  def ai_generate(prompt, model: nil, provider: :claude, env_prefix: "DOTFILES")
+    model = ENV.fetch("#{env_prefix}_MODEL", model)
+    provider = ENV.fetch("#{env_prefix}_PROVIDER", provider.to_s).to_sym
     case provider
     when :claude
       ai_generate_claude(prompt, model: model || "haiku")
@@ -247,6 +251,10 @@ module Utils
 
   SELECTION_MIN_FILES = 2
   SELECTION_MIN_BYTES = 4_000
+  # Pass-1 triage runs a cheap model independent of the main one; override with
+  # DOTFILES_TRIAGE_PROVIDER / DOTFILES_TRIAGE_MODEL.
+  TRIAGE_PROVIDER = :opencode
+  TRIAGE_MODEL = "openai/gpt-5.4-mini"
 
   # Assemble a token-efficient diff context. A cheap first pass shows the model
   # only the changed-file list (name-status + stat) and commit subjects and asks
@@ -255,7 +263,7 @@ module Utils
   #
   # `diff_args` is shared by `git diff`, `--stat`, and `--name-status`
   # (e.g. "origin/main...HEAD" or "--cached"). Returns a single string.
-  def relevant_diff(diff_args, log: "", model: "haiku")
+  def relevant_diff(diff_args, log: "")
     full = `git diff #{diff_args}`
     stat = `git diff --stat #{diff_args}`.strip
     name_status = `git diff --name-status #{diff_args}`.strip
@@ -264,7 +272,7 @@ module Utils
     # An extra model call isn't worth it for tiny or single-file diffs.
     return full if changed.size < SELECTION_MIN_FILES || full.bytesize < SELECTION_MIN_BYTES
 
-    selected = select_files(name_status, stat, log, changed, model)
+    selected = select_files(name_status, stat, log, changed)
     omitted = changed - selected
 
     sections = ["Changed files:\n#{stat}"]
@@ -280,7 +288,7 @@ module Utils
 
   # Pass 1 of relevant_diff: ask the model which files need a full-diff read.
   # Falls back to "all files" on error or unparseable output; honors NONE.
-  def select_files(name_status, stat, log, changed, model)
+  def select_files(name_status, stat, log, changed)
     commits = log.strip.empty? ? "" : "\n\nCommits:\n#{log.strip}"
     prompt = <<~PROMPT
       You are gathering context to summarize a set of code changes.
@@ -298,7 +306,7 @@ module Utils
       #{stat}#{commits}
     PROMPT
 
-    success, output = ai_generate(prompt, model: model)
+    success, output = ai_generate(prompt, provider: TRIAGE_PROVIDER, model: TRIAGE_MODEL, env_prefix: "DOTFILES_TRIAGE")
     return changed unless success
 
     output = strip_code_fences(output)
