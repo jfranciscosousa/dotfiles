@@ -49,12 +49,18 @@ module Utils
   # For :opencode, model uses "provider/model" format (e.g. "anthropic/claude-sonnet-4-6").
   # Defaults to "openai/gpt-5.4-mini".
   #
-  # env_prefix selects which override vars are read (default "DOTFILES" ->
-  # DOTFILES_MODEL / DOTFILES_PROVIDER). The triage pass passes "DOTFILES_TRIAGE"
-  # so it can run a cheaper model independently of the main one.
-  def ai_generate(prompt, model: nil, provider: :claude, env_prefix: "DOTFILES")
-    model = ENV.fetch("#{env_prefix}_MODEL", model)
-    provider = ENV.fetch("#{env_prefix}_PROVIDER", provider.to_s).to_sym
+  # The model/provider come from DOTFILES_MODEL / DOTFILES_PROVIDER. With
+  # fast: true, DOTFILES_FAST_MODEL / DOTFILES_FAST_PROVIDER are used instead,
+  # each falling back to its regular counterpart when unset -- so a machine that
+  # wants one model for both can just leave the FAST vars unset.
+  def ai_generate(prompt, model: nil, provider: :claude, fast: false)
+    if fast
+      provider = ENV.fetch("DOTFILES_FAST_PROVIDER", ENV.fetch("DOTFILES_PROVIDER", provider.to_s)).to_sym
+      model = ENV.fetch("DOTFILES_FAST_MODEL", ENV.fetch("DOTFILES_MODEL", model))
+    else
+      provider = ENV.fetch("DOTFILES_PROVIDER", provider.to_s).to_sym
+      model = ENV.fetch("DOTFILES_MODEL", model)
+    end
     case provider
     when :claude
       ai_generate_claude(prompt, model: model || "haiku")
@@ -251,10 +257,6 @@ module Utils
 
   SELECTION_MIN_FILES = 2
   SELECTION_MIN_BYTES = 4_000
-  # Pass-1 triage runs a cheap model independent of the main one; override with
-  # DOTFILES_TRIAGE_PROVIDER / DOTFILES_TRIAGE_MODEL.
-  TRIAGE_PROVIDER = :opencode
-  TRIAGE_MODEL = "openai/gpt-5.4-mini"
 
   # Assemble a token-efficient diff context. A cheap first pass shows the model
   # only the changed-file list (name-status + stat) and commit subjects and asks
@@ -306,7 +308,7 @@ module Utils
       #{stat}#{commits}
     PROMPT
 
-    success, output = ai_generate(prompt, provider: TRIAGE_PROVIDER, model: TRIAGE_MODEL, env_prefix: "DOTFILES_TRIAGE")
+    success, output = ai_generate(prompt, fast: true)
     return changed unless success
 
     output = strip_code_fences(output)

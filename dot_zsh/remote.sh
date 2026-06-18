@@ -2,6 +2,8 @@ export AWS_PROFILE=sts
 
 export DOTFILES_PROVIDER=claude
 export DOTFILES_MODEL=sonnet
+export DOTFILES_FAST_PROVIDER=opencode
+export DOTFILES_FAST_MODEL=openai/gpt-5.4-mini
 
 alias prod="remotectl k8s shell tiger-api -lc -e production -r production-basic -m 4Gi -- tiger/bin/tiger start_iex"
 alias staging="remotectl k8s shell tiger-api -lc -e staging -r engineer -m 4Gi -- tiger/bin/tiger start_iex"
