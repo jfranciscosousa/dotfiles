@@ -10,125 +10,19 @@
 #   -h                    Show this help
 #
 # Looks for an MR template in .gitlab/merge_request_templates/Default.md,
-# fills it in with Claude based on the branch diff, then creates the MR via glab.
-require 'English'
-require 'optparse'
+# fills it in with AI based on the branch diff, then creates the MR via glab.
 require 'shellwords'
 require_relative 'utils'
 
-def find_mr_template
-  root = Utils.repo_root
-  return [nil, nil] unless root
-
-  dir = File.join(root, ".gitlab/merge_request_templates")
-  return [nil, nil] unless Dir.exist?(dir)
-
-  # Look for Default.md (case-insensitive), fall back to first template
-  templates = Dir.glob("#{dir}/*.md")
-  default = templates.find { |f| File.basename(f).downcase == "default.md" }
-  path = default || templates.first
-  path ? [File.read(path), path] : [nil, nil]
-end
-
-target = nil
-
-OptionParser.new do |opts|
-  opts.banner = "Usage: git mr [options]\n\nCreate a GitLab merge request with an AI-generated description.\n\n"
-
-  opts.on("-t", "--target BRANCH", "Target branch (default: auto-detect)") do |v|
-    target = v
-  end
-end.parse!
-
-remote_url = `git remote get-url origin 2>/dev/null`.strip
-unless remote_url.include?("gitlab")
-  warn "Remote origin does not point to GitLab: #{remote_url}"
-  exit(1)
-end
-
-branch = Utils.shell("git rev-parse --abbrev-ref HEAD").strip
-target ||= Utils.detect_default_branch
-
-if branch == target
-  warn "Already on #{target}, nothing to merge."
-  exit(1)
-end
-
-# Make sure we have the latest remote state
-Utils.shell("git fetch origin #{target}")
-
-diff = Utils.shell("git diff origin/#{target}...HEAD")
-log = Utils.shell("git log origin/#{target}..HEAD --oneline")
-
-if diff.strip.empty?
-  warn "No changes between #{branch} and #{target}."
-  exit(1)
-end
-
-template, template_path = find_mr_template
-
-if template
-  puts "Using MR template: #{template_path}"
-else
-  puts "No MR template found, using default format."
-end
-
-prompt = if template
-           <<~PROMPT
-             Fill in this merge request template based on the changes below.
-             The FIRST line of your output must be the MR title (short, under 72 chars).
-             The SECOND line must be blank.
-             Everything after that is the filled template body. Plain text with markdown. Do not wrap in a code block.
-
-             Template:
-             #{template}
-
-             Commits:
-             #{log}
-
-             Diff:
-             #{diff}
-           PROMPT
-         else
-           <<~PROMPT
-             Write a GitLab merge request description for these changes.
-             The FIRST line of your output must be the MR title (short, under 72 chars).
-             The SECOND line must be blank.
-             Everything after that is the description body with a summary section and a short test plan. Use markdown. Do not wrap in a code block.
-
-             Commits:
-             #{log}
-
-             Diff:
-             #{diff}
-           PROMPT
-         end
-
-puts "Generating MR description with AI..."
-
-success, ai_output = Utils.ai_generate(prompt, model: "sonnet")
-
-if success
-  output = Utils.strip_code_fences(ai_output)
-  lines = output.lines
-  title = lines.first&.strip || branch
-  description = lines.drop(1).join.strip
-else
-  warn "Warning: AI generation failed, using commit log as description."
-  warn ai_output unless ai_output.empty?
-  title = log.lines.first&.strip&.sub(/^[a-f0-9]+\s+/, "") || branch
-  description = log
-end
-
-puts "Creating MR: #{title}"
-
-# Push branch if needed
-Utils.shell("git push -u origin #{branch}")
-
-mr_output = `glab mr create --title #{title.shellescape} --description #{description.shellescape} --target-branch #{target} 2>&1`
-unless $CHILD_STATUS.success?
-  warn "Error creating MR:"
-  warn mr_output
-  exit(-1)
-end
-puts mr_output
+Utils.create_change_request(
+  cmd: "mr",
+  abbr: "MR",
+  noun: "GitLab merge request",
+  noun_short: "merge request",
+  host_label: "GitLab",
+  remote_host: "gitlab",
+  template_dirs: [".gitlab/merge_request_templates"],
+  create: lambda { |title, description, target|
+    "glab mr create --title #{title.shellescape} --description #{description.shellescape} --target-branch #{target.shellescape}"
+  }
+)

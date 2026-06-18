@@ -1,2 +1,2 @@
-export DOTFILES_PROVIDER=opencode
-export DOTFILES_MODEL=opencode/deepseek-v4-flash-free
+export DOTFILES_PROVIDER=claude
+export DOTFILES_MODEL=sonnet

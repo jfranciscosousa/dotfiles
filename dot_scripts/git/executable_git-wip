@@ -68,10 +68,12 @@ end
 puts Utils.shell("git add --all")
 
 if ai_message
-  diff_full = `git diff --cached`
+  diff_full = Utils.relevant_diff("--cached")
 
   prompt = <<~PROMPT
-    Summarize this diff as: one subject line, then a blank line, then the commit description. Use bullet points for different subjects.
+    Summarize this staged diff as a git commit message: one subject line, then a blank line, then the body.
+    #{Utils.title_style("subject line", max_chars: 50)}
+    In the body, use bullet points grouped by topic.
 
     Do not wrap the output in a code block.
 
@@ -81,11 +83,14 @@ if ai_message
   success, ai_output = Utils.ai_generate(prompt, model: "sonnet")
 
   if success
-    lines = ai_output.lines.map(&:rstrip)
-    subject = Utils.wrap(lines.first, 72)
-    body = lines.drop(1).drop_while(&:empty?)
-    formatted_body = body.map { |l| Utils.wrap(l, 72) }.join("\n")
-    message = formatted_body.empty? ? subject : "#{subject}\n\n#{formatted_body}"
+    subject, body = Utils.split_title_body(ai_output, fallback: "wip")
+    subject = Utils.wrap(subject, 72)
+    if body.empty?
+      message = subject
+    else
+      formatted_body = body.lines.map { |l| Utils.wrap(l.rstrip, 72) }.join("\n")
+      message = "#{subject}\n\n#{formatted_body}"
+    end
   else
     warn "Warning: AI generation failed, falling back to 'wip' message" unless ai_output.empty?
     warn ai_output unless ai_output.empty?

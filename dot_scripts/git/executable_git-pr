@@ -9,144 +9,30 @@
 #   -t, --target BRANCH   Target branch (default: auto-detect main/master)
 #   -h                    Show this help
 #
-# Looks for a PR template in .github/pull_request_template.md,
-# fills it in with Claude based on the branch diff, then creates the PR via gh.
-require 'English'
-require 'optparse'
+# Looks for a PR template under .github/, fills it in with AI based on the
+# branch diff, then creates the PR via gh.
 require 'shellwords'
 require_relative 'utils'
 
-def find_pr_template
-  root = Utils.repo_root
-  return [nil, nil] unless root
-
-  candidates = [
+Utils.create_change_request(
+  cmd: "pr",
+  abbr: "PR",
+  noun: "GitHub pull request",
+  noun_short: "pull request",
+  host_label: "GitHub",
+  remote_host: "github",
+  template_candidates: [
     ".github/pull_request_template.md",
     ".github/PULL_REQUEST_TEMPLATE.md",
     "pull_request_template.md",
     "PULL_REQUEST_TEMPLATE.md",
     "docs/pull_request_template.md"
-  ]
-
-  # Check exact candidates first
-  candidates.each do |rel|
-    path = File.join(root, rel)
-    return [File.read(path), path] if File.exist?(path)
-  end
-
-  # Check for templates directory (case-insensitive)
-  dir = File.join(root, ".github/PULL_REQUEST_TEMPLATE")
-  dir = File.join(root, ".github/pull_request_template") unless Dir.exist?(dir)
-
-  if Dir.exist?(dir)
-    templates = Dir.glob("#{dir}/*.md")
-    default = templates.find { |f| File.basename(f).downcase == "default.md" }
-    path = default || templates.first
-    return [File.read(path), path] if path
-  end
-
-  [nil, nil]
-end
-
-target = nil
-
-OptionParser.new do |opts|
-  opts.banner = "Usage: git pr [options]\n\nCreate a GitHub pull request with an AI-generated description.\n\n"
-
-  opts.on("-t", "--target BRANCH", "Target branch (default: auto-detect)") do |v|
-    target = v
-  end
-end.parse!
-
-remote_url = `git remote get-url origin 2>/dev/null`.strip
-unless remote_url.include?("github")
-  warn "Remote origin does not point to GitHub: #{remote_url}"
-  exit(1)
-end
-
-branch = Utils.shell("git rev-parse --abbrev-ref HEAD").strip
-target ||= Utils.detect_default_branch
-
-if branch == target
-  warn "Already on #{target}, nothing to merge."
-  exit(1)
-end
-
-# Make sure we have the latest remote state
-Utils.shell("git fetch origin #{target}")
-
-diff = Utils.shell("git diff origin/#{target}...HEAD")
-log = Utils.shell("git log origin/#{target}..HEAD --oneline")
-
-if diff.strip.empty?
-  warn "No changes between #{branch} and #{target}."
-  exit(1)
-end
-
-template, template_path = find_pr_template
-
-if template
-  puts "Using PR template: #{template_path}"
-else
-  puts "No PR template found, using default format."
-end
-
-prompt = if template
-           <<~PROMPT
-             Fill in this pull request template based on the changes below.
-             The FIRST line of your output must be the PR title (short, under 72 chars).
-             The SECOND line must be blank.
-             Everything after that is the filled template body. Plain text with markdown. Do not wrap in a code block.
-
-             Template:
-             #{template}
-
-             Commits:
-             #{log}
-
-             Diff:
-             #{diff}
-           PROMPT
-         else
-           <<~PROMPT
-             Write a GitHub pull request description for these changes.
-             The FIRST line of your output must be the PR title (short, under 72 chars).
-             The SECOND line must be blank.
-             Everything after that is the description body with a summary section and a short test plan. Use markdown. Do not wrap in a code block.
-
-             Commits:
-             #{log}
-
-             Diff:
-             #{diff}
-           PROMPT
-         end
-
-puts "Generating PR description with AI..."
-
-success, ai_output = Utils.ai_generate(prompt, model: "sonnet")
-
-if success
-  output = Utils.strip_code_fences(ai_output)
-  lines = output.lines
-  title = lines.first&.strip || branch
-  description = lines.drop(1).join.strip
-else
-  warn "Warning: AI generation failed, using commit log as description."
-  warn ai_output unless ai_output.empty?
-  title = log.lines.first&.strip&.sub(/^[a-f0-9]+\s+/, "") || branch
-  description = log
-end
-
-puts "Creating PR: #{title}"
-
-# Push branch if needed
-Utils.shell("git push -u origin #{branch}")
-
-pr_output = `gh pr create --title #{title.shellescape} --body #{description.shellescape} --base #{target} 2>&1`
-unless $CHILD_STATUS.success?
-  warn "Error creating PR:"
-  warn pr_output
-  exit(-1)
-end
-puts pr_output
+  ],
+  template_dirs: [
+    ".github/PULL_REQUEST_TEMPLATE",
+    ".github/pull_request_template"
+  ],
+  create: lambda { |title, description, target|
+    "gh pr create --title #{title.shellescape} --body #{description.shellescape} --base #{target.shellescape}"
+  }
+)
