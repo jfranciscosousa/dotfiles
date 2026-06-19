@@ -6,6 +6,7 @@
 require 'English'
 require 'optparse'
 require 'shellwords'
+require 'json'
 
 module Utils
   extend self
@@ -93,20 +94,41 @@ module Utils
   end
 
   def ai_generate_opencode(prompt, model:)
-    cmd = %w[opencode run --dir /tmp]
+    cmd = %w[opencode run --format json --dir /tmp]
     cmd += ["--model", model] if model
     cmd << prompt
 
     debug "model=#{model}"
     debug "command=#{cmd.join(" ")}"
-    output = IO.popen(cmd, err: %i[child out], &:read)
-    output = output.gsub(/\e\[[0-9;]*m/, "")
-                   .lines
-                   .reject { |l| l.strip.start_with?(">") }
-                   .join
-                   .strip
+    raw = IO.popen(cmd, err: %i[child out], &:read)
+    text = extract_opencode_text(raw)
 
-    [$CHILD_STATUS.success? && !output.empty?, output]
+    [$CHILD_STATUS.success? && !text.empty?, text]
+  end
+
+  # Pull the assistant's final answer out of opencode's `--format json` event
+  # stream, dropping tool calls and intermediate "Let me..." narration. Prefers
+  # text parts tagged as the final answer; otherwise uses the last text part.
+  def extract_opencode_text(raw)
+    final = []
+    last = nil
+    raw.each_line do |line|
+      event = begin
+        JSON.parse(line)
+      rescue JSON::ParserError
+        next
+      end
+      next unless event["type"] == "text"
+
+      part = event["part"] || {}
+      text = part["text"].to_s
+      next if text.strip.empty?
+
+      last = text
+      phases = (part["metadata"] || {}).values.filter_map { |v| v["phase"] if v.is_a?(Hash) }
+      final << text if phases.include?("final_answer")
+    end
+    (final.empty? ? Array(last) : final).join.strip
   end
 
   public
