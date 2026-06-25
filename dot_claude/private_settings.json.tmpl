@@ -7,6 +7,11 @@
     ],
     "defaultMode": "auto"
   },
+{{- if not (hasPrefix "Remote" .chezmoi.hostname) }}
+  "env": {
+    "CLAUDE_CODE_DISABLE_1M_CONTEXT": "1"
+  },
+{{- end }}
   "model": "{{ if hasPrefix "Remote" .chezmoi.hostname }}opus[1m]{{ else }}claude-sonnet-4-6{{ end }}",
   "hooks": {
     "PreToolUse": [
@@ -26,6 +31,7 @@
     "command": "bash ~/.claude/statusline-command.sh"
   },
   "effortLevel": "xhigh",
+  "tui": "fullscreen",
   "preferredNotifChannel": "terminal_bell",
   "skipAutoPermissionPrompt": true
 }
