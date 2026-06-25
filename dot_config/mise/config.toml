@@ -1,0 +1,6 @@
+# Global mise config (~/.config/mise/config.toml).
+# Pinned runtime versions used by the shell + git-* scripts.
+# Project mise.toml / .tool-versions files override these per-repo.
+[tools]
+ruby = "4.0.5"
+node = "26.3.0"

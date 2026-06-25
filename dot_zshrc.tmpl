@@ -14,12 +14,15 @@ if ! zgen saved; then
   zgen save
 fi
 
-if [[ ! -f "${ASDF_DATA_DIR:-$HOME/.asdf}/completions/_asdf" ]]; then
-  mkdir -p "${ASDF_DATA_DIR:-$HOME/.asdf}/completions"
-  asdf completion zsh > "${ASDF_DATA_DIR:-$HOME/.asdf}/completions/_asdf"
+# mise (runtime version manager) - activate manages PATH for interactive shells
+eval "$(mise activate zsh)"
+
+if [[ ! -f "${MISE_DATA_DIR:-$HOME/.local/share/mise}/completions/_mise" ]]; then
+  mkdir -p "${MISE_DATA_DIR:-$HOME/.local/share/mise}/completions"
+  mise completion zsh > "${MISE_DATA_DIR:-$HOME/.local/share/mise}/completions/_mise"
 fi
 
-fpath=("$HOME/.zsh/completions" ${ASDF_DATA_DIR:-$HOME/.asdf}/completions $fpath)
+fpath=("$HOME/.zsh/completions" ${MISE_DATA_DIR:-$HOME/.local/share/mise}/completions $fpath)
 autoload -Uz compinit
 compinit -u
 

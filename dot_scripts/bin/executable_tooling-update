@@ -2,21 +2,18 @@
 
 set -e
 
-# Update brew and all brew packages
+# Update brew and all brew packages (mise itself is brew-managed)
 brew update && brew upgrade
 
-# Update asdf plugins
-asdf plugin update --all
+# Update mise plugin/backend metadata
+mise plugins update || true
 
-# Update all local home tools
-TOOLVERSIONS="$HOME/.tool-versions"
-[ -f "$TOOLVERSIONS" ] || exit 0
+# Upgrade installed tools to the latest version and bump the pinned versions
+# in the mise config files (~/.config/mise/config.toml + any project configs).
+mise upgrade --bump || true
 
-while read -r plugin version _; do
-  [[ "$plugin" =~ ^#.*$ ]] && continue
-  [[ -z "$plugin" ]] && continue
-
-  latest=$(asdf latest "$plugin" 2>/dev/null) || continue
-  asdf install "$plugin" "$latest" || true
-  asdf set --home "$plugin" "$latest"
-done < "$TOOLVERSIONS"
+# The global config (~/.config/mise/config.toml) is managed by chezmoi. If
+# --bump changed it, fold the new versions back into the dotfiles source:
+if ! chezmoi verify "$HOME/.config/mise/config.toml" 2>/dev/null; then
+  echo "mise global versions changed; run: chezmoi re-add ~/.config/mise/config.toml"
+fi

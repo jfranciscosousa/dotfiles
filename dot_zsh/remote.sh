@@ -11,8 +11,7 @@ alias staging="remotectl k8s shell tiger-api -lc -e staging -r engineer -m 4Gi -
 alias tiger-up="git pull && git prune && git gc; mix deps.get --force && mix ecto.migrate"
 alias dragon-up="git pull && git prune && git gc; yarn --frozen-lockfile; yarn workspace @remote-com/employ env:local"
 
-alias remotectl-update="asdf install remotectl latest && asdf set -u remotectl latest"
-alias dexter-update="asdf install dexter latest && asdf set -u dexter latest"
+alias remotectl-update="mise use -g remotectl@latest"
 
 # Dragon aliases
 # dragon-dev: tmux session manager -> ~/.scripts/bin/dragon-dev

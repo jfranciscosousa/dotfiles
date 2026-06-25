@@ -11,11 +11,13 @@ export PATH="$PATH:$HOME/.scripts/git"
 export PATH="$PATH:$HOME/.scripts/bin"
 export PATH=/usr/local/bin:$PATH
 export PATH="$PATH:$HOME/.local/bin"
-# ASDF
-export PATH="${ASDF_DATA_DIR:-$HOME/.asdf}/shims:$PATH"
-# PNPM
+# mise (runtime version manager) - shims keep runtimes on PATH for
+# non-interactive shells (Claude Code, IDEs). Interactive shells additionally
+# get `mise activate` in .zshrc.
+export PATH="${MISE_DATA_DIR:-$HOME/.local/share/mise}/shims:$PATH"
+# PNPM (the pnpm CLI + global bins live in $PNPM_HOME/bin)
 export PNPM_HOME="$HOME/.local/share/pnpm"
-export PATH="$PNPM_HOME:$PATH"
+export PATH="$PNPM_HOME/bin:$PATH"
 # Opencode
 export PATH=$HOME/.opencode/bin:$PATH
 

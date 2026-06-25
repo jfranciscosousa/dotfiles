@@ -86,9 +86,13 @@ The `y` script auto-detects and delegates to yarn/npm/pnpm based on lockfile pre
 
 ### Version/Package Managers
 
-- **asdf** — runtime version manager (completions auto-generated on shell start)
+- **mise** — runtime version manager. Shims (`~/.local/share/mise/shims`) are on
+  PATH via `dot_zshenv`/`dot_zprofile` so runtimes resolve in non-interactive
+  shells (Claude Code, IDEs); interactive zsh additionally runs `mise activate`
+  and generates completions in `dot_zshrc.tmpl`. Global versions are pinned in
+  `dot_config/mise/config.toml`.
 - **pnpm** — `PNPM_HOME=~/.local/share/pnpm`
-- PATH order matters: asdf shims, pnpm, `~/.local/bin`, custom scripts, `/usr/local/bin`
+- PATH order matters: mise shims, pnpm, `~/.local/bin`, custom scripts, `/usr/local/bin`
 
 ### Platform Differences
 
