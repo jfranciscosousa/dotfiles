@@ -42,19 +42,20 @@ module Utils
 
   # Run an AI model with a prompt, return [success, output].
   #
-  # provider: :claude (default) or :opencode
+  # provider: :opencode (default) or :claude
   #
   # For :claude, model accepts aliases ("haiku", "sonnet", "opus") or full IDs.
-  # Defaults to "haiku" to keep scripts fast and cheap.
+  # Defaults to "haiku" to keep scripts fast and cheap when explicitly selected.
   #
   # For :opencode, model uses "provider/model" format (e.g. "anthropic/claude-sonnet-4-6").
-  # Defaults to "openai/gpt-5.4-mini".
+  # Defaults to GPT so shared scripts stay safe on remote work machines.
+  # Personal machines override this from ~/.zsh/personal.sh to use OpenCode Go.
   #
   # The model/provider come from DOTFILES_MODEL / DOTFILES_PROVIDER. With
   # fast: true, DOTFILES_FAST_MODEL / DOTFILES_FAST_PROVIDER are used instead,
   # each falling back to its regular counterpart when unset -- so a machine that
   # wants one model for both can just leave the FAST vars unset.
-  def ai_generate(prompt, model: nil, provider: :claude, fast: false)
+  def ai_generate(prompt, model: nil, provider: :opencode, fast: false)
     if fast
       provider = ENV.fetch("DOTFILES_FAST_PROVIDER", ENV.fetch("DOTFILES_PROVIDER", provider.to_s)).to_sym
       model = ENV.fetch("DOTFILES_FAST_MODEL", ENV.fetch("DOTFILES_MODEL", model))
@@ -252,7 +253,7 @@ module Utils
     prompt = build_request_prompt(forge, template: template, log: log, diff: diff)
 
     puts "Generating #{forge[:abbr]} description with AI..."
-    success, ai_output = ai_generate(prompt, model: "sonnet")
+    success, ai_output = ai_generate(prompt, model: "openai/gpt-5.5")
 
     if success
       title, description = split_title_body(ai_output, fallback: branch)

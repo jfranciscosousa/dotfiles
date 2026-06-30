@@ -1,7 +1,8 @@
 export AWS_PROFILE=sts
 
-export DOTFILES_PROVIDER=claude
-export DOTFILES_MODEL=sonnet
+# Remote work machines intentionally use GPT/OpenAI, not OpenCode Go.
+export DOTFILES_PROVIDER=opencode
+export DOTFILES_MODEL=openai/gpt-5.5
 export DOTFILES_FAST_PROVIDER=opencode
 export DOTFILES_FAST_MODEL=openai/gpt-5.4-mini
 

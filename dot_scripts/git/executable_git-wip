@@ -80,7 +80,7 @@ if ai_message
     #{diff_full}
   PROMPT
 
-  success, ai_output = Utils.ai_generate(prompt, model: "sonnet")
+  success, ai_output = Utils.ai_generate(prompt, model: "openai/gpt-5.4-mini")
 
   if success
     subject, body = Utils.split_title_body(ai_output, fallback: "wip")
