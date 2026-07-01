@@ -14,9 +14,19 @@ Only do this if there's a way to lint, verify, or equivalent for specific files 
 
 ### Git
 
-Never perform git, gitlab or github operations unless I specifically specify it.
+Never perform git, GitLab, GitHub, `git`, `gh`, or `glab` operations unless my current prompt explicitly asks for that exact operation.
 
-And if you do, any branch you create should be prefixed with fs/
+Approval is per prompt only. Prior approval earlier in the conversation does not carry forward. If my latest prompt does not explicitly ask you to commit, amend, branch, tag, push, open/update/merge/close a PR or MR, create/update/delete an issue or release, or run any other git/GitHub/GitLab operation, do not do it.
+
+If there is any ambiguity, ask for express approval first. Any branch you create must be prefixed with `fs/`.
+
+### MCP guidelines
+
+Never use MCPs to create, update, delete, post, send, comment, answer people, or otherwise act on my behalf unless my current prompt explicitly asks for that exact MCP action.
+
+Approval is per prompt only. Prior approval earlier in the conversation does not carry forward. If my latest prompt does not explicitly ask you to create, update, delete, post, send, comment, or answer via MCP, do not do it.
+
+Whenever you use MCPs to create, read, update or delete anything, please provide an HTTP link to that resource when applicable.
 
 ### Terminal file links
 
@@ -24,8 +34,3 @@ When referencing files in terminal-facing responses, format them for editor
 cmd-click detection: prefer short repo-relative `path:line` references, put
 important file references on their own line when possible, and avoid tree
 decorations or long prose around the path that can wrap in narrow terminals.
-
-### MCP resource links
-
-Whenever you use MCPs to create, read, update or delete anything, 
-please provide an HTTP link to that resource when applicable.
