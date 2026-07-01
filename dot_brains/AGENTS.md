@@ -4,7 +4,7 @@ These are my personal styles. They bypass anything specific on project-level gui
 
 ### ast-grep
 
-Avoid grep and use faster and better ast-grep
+Avoid grep and use faster and better ast-grep (if you can)
 
 ### Typechecks and builds
 
@@ -24,3 +24,8 @@ When referencing files in terminal-facing responses, format them for editor
 cmd-click detection: prefer short repo-relative `path:line` references, put
 important file references on their own line when possible, and avoid tree
 decorations or long prose around the path that can wrap in narrow terminals.
+
+### MCP resource links
+
+Whenever you use MCPs to create, read, update or delete anything, 
+please provide an HTTP link to that resource when applicable.
