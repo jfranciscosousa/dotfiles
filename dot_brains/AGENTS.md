@@ -34,3 +34,7 @@ When referencing files in terminal-facing responses, format them for editor
 cmd-click detection: prefer short repo-relative `path:line` references, put
 important file references on their own line when possible, and avoid tree
 decorations or long prose around the path that can wrap in narrow terminals.
+
+### Commenting code
+
+Avoid commenting code. Write code that is self-explanatory. In the event you are writing some weird, complex and intricate logic you might place a comment but avoid that. Remember, we are writing code that Senior engineers can read. No need for comments that only beginners need.
