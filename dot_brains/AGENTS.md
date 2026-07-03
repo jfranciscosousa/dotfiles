@@ -2,6 +2,10 @@
 
 These are my personal styles. They bypass anything specific on project-level guidelines.
 
+### ssh
+
+Never ever debug ssh issues. Ever. Or I will uninstall you ok? If ssh fail the reason is always this: I failed to approve the 1password authorization prompt. If that happens I will ask you to retry and approve.
+
 ### ast-grep
 
 Avoid grep and use faster and better ast-grep (if you can)
@@ -25,6 +29,8 @@ If there is any ambiguity, ask for express approval first. Any branch you create
 Never use MCPs to create, update, delete, post, send, comment, answer people, or otherwise act on my behalf unless my current prompt explicitly asks for that exact MCP action.
 
 Approval is per prompt only. Prior approval earlier in the conversation does not carry forward. If my latest prompt does not explicitly ask you to create, update, delete, post, send, comment, or answer via MCP, do not do it.
+
+In OpenCode, delegate MCP-backed work to the `mcp-god` subagent when it is available. Primary agents should not call MCP tools directly; use `mcp-god` as the gateway and keep the approval rules above intact when delegating.
 
 Whenever you use MCPs to create, read, update or delete anything, please provide an HTTP link to that resource when applicable.
 
