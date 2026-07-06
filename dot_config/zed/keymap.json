@@ -5,14 +5,14 @@
       "alt-left": "pane::ActivatePreviousItem",
       "alt-right": "pane::ActivateNextItem",
       "f12": "terminal_panel::ToggleFocus",
-      "secondary-shift-c": "workspace::CopyRelativePath",
-    },
+      "secondary-shift-c": "workspace::CopyRelativePath"
+    }
   },
   {
     "context": "Editor",
     "bindings": {
-      "secondary-down": "editor::ShowCompletions",
-    },
+      "secondary-down": "editor::ShowCompletions"
+    }
   },
   {
     "context": "Terminal",
@@ -23,8 +23,8 @@
       "alt-left": "pane::ActivatePreviousItem",
       "alt-right": "pane::ActivateNextItem",
       "secondary-d": "pane::SplitRight",
-      "secondary-w": "pane::CloseActiveItem",
-    },
+      "secondary-w": "pane::CloseActiveItem"
+    }
   },
   {
     "context": "Workspace",
@@ -34,7 +34,7 @@
       "secondary-shift-b": "git_panel::Toggle",
       "secondary-shift-n": "agent::Toggle",
       "secondary-shift-m": "multi_workspace::ToggleWorkspaceSidebar",
-      "f12": "terminal_panel::ToggleFocus",
-    },
-  },
+      "f12": "terminal_panel::ToggleFocus"
+    }
+  }
 ]

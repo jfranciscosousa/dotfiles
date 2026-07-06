@@ -36,7 +36,7 @@ def truncate_title(title)
   return "(untitled)" if title.nil? || title.strip.empty?
 
   cleaned = title.to_s.gsub(/\s+/, " ").strip
-  words   = cleaned.split(" ")
+  words   = cleaned.split
   return cleaned if words.length <= TITLE_WORD_LIMIT
 
   "#{words.first(TITLE_WORD_LIMIT).join(' ')}…"
@@ -47,7 +47,7 @@ end
 def normalize_model(model)
   model.to_s
        .sub(/\A(?:us|eu|apac)\./, "")
-       .sub(/\Aanthropic[.\/]/, "")
+       .sub(%r{\Aanthropic[./]}, "")
        .sub(%r{\A(?:openai|azure|azure_ai)/}, "")
 end
 
@@ -181,7 +181,7 @@ def worktree_links(repo)
     gitdir = File.read(gitdir_file).strip
     next if gitdir.empty?
 
-    worktree_path = gitdir.sub(/\/\.git\z/, "")
+    worktree_path = gitdir.sub(%r{/\.git\z}, "")
     links[worktree_path] = repo
   end
   links
@@ -231,14 +231,14 @@ end
 # Creates an empty session record. One per Claude/OpenCode conversation.
 def new_session(source, session_id)
   {
-    source:        source,
-    session_id:    session_id,
-    cwd:           nil,
-    date:          nil,   # first observed date
-    title:         nil,   # filled from ai-title (Claude) or session.title (OpenCode)
+    source: source,
+    session_id: session_id,
+    cwd: nil,
+    date: nil, # first observed date
+    title: nil, # filled from ai-title (Claude) or session.title (OpenCode)
     branch_counts: Hash.new(0),
-    model_costs:   Hash.new(0.0),  # model => cost (used to pick the dominant model for display)
-    bucket:        new_bucket
+    model_costs: Hash.new(0.0), # model => cost (used to pick the dominant model for display)
+    bucket: new_bucket
   }
 end
 
@@ -248,10 +248,10 @@ end
 # show each conversation's title alongside its cost.
 # ───────────────────────────────────────────────────────────────────────────────────────
 
-sessions       = {}  # [source, session_id] => session record
+sessions       = {} # [source, session_id] => session record
 total_files    = 0
 total_messages = Hash.new(0)
-extra_repos    = Set.new  # additional main repos contributed by other data sources
+extra_repos    = Set.new # additional main repos contributed by other data sources
 
 # --- Claude Code (~/.claude/projects/**/*.jsonl) ---------------------------------------
 # Each jsonl file is one conversation; sessionId is in the records and matches the filename.
@@ -306,7 +306,7 @@ if projects_dir.directory?
         session[:cwd]                ||= record["cwd"] || project_dir.basename.to_s
         session[:date]                 = date if session[:date].nil? || date < session[:date]
         session[:branch_counts][record["gitBranch"]] += 1 if record["gitBranch"] && !record["gitBranch"].empty?
-        session[:model_costs][model]  += cost
+        session[:model_costs][model] += cost
 
         b = session[:bucket]
         b[:input]       += input
@@ -420,6 +420,7 @@ all_cwds    = sessions.values.map { |s| s[:cwd] }.compact.uniq
 known_repos = Set.new(extra_repos)
 all_cwds.each do |cwd|
   next unless File.directory?(cwd)
+
   known_repos << repo_root_for(cwd)
 end
 
@@ -492,7 +493,7 @@ render_section = lambda do |source, title|
     puts "  #{p.bold(project_name.ljust(44))}#{p.yellow(format('$%.4f', proj_cost))}"
 
     project_sessions.sort_by { |s| -s[:bucket][:cost] }.each do |session|
-      bucket       = session[:bucket]
+      bucket = session[:bucket]
       dominant_model = session[:model_costs].max_by { |_, c| c }&.first || "?"
       short_model    = dominant_model.sub("claude-", "").sub(/-\d{8}\z/, "")
       token_in       = format_tokens(bucket[:input] + bucket[:cache_write] + bucket[:cache_read])

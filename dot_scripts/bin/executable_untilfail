@@ -1,4 +1,9 @@
 #!/bin/bash
 # untilfail - Repeat a command until it fails.
 
-while $@; do :; done
+if [ "$#" -eq 0 ]; then
+  echo "usage: untilfail COMMAND [ARG...]" >&2
+  exit 2
+fi
+
+while "$@"; do :; done

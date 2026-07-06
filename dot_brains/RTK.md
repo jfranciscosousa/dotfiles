@@ -19,19 +19,23 @@ rtk gain              # Should work (not "command not found")
 which rtk             # Verify correct binary
 ```
 
-⚠️ **Name collision**: If `rtk gain` fails, you may have reachingforthejack/rtk (Rust Type Kit) installed instead.
+⚠️ **Name collision**: If `rtk gain` fails, you may have reachingforthejack/rtk (Rust Type Kit)
+installed instead.
 
 ## Hook-Based Usage
 
 All other commands are automatically rewritten:
+
 - **Claude Code**: via the `PreToolUse` Bash hook (`rtk hook claude`) in `~/.claude/settings.json`.
-- **OpenCode**: via the `tool.execute.before` plugin at `~/.config/opencode/plugins/rtk.ts`, which calls `rtk rewrite <command>`.
+- **OpenCode**: via the `tool.execute.before` plugin at `~/.config/opencode/plugins/rtk.ts`, which
+  calls `rtk rewrite <command>`.
 
 Example: `git status` → `rtk git status` (transparent, 0 tokens overhead).
 
 ## Prefer rtk wrappers explicitly
 
-The auto-rewriter only matches **bare commands**. Chained pipelines (`a; b; c`) bypass it because the leading verb is `echo` or similar. Reach for rtk wrappers directly:
+The auto-rewriter only matches **bare commands**. Chained pipelines (`a; b; c`) bypass it because
+the leading verb is `echo` or similar. Reach for rtk wrappers directly:
 
 - `rtk git status/diff/log/branch/show/...`
 - `rtk read <file>` (instead of `cat`/`head`/`tail`)
@@ -42,4 +46,5 @@ The auto-rewriter only matches **bare commands**. Chained pipelines (`a; b; c`) 
 - `rtk test`, `rtk jest`, `rtk vitest`, `rtk tsc`, `rtk lint`
 - `rtk docker`, `rtk kubectl`, `rtk aws`, `rtk psql`, `rtk pnpm`
 
-When you need multiple outputs, prefer **separate tool calls** over chained pipelines so each command can be rewritten individually.
+When you need multiple outputs, prefer **separate tool calls** over chained pipelines so each
+command can be rewritten individually.

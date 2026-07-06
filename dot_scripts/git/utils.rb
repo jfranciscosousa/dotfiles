@@ -82,10 +82,9 @@ module Utils
   def ai_generate_claude(prompt, model:)
     cmd = ["claude", "--print", "--model", model, "--no-session-persistence", "--tools", "", "--disable-slash-commands", "--strict-mcp-config", "-"]
     debug "model=#{model}"
-    debug "command=#{cmd.join(" ")}"
+    debug "command=#{cmd.join(' ')}"
     output = IO.popen(cmd,
-      "r+", err: %i[child out]
-    ) do |io|
+                      "r+", err: %i[child out]) do |io|
       io.write(prompt)
       io.close_write
       io.read
@@ -100,7 +99,7 @@ module Utils
     cmd << prompt
 
     debug "model=#{model}"
-    debug "command=#{cmd.join(" ")}"
+    debug "command=#{cmd.join(' ')}"
     raw = IO.popen(cmd, err: %i[child out], &:read)
     text = extract_opencode_text(raw)
 
@@ -163,8 +162,8 @@ module Utils
     return [fallback, ""] unless idx
 
     title = lines[idx].strip
-                      .sub(/\A#+\s+/, "")                          # markdown heading
-                      .sub(/\A(?:title|subject)\s*[:\-]\s*/i, "")  # "Title:" / "Subject -"
+                      .sub(/\A#+\s+/, "") # markdown heading
+                      .sub(/\A(?:title|subject)\s*[:-]\s*/i, "") # "Title:" / "Subject -"
                       .sub(/\A\*\*(.*)\*\*\z/, '\1')               # **bold**
                       .sub(/\A["'](.*)["']\z/, '\1')               # "quoted"
                       .strip
@@ -364,7 +363,7 @@ module Utils
       #{intro}
       Output only the title and body — no preamble, explanation, or surrounding text.
       The FIRST line of your output must be the #{forge[:abbr]} title.
-      #{title_style("title")}
+      #{title_style('title')}
       The SECOND line must be blank.
       #{body}
     HEAD

@@ -41,8 +41,8 @@ if [ -n "$used" ]; then
   filled=$(printf "%.0f" "$(echo "$used * 10 / 100" | bc -l)")
   empty=$((10 - filled))
   bar=""
-  for i in $(seq 1 "$filled"); do bar="${bar}█"; done
-  for i in $(seq 1 "$empty"); do bar="${bar}░"; done
+  for ((i = 0; i < filled; i++)); do bar="${bar}█"; done
+  for ((i = 0; i < empty; i++)); do bar="${bar}░"; done
   printf "%s  [%s] %.0f%%%s%s%s" "$model" "$bar" "$used" "$git_info" "$cost_str" "$plan_str"
 else
   printf "%s  [░░░░░░░░░░] -%s%s%s" "$model" "$git_info" "$cost_str" "$plan_str"

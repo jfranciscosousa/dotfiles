@@ -56,7 +56,7 @@ _octmux_main() {
   if [ "$list" -eq 1 ]; then
     tmux list-sessions -F '#S' 2>/dev/null | while IFS= read -r s; do
       if [[ "$s" == "${prefix}_"* ]]; then
-        echo "${s#${prefix}_}"
+        echo "${s#"${prefix}"_}"
       fi
     done
     return 0

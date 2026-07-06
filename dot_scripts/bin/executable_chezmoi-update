@@ -28,11 +28,11 @@ trap 'rm -f "$ERR_LOG"' EXIT
 if chezmoi apply >/dev/null 2>"$ERR_LOG"; then
     echo "✅ Chezmoi updated and applied successfully!"
     # Return to previous directory if needed (though exec zsh will replace the shell)
-    cd "$PREV_DIR"
+    cd "$PREV_DIR" || exit
     # Restart shell
     exec zsh
 else
     log_error "chezmoi apply failed. Original error: $(cat "$ERR_LOG")"
-    cd "$PREV_DIR"
+    cd "$PREV_DIR" || exit
     exit 1
 fi

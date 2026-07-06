@@ -72,7 +72,7 @@ if ai_message
 
   prompt = <<~PROMPT
     Summarize this staged diff as a git commit message: one subject line, then a blank line, then the body.
-    #{Utils.title_style("subject line", max_chars: 50)}
+    #{Utils.title_style('subject line', max_chars: 50)}
     In the body, use bullet points grouped by topic.
 
     Do not wrap the output in a code block.
