@@ -1,25 +1,31 @@
 {
   "name": "dotfiles",
   "private": true,
+  "type": "module",
   "scripts": {
-    "fmt": "bash scripts/format-dotfiles.sh",
+    "fmt": "zx scripts/format-dotfiles.ts",
     "format": "pnpm run fmt",
     "format:check": "oxfmt --check --disable-nested-config .",
-    "lint": "bash scripts/lint-dotfiles.sh",
+    "lint": "pnpm typecheck && zx scripts/lint-dotfiles.ts",
     "lint:staged": "lint-staged",
-    "prepare": "husky"
+    "prepare": "husky",
+    "typecheck": "tsc --noEmit"
   },
   "devDependencies": {
     "@taplo/cli": "0.7.0",
+    "@types/fs-extra": "11.0.4",
+    "@types/node": "26.1.0",
     "husky": "9.1.7",
     "lint-staged": "17.0.8",
     "oxfmt": "0.57.0",
     "oxlint": "1.72.0",
-    "shellcheck": "4.1.0"
+    "shellcheck": "4.1.0",
+    "typescript": "6.0.3",
+    "zx": "8.8.5"
   },
   "lint-staged": {
-    "*": "bash scripts/lint-staged-dotfiles.sh",
-    ".*": "bash scripts/lint-staged-dotfiles.sh"
+    "*": "zx scripts/lint-staged-dotfiles.ts",
+    ".*": "zx scripts/lint-staged-dotfiles.ts"
   },
   "packageManager": "pnpm@11.8.0"
 }
