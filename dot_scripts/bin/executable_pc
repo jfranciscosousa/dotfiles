@@ -1,0 +1,4 @@
+#!/bin/bash
+# pc — tmux session manager for Pi. See ~/.scripts/lib/tmux-session.sh.
+source "$HOME/.scripts/lib/tmux-session.sh"
+_octmux_main pi pc "$@"

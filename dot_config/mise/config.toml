@@ -3,4 +3,4 @@
 # Project mise.toml / .tool-versions files override these per-repo.
 [tools]
 ruby = "4.0.5"
-node = "26.3.0"
+node = "latest"

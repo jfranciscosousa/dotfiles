@@ -11,6 +11,7 @@ dotfiles by maintaining a source directory (this repo) and applying them to the 
   apply and tell me to test things manually
 - All changes you make to a config must be made on my dotfiles repo, not to me home directory
   directly, ever
+- After any change, run `pnpm run lint`
 
 ## Common Chezmoi Commands
 
