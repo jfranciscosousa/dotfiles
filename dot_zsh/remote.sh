@@ -1,9 +1,9 @@
 export AWS_PROFILE=sts
 
-# Remote work machines intentionally use GPT/OpenAI, not OpenCode Go.
-export DOTFILES_PROVIDER=opencode
+# Remote work machines intentionally use Pi with GPT/OpenAI, not OpenCode Go.
+export DOTFILES_PROVIDER=pi
 export DOTFILES_MODEL=openai/gpt-5.5
-export DOTFILES_FAST_PROVIDER=opencode
+export DOTFILES_FAST_PROVIDER=pi
 export DOTFILES_FAST_MODEL=openai/gpt-5.4-mini
 
 alias prod="remotectl k8s shell tiger-api -lc -e production -r production-basic -m 4Gi -- tiger/bin/tiger start_iex"

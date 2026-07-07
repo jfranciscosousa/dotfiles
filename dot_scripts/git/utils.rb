@@ -42,14 +42,15 @@ module Utils
 
   # Run an AI model with a prompt, return [success, output].
   #
-  # provider: :opencode (default) or :claude
+  # provider: :opencode (default), :pi, or :claude
   #
   # For :claude, model accepts aliases ("haiku", "sonnet", "opus") or full IDs.
   # Defaults to "haiku" to keep scripts fast and cheap when explicitly selected.
   #
-  # For :opencode, model uses "provider/model" format (e.g. "anthropic/claude-sonnet-4-6").
-  # Defaults to GPT so shared scripts stay safe on remote work machines.
-  # Personal machines override this from ~/.zsh/personal.sh to use OpenCode Go.
+  # For :opencode and :pi, model uses "provider/model" format
+  # (e.g. "anthropic/claude-sonnet-4-6"). Defaults to GPT so shared scripts stay
+  # safe on remote work machines. Personal machines override this from
+  # ~/.zsh/personal.sh to use OpenCode Go.
   #
   # The model/provider come from DOTFILES_MODEL / DOTFILES_PROVIDER. With
   # fast: true, DOTFILES_FAST_MODEL / DOTFILES_FAST_PROVIDER are used instead,
@@ -68,6 +69,8 @@ module Utils
       ai_generate_claude(prompt, model: model || "haiku")
     when :opencode
       ai_generate_opencode(prompt, model: model || "openai/gpt-5.4-mini")
+    when :pi
+      ai_generate_pi(prompt, model: model || "openai/gpt-5.4-mini")
     else
       raise ArgumentError, "Unknown provider: #{provider}"
     end
@@ -119,6 +122,30 @@ module Utils
              end
 
     [false, ai_failure_details(provider: "opencode", model: model, command: cmd, status: status, output: raw, reason: reason)]
+  end
+
+  def ai_generate_pi(prompt, model:)
+    cmd = %w[pi --print --no-session --no-tools]
+    cmd += ["--model", model] if model
+    cmd << prompt
+
+    debug "model=#{model}"
+    debug "command=#{command_for_log(cmd)}"
+    output = IO.popen(cmd, err: %i[child out], &:read).to_s
+    status = $CHILD_STATUS
+    text = output.strip
+
+    return [true, text] if status.success? && !text.empty?
+
+    reason = if !status.success?
+               "pi exited unsuccessfully"
+             elsif output.strip.empty?
+               "pi returned no output"
+             else
+               "pi returned no final text"
+             end
+
+    [false, ai_failure_details(provider: "pi", model: model, command: cmd, status: status, output: output, reason: reason)]
   end
 
   def ai_failure_details(context)
