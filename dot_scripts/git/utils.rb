@@ -82,15 +82,19 @@ module Utils
   def ai_generate_claude(prompt, model:)
     cmd = ["claude", "--print", "--model", model, "--no-session-persistence", "--tools", "", "--disable-slash-commands", "--strict-mcp-config", "-"]
     debug "model=#{model}"
-    debug "command=#{cmd.join(' ')}"
-    output = IO.popen(cmd,
-                      "r+", err: %i[child out]) do |io|
+    debug "command=#{command_for_log(cmd)}"
+    output = IO.popen(cmd, "r+", err: %i[child out]) do |io|
       io.write(prompt)
       io.close_write
       io.read
     end
+    status = $CHILD_STATUS
+    text = output.to_s.strip
 
-    [$CHILD_STATUS.success? && !output.strip.empty?, output.strip]
+    return [true, text] if status.success? && !text.empty?
+
+    reason = status.success? ? "claude returned no text" : "claude exited unsuccessfully"
+    [false, ai_failure_details(provider: "claude", model: model, command: cmd, status: status, output: output, reason: reason)]
   end
 
   def ai_generate_opencode(prompt, model:)
@@ -99,11 +103,54 @@ module Utils
     cmd << prompt
 
     debug "model=#{model}"
-    debug "command=#{cmd.join(' ')}"
-    raw = IO.popen(cmd, err: %i[child out], &:read)
+    debug "command=#{command_for_log(cmd)}"
+    raw = IO.popen(cmd, err: %i[child out], &:read).to_s
+    status = $CHILD_STATUS
     text = extract_opencode_text(raw)
 
-    [$CHILD_STATUS.success? && !text.empty?, text]
+    return [true, text] if status.success? && !text.empty?
+
+    reason = if !status.success?
+               "opencode exited unsuccessfully"
+             elsif raw.strip.empty?
+               "opencode returned no output"
+             else
+               "opencode returned no final text"
+             end
+
+    [false, ai_failure_details(provider: "opencode", model: model, command: cmd, status: status, output: raw, reason: reason)]
+  end
+
+  def ai_failure_details(context)
+    details = [
+      "provider: #{context.fetch(:provider)}",
+      "model: #{context[:model] || '(default)'}",
+      "reason: #{context.fetch(:reason)}",
+      "status: #{status_summary(context[:status])}",
+      "command: #{command_for_log(context.fetch(:command))}"
+    ]
+    raw = context[:output].to_s.strip
+    details << "output:\n#{raw}" unless raw.empty?
+    details.join("\n")
+  end
+
+  def status_summary(status)
+    return "unknown" unless status
+    return "exit #{status.exitstatus}" if status.exited?
+    return "signal #{status.termsig}" if status.signaled?
+
+    status.to_s
+  end
+
+  def command_for_log(command)
+    command.map do |arg|
+      text = arg.to_s
+      if text.include?("\n") || text.bytesize > 120
+        "<#{text.bytesize} byte prompt>"
+      else
+        Shellwords.escape(text)
+      end
+    end.join(" ")
   end
 
   # Pull the assistant's final answer out of opencode's `--format json` event

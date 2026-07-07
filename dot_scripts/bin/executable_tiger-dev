@@ -1,5 +1,4 @@
 #!/bin/bash
 # tiger-dev - tmux session manager for the Tiger dev server. See ~/.scripts/lib/tmux-session.sh.
 source "$HOME/.scripts/lib/tmux-session.sh"
-cd "$HOME/Projects/tiger/apps/tiger" || exit
 _octmux_main "iex -S mix phx.server" tiger-dev "$@"

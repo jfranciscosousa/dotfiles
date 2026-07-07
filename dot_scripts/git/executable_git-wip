@@ -92,9 +92,9 @@ if ai_message
       message = "#{subject}\n\n#{formatted_body}"
     end
   else
-    warn "Warning: AI generation failed, falling back to 'wip' message" unless ai_output.empty?
+    warn "could not reach ai"
     warn ai_output unless ai_output.empty?
-    message = "wip"
+    exit(1)
   end
 end
 
