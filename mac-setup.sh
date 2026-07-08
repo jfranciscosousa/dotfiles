@@ -19,11 +19,10 @@ set -euo pipefail
 # Config (edit these to taste)
 # ----------------------------------------------------------------------------
 
-# mise runtime versions set globally so the shell + ruby git-scripts work.
+# mise runtime versions set globally so the shell + scripts work.
 # These are also pinned in dot_config/mise/config.toml (the global mise config),
 # which takes effect on `chezmoi apply`. Project mise.toml / .tool-versions
 # files override them per-repo.
-RUBY_VERSION="${RUBY_VERSION:-4.0.5}"
 NODE_VERSION="${NODE_VERSION:-26.3.0}"
 
 # Other runtimes the dotfiles use (erlang, elixir, postgres, yarn) install on
@@ -35,8 +34,8 @@ FORMULAE=(
   # core CLI used directly by the shell + scripts
   chezmoi git gh glab mise direnv tmux neovim bat jq rtk
   coreutils gawk curl pkgconf
-  # build deps for mise-built runtimes (erlang/ruby/node native extensions)
-  autoconf openssl@3 readline libyaml libxslt zlib ossp-uuid wxwidgets gcc
+  # build deps for mise-built runtimes (erlang/node native extensions)
+  autoconf openssl@3 readline libxslt zlib ossp-uuid wxwidgets gcc
   # containers (colima provides the docker daemon on macOS)
   colima docker docker-compose
   # project doc/PDF toolchain (tiger): weasyprint + friends
@@ -180,18 +179,17 @@ else
 fi
 
 # ----------------------------------------------------------------------------
-# 7. mise runtimes (node, ruby, erlang, elixir, postgres, yarn)
+# 7. mise runtimes (node, erlang, elixir, postgres, yarn)
 # ----------------------------------------------------------------------------
 
 log "mise runtimes"
 if ! have mise; then
   warn "mise not found (brew step should have installed it); skipping runtimes"
 else
-  # Install the globals up front (ruby is required by the git-* scripts; node by
-  # the JS toolchain). The pins live in dot_config/mise/config.toml and become
-  # the global defaults once `chezmoi apply` deploys it.
-  log "mise: ruby ${RUBY_VERSION}, node ${NODE_VERSION}"
-  mise install "ruby@${RUBY_VERSION}" "node@${NODE_VERSION}" || warn "mise runtime install failed"
+  # Install the globals up front. The pins live in dot_config/mise/config.toml
+  # and become the global defaults once `chezmoi apply` deploys it.
+  log "mise: node ${NODE_VERSION}"
+  mise install "node@${NODE_VERSION}" || warn "mise runtime install failed"
 fi
 
 # ----------------------------------------------------------------------------

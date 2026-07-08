@@ -1,8 +1,7 @@
 # Global mise config (~/.config/mise/config.toml).
-# Pinned runtime versions used by the shell + git-* scripts.
+# Pinned runtime versions used by the shell + scripts.
 # Project mise.toml / .tool-versions files override these per-repo.
 [tools]
-ruby = "4.0.5"
 node = "latest"
 "npm:zx" = "latest"
 "npm:@earendil-works/pi-coding-agent" = "latest"

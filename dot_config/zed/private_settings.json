@@ -22,8 +22,7 @@
   "auto_install_extensions": {
     "catppuccin-icons": true,
     "elixir": true,
-    "mdx": false,
-    "ruby": true
+    "mdx": false
   },
   "icon_theme": "Catppuccin Mocha",
   "project_panel": {

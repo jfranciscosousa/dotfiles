@@ -4,10 +4,10 @@ Personal dotfiles managed with [chezmoi](https://www.chezmoi.io/).
 
 ## Linting
 
-Install repo-local tooling with `pnpm install` and `bundle install`. `pnpm install` also installs
-the Husky pre-commit hook.
+Install repo-local tooling with `pnpm install`. `pnpm install` also installs the Husky pre-commit
+hook.
 
-- `pnpm lint` checks Oxfmt-managed formatting, TOML, JavaScript, Bash, Zsh syntax, and Ruby.
+- `pnpm lint` checks Oxfmt-managed formatting, TOML, JavaScript/TypeScript, Bash, and Zsh syntax.
 - `pnpm lint:staged` checks only currently staged files through lint-staged.
 - `pnpm fmt` runs Oxfmt on supported non-template files.
 

@@ -5,7 +5,6 @@
   "ignorePatterns": [
     "**/*.tmpl",
     "node_modules/**",
-    "Gemfile.lock",
     "package-lock.json",
     "pnpm-lock.yaml",
     "yarn.lock"

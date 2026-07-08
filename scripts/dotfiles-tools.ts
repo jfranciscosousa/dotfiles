@@ -14,7 +14,7 @@ export type FileGroups = {
 
 const root = cwd();
 const ignoredDirectories = new Set([".git", "node_modules"]);
-const ignoredFiles = new Set(["Gemfile.lock", "package-lock.json", "pnpm-lock.yaml", "yarn.lock"]);
+const ignoredFiles = new Set(["package-lock.json", "pnpm-lock.yaml", "yarn.lock"]);
 const oxfmtExtensions = new Set([
   ".cjs",
   ".css",
