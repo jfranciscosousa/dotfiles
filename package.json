@@ -7,7 +7,7 @@
     "format": "pnpm run fmt",
     "format:check": "oxfmt --check --disable-nested-config .",
     "lint": "pnpm typecheck && zx scripts/lint-dotfiles.ts",
-    "lint:staged": "lint-staged",
+    "lint:staged": "pnpm typecheck && lint-staged",
     "prepare": "husky",
     "typecheck": "tsc --noEmit"
   },
