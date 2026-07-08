@@ -10,7 +10,6 @@ export type FileGroups = {
   shellBash: Set<string>;
   shellSh: Set<string>;
   zsh: Set<string>;
-  ruby: Set<string>;
 };
 
 const root = cwd();
@@ -51,7 +50,6 @@ export function createGroups(): FileGroups {
     shellBash: new Set(),
     shellSh: new Set(),
     zsh: new Set(),
-    ruby: new Set(),
   };
 }
 
@@ -112,8 +110,6 @@ export async function lintGroups(groups: FileGroups): Promise<void> {
     console.log(`\n==> zsh -n ${file}`);
     await $`zsh -n ${file}`;
   }
-
-  await runIfAny(["bundle", "exec", "rubocop"], groups.ruby);
 }
 
 function classifyFile(file: string, groups: FileGroups): void {
@@ -134,10 +130,6 @@ function classifyFile(file: string, groups: FileGroups): void {
     groups.oxlint.add(file);
   }
 
-  if (extension === ".rb") {
-    groups.ruby.add(file);
-  }
-
   const shebang = firstLine(file);
   const shell = shellFor(file, shebang);
   if (shell === "bash") {
@@ -146,10 +138,6 @@ function classifyFile(file: string, groups: FileGroups): void {
     groups.shellSh.add(file);
   } else if (shell === "zsh") {
     groups.zsh.add(file);
-  }
-
-  if (shebang.startsWith("#!") && shebang.includes("ruby")) {
-    groups.ruby.add(file);
   }
 }
 
