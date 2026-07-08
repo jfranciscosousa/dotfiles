@@ -1,3 +1,6 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
 # shellcheck shell=bash
 
 _octmux_quote_arg() {
@@ -54,11 +57,11 @@ _octmux_main() {
   local prefix="${TOOL_SHORT}--${pathkey}"
 
   if [ "$list" -eq 1 ]; then
-    tmux list-sessions -F '#S' 2>/dev/null | while IFS= read -r s; do
+    while IFS= read -r s; do
       if [[ "$s" == "${prefix}_"* ]]; then
         echo "${s#"${prefix}"_}"
       fi
-    done
+    done < <(tmux list-sessions -F '#S' 2>/dev/null || true)
     return 0
   fi
 
@@ -69,7 +72,7 @@ _octmux_main() {
       if [[ "$s" == "${prefix}_"* ]]; then
         tmux kill-session -t "=${s}" 2>/dev/null && killed=$((killed + 1))
       fi
-    done < <(tmux list-sessions -F '#S' 2>/dev/null)
+    done < <(tmux list-sessions -F '#S' 2>/dev/null || true)
     if [ "$killed" -gt 0 ]; then
       echo "${TOOL_SHORT}: killed ${killed} session(s) for this folder"
       return 0

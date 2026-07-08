@@ -19,6 +19,13 @@ On very large projects, do not run type checks, lints, or compiles.
 Only do this if there's a way to lint, verify, or equivalent for specific files and not the whole
 project.
 
+### Scripting
+
+For standalone shell scripts in my dotfiles or other cross macOS/Linux automation, default to Bash:
+start with `#!/usr/bin/env bash` and `set -euo pipefail`, and keep syntax compatible with macOS Bash
+3.2 unless another non-shell runtime is explicitly required. zsh is only allowed for files sourced
+from zsh config files. POSIX sh is banned; use Bash instead.
+
 ### Git
 
 Never perform git, GitLab, GitHub, `git`, `gh`, or `glab` operations unless my current prompt

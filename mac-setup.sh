@@ -1,4 +1,5 @@
 #!/usr/bin/env bash
+set -euo pipefail
 #
 # mac-setup.sh - Bootstrap a fresh macOS machine for these dotfiles.
 #
@@ -13,7 +14,6 @@
 #   ./mac-setup.sh            # full setup
 #   ./mac-setup.sh --no-casks # skip GUI apps (headless / CI)
 #
-set -euo pipefail
 
 # ----------------------------------------------------------------------------
 # Config (edit these to taste)

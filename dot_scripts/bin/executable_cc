@@ -1,4 +1,6 @@
-#!/bin/bash
+#!/usr/bin/env bash
+set -euo pipefail
+
 # cc — tmux session manager for Claude Code. See ~/.scripts/lib/tmux-session.sh.
 source "$HOME/.scripts/lib/tmux-session.sh"
 _octmux_main claude cc "$@"

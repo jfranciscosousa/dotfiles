@@ -1,31 +1,38 @@
-#!/usr/bin/env zsh
+#!/usr/bin/env bash
+set -euo pipefail
+
 # git-squash-feature - Soft reset all commits since branching from a base branch into one.
 
-set -e
+not_merged() {
+  local merge_destination_branch="$1"
+  local merge_source_branch="$2"
+  local merge_base
+  local merge_source_current_commit
 
-function not_merged() {
-  merge_destination_branch=$1
-  merge_source_branch=$2
+  merge_base=$(git merge-base "$merge_destination_branch" "$merge_source_branch")
+  merge_source_current_commit=$(git rev-parse "$merge_source_branch")
 
-  merge_base=$(git merge-base $merge_destination_branch $merge_source_branch)
-  merge_source_current_commit=$(git rev-parse $merge_source_branch)
-  if [[ $merge_base = $merge_source_current_commit ]]
-  then
+  if [[ "$merge_base" = "$merge_source_current_commit" ]]; then
     return 1
-  else
-    return 0
   fi
+
+  return 0
 }
 
-BASE=$(git merge-base HEAD $1)
-CURRENT_BRANCH=$(git branch | grep \* | cut -d ' ' -f2)
-
-if not_merged $CURRENT_BRANCH $1; then
-    echo "$1 is not merged with this branch, fix that please"
-
-    exit -1
+if [ "$#" -ne 1 ]; then
+  echo "usage: git squash-feature <base-branch>" >&2
+  exit 2
 fi
 
-git reset --soft $BASE
+base_branch="$1"
+base=$(git merge-base HEAD "$base_branch")
+current_branch=$(git branch --show-current)
+
+if not_merged "$current_branch" "$base_branch"; then
+  echo "$base_branch is not merged with this branch, fix that please"
+  exit 1
+fi
+
+git reset --soft "$base"
 
 echo "squashed everything, ready to commit"

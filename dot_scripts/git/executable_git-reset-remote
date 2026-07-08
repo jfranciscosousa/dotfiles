@@ -1,16 +1,19 @@
-#!/usr/bin/env zsh
+#!/usr/bin/env bash
+set -euo pipefail
+
 # git-reset-remote - Hard reset the current branch to match its upstream remote.
 
 printf "This will fully reset the repo to the match the remote. YOU CAN LOSE DATA\n"
-if read -q "REPLY?Are you sure you want to continue? <y/N> "; then
+read -r -p "Are you sure you want to continue? <y/N> " reply
+
+if [[ "$reply" =~ ^[Yy]$ ]]; then
   git pull
 
-  remote=$(git rev-parse --abbrev-ref --symbolic-full-name @{u})
+  remote=$(git rev-parse --abbrev-ref --symbolic-full-name '@{u}')
+  git reset --hard "$remote"
 
-  git reset --hard $remote
   printf "\nSynced everything o the remote\n"
 else
   printf "\nAaaand nothing happened, I swear\n"
-
   exit 0
 fi

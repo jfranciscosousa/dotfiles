@@ -1,4 +1,6 @@
 #!/usr/bin/env bash
+set -euo pipefail
+
 input=$(cat)
 
 model=$(echo "$input" | jq -r '.model.display_name // "Unknown"')
@@ -7,9 +9,13 @@ cost=$(echo "$input" | jq -r '.cost.total_cost_usd // empty')
 plan_pct=$(echo "$input" | jq -r '.rate_limits.five_hour.used_percentage // empty')
 plan_resets_at=$(echo "$input" | jq -r '.rate_limits.five_hour.resets_at // empty')
 
-# Git info
-branch=$(git rev-parse --abbrev-ref HEAD 2>/dev/null)
-repo=$(basename "$(git rev-parse --show-toplevel 2>/dev/null)" 2>/dev/null)
+branch=$(git rev-parse --abbrev-ref HEAD 2>/dev/null || true)
+repo_root=$(git rev-parse --show-toplevel 2>/dev/null || true)
+repo=""
+if [ -n "$repo_root" ]; then
+  repo=$(basename "$repo_root")
+fi
+
 git_info=""
 if [ -n "$branch" ] && [ -n "$repo" ]; then
   git_info="  ${repo}:${branch}"
@@ -24,10 +30,10 @@ plan_str=""
 if [ -n "$plan_pct" ]; then
   if [ -n "$plan_resets_at" ]; then
     now=$(date +%s)
-    remaining=$(( plan_resets_at - now ))
+    remaining=$((plan_resets_at - now))
     if [ "$remaining" -gt 0 ]; then
-      h=$(( remaining / 3600 ))
-      m=$(( (remaining % 3600) / 60 ))
+      h=$((remaining / 3600))
+      m=$(((remaining % 3600) / 60))
       plan_str=$(printf "  plan: %d%% ↻%dh%dm" "$plan_pct" "$h" "$m")
     else
       plan_str=$(printf "  plan: %d%%" "$plan_pct")

@@ -1,4 +1,6 @@
-#!/bin/bash
+#!/usr/bin/env bash
+set -euo pipefail
+
 # untilfail - Repeat a command until it fails.
 
 if [ "$#" -eq 0 ]; then

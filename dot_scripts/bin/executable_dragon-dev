@@ -1,4 +1,6 @@
-#!/bin/bash
+#!/usr/bin/env bash
+set -euo pipefail
+
 # dragon-dev - tmux session manager for the Dragon dev server. See ~/.scripts/lib/tmux-session.sh.
 source "$HOME/.scripts/lib/tmux-session.sh"
 _octmux_main "yarn workspace @remote-com/employ dev" dragon-dev "$@"

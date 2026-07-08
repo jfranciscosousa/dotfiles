@@ -1,4 +1,6 @@
-#!/usr/bin/env zsh
+#!/usr/bin/env bash
+set -euo pipefail
+
 # git-nuke - Prune remotes and delete all local branches with no remote counterpart.
 #
 # # # # # # # # # # # # # # # # # #
@@ -17,21 +19,21 @@
 # WHICH HAVEN'T BEEN PUSHED YET.
 # TODO: Add a --safe flag to avoid this
 
-# Prune origin
 echo "[git]: pruning..."
 git fetch --prune
 
-# Delete merged branches
 echo "[git]: deleting merged branches..."
 git branch --merged \
-  | grep -v master \
-  | grep -v '^\*' \
-  | xargs git branch -d
+  | awk '$1 != "*" && $1 != "master" && $1 != "main" { print $1 }' \
+  | while IFS= read -r branch; do
+    git branch -d "$branch"
+  done
 
-# Delete unmerged branches with no remote counterpart
 echo "[git]: deleting unmerged branches..."
 git branch -avv \
-  | awk '/: gone\]/ { print $1 }' \
-  | xargs git branch -D
+  | awk '/: gone\]/ { branch = $1; if (branch == "*") branch = $2; print branch }' \
+  | while IFS= read -r branch; do
+    git branch -D "$branch"
+  done
 
-echo "\n\nI AM BECOME DEATH,\nDESTROYER OF WORLDS"
+printf "\n\nI AM BECOME DEATH,\nDESTROYER OF WORLDS\n"

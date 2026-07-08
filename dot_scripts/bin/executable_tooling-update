@@ -1,6 +1,5 @@
-#!/bin/bash
-
-set -e
+#!/usr/bin/env bash
+set -euo pipefail
 
 # Update brew and all brew packages (mise itself is brew-managed)
 brew update && brew upgrade
