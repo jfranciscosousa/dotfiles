@@ -1,28 +1,3 @@
-#!/usr/bin/env ruby
-# frozen_string_literal: true
+#!/usr/bin/env zx
 
-# git-mr - Create a GitLab merge request with an AI-generated description.
-#
-# Usage: git mr [options]
-#
-# Options:
-#   -t, --target BRANCH   Target branch (default: auto-detect main/master)
-#   -h                    Show this help
-#
-# Looks for an MR template in .gitlab/merge_request_templates/Default.md,
-# fills it in with AI based on the branch diff, then creates the MR via glab.
-require 'shellwords'
-require_relative 'utils'
-
-Utils.create_change_request(
-  cmd: "mr",
-  abbr: "MR",
-  noun: "GitLab merge request",
-  noun_short: "merge request",
-  host_label: "GitLab",
-  remote_host: "gitlab",
-  template_dirs: [".gitlab/merge_request_templates"],
-  create: lambda { |title, description, target|
-    "glab mr create --title #{title.shellescape} --description #{description.shellescape} --target-branch #{target.shellescape}"
-  }
-)
+await import("./src/mr.ts");

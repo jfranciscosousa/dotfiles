@@ -4,3 +4,5 @@
 [tools]
 ruby = "4.0.5"
 node = "latest"
+"npm:zx" = "latest"
+"npm:@earendil-works/pi-coding-agent" = "latest"

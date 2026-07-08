@@ -8,7 +8,7 @@
     "noUncheckedIndexedAccess": true,
     "strict": true,
     "target": "ES2024",
-    "types": ["node"]
+    "types": ["node", "zx/globals"]
   },
-  "include": ["scripts/**/*.ts"]
+  "include": ["scripts/**/*.ts", "dot_scripts/**/*.ts"]
 }
