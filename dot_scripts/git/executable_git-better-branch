@@ -2,4 +2,4 @@
 set -euo pipefail
 
 source "$HOME/.scripts/lib/run-relative.sh"
-exec_relative_to_script "${BASH_SOURCE[0]}" zx src/better-branch.ts "$@"
+exec_zx_relative_to_script "${BASH_SOURCE[0]}" src/better-branch.ts "$@"
