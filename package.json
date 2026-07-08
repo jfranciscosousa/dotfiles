@@ -12,6 +12,7 @@
     "typecheck": "tsc --noEmit"
   },
   "devDependencies": {
+    "@earendil-works/pi-coding-agent": "^0.80.3",
     "@taplo/cli": "0.7.0",
     "@types/fs-extra": "11.0.4",
     "@types/node": "26.1.0",
