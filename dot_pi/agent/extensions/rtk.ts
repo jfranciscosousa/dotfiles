@@ -5,6 +5,7 @@ import { join } from "node:path";
 
 const RTK_DOC_PATH = join(homedir(), ".brains", "RTK.md");
 const RTK_COMMAND_PREFIX = /^(?:env\s+\S+\s+)*rtk(?:\s|$)/;
+const RTK_REWRITE_CODES = new Set([0, 3]);
 
 export default function (pi: ExtensionAPI) {
   let rtkDoc: string | undefined;
@@ -36,7 +37,7 @@ export default function (pi: ExtensionAPI) {
         timeout: 3000,
       });
 
-      if (result.code !== 0) {
+      if (!RTK_REWRITE_CODES.has(result.code)) {
         if (!warnedUnavailable && ctx.hasUI) {
           warnedUnavailable = true;
           ctx.ui.notify("rtk rewrite unavailable; leaving bash commands unchanged", "warning");
