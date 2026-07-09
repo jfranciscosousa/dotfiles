@@ -1,5 +1,3 @@
-export AWS_PROFILE=sts
-
 # Remote work machines intentionally use Pi with GPT/OpenAI, not OpenCode Go.
 export DOTFILES_PROVIDER=pi
 export DOTFILES_MODEL=openai/gpt-5.5
