@@ -12,7 +12,10 @@ function hidden() {
   return new Container();
 }
 
-function registerQuietTool(pi: ExtensionAPI, createDefinition: (cwd: string) => ToolDefinition) {
+function registerQuietTool(
+  pi: ExtensionAPI,
+  createDefinition: (cwd: string) => ToolDefinition<any, any, any>,
+) {
   const base = createDefinition(process.cwd());
 
   pi.registerTool({

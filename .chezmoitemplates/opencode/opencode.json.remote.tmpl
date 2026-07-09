@@ -2,13 +2,27 @@
 {
   "$schema": "https://opencode.ai/config.json",
   "enabled_providers": ["openai"],
-  "model": "openai/gpt-5.5",
+  "model": "openai/gpt-5.6-terra",
   "provider": {
     "openai": {
       "models": {
-        "gpt-5.5": {
+        "gpt-5.6-sol": {
           "options": {
             "reasoningEffort": "high",
+            "textVerbosity": "low",
+            "reasoningSummary": "auto"
+          }
+        },
+        "gpt-5.6-terra": {
+          "options": {
+            "reasoningEffort": "high",
+            "textVerbosity": "low",
+            "reasoningSummary": "auto"
+          }
+        },
+        "gpt-5.6-luna": {
+          "options": {
+            "reasoningEffort": "low",
             "textVerbosity": "low",
             "reasoningSummary": "auto"
           }
@@ -17,18 +31,21 @@
     }
   },
   "agent": {
+    "plan": {
+      "model": "openai/gpt-5.6-sol"
+    },
     "build": {
-      "model": "openai/gpt-5.5"
+      "model": "openai/gpt-5.6-terra"
     },
     "build-deep": {
       "mode": "primary",
-      "description": "Like build, but uses GPT-5.5",
-      "model": "openai/gpt-5.5"
+      "description": "Like build, but uses GPT-5.6 Sol",
+      "model": "openai/gpt-5.6-sol"
     },
     "build-fast": {
       "mode": "primary",
-      "description": "Guided, low-exploration flow on GPT-5.5 low reasoning",
-      "model": "openai/gpt-5.5",
+      "description": "Guided, low-exploration flow on GPT-5.6 Luna low reasoning",
+      "model": "openai/gpt-5.6-luna",
       "prompt": "{file:./prompts/build-fast.md}",
       "options": {
         "reasoningEffort": "low",
@@ -38,7 +55,7 @@
     "research-fast": {
       "mode": "primary",
       "description": "Read-only explorer: fuzzy-finds files, reads code, and checks assumptions. Implements nothing.",
-      "model": "openai/gpt-5.4-mini",
+      "model": "openai/gpt-5.6-luna",
       "prompt": "{file:./prompts/research-fast.md}",
       "permission": {
         "edit": "deny",
