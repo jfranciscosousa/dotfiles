@@ -7,6 +7,29 @@
 // custom settings, run `zed: open default settings` from the
 // command palette (cmd-shift-p / ctrl-shift-p)
 {
+{{ if hasPrefix "Remote-" .chezmoi.hostname }}
+  "edit_predictions": {
+    "provider": "open_ai_compatible_api",
+    "open_ai_compatible_api": {
+      "model": "gpt-5.4-nano",
+      "api_url": "https://api.openai.com/v1"
+    }
+  },
+  "language_models": {
+    "openai": {
+      "api_url": "https://api.openai.com/v1",
+      "available_models": [
+        {
+          "name": "gpt-5.5",
+          "display_name": "GPT-5.5 High",
+          "reasoning_effort": "high",
+          "max_tokens": 272000,
+          "max_completion_tokens": 20000
+        }
+      ]
+    }
+  },
+{{ end }}
   "agent_servers": {
     "opencode": {
       "type": "registry"
@@ -29,6 +52,12 @@
     "dock": "left"
   },
   "agent": {
+{{ if hasPrefix "Remote-" .chezmoi.hostname }}
+    "default_model": {
+      "provider": "openai",
+      "model": "gpt-5.5"
+    },
+{{ end }}
     "sidebar_side": "right",
     "dock": "right"
   },

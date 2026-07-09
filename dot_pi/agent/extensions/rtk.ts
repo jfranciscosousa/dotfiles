@@ -11,9 +11,8 @@ export default function (pi: ExtensionAPI) {
   let rtkDoc: string | undefined;
   let warnedUnavailable = false;
 
-  pi.on("session_start", async (_event, ctx) => {
+  pi.on("session_start", async (_event) => {
     rtkDoc = await readRtkDoc();
-    ctx.ui.setStatus("rtk", "rtk");
   });
 
   pi.on("before_agent_start", async (event) => {
