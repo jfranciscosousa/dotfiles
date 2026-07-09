@@ -1,4 +1,4 @@
-import { mkdir, readFile, readdir, stat, writeFile } from "node:fs/promises";
+import { mkdir, readFile, readdir, rm, stat, writeFile } from "node:fs/promises";
 import { homedir, tmpdir } from "node:os";
 import { dirname, join } from "node:path";
 import { collectClaude } from "./ai-costs/sources/claude.ts";
@@ -44,6 +44,11 @@ await main();
 async function main(): Promise<void> {
   const since = parseSince(String(argv._[0] ?? "30 days ago"));
   const sinceTimeMs = new Date(`${since}T00:00:00`).getTime();
+
+  if (argv["clear-cache"]) {
+    await rm(PRICING_CACHE, { force: true });
+  }
+
   pricing = await fetchPricing();
 
   const options: CollectOptions = { since, sinceTimeMs, costFor };
