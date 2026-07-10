@@ -34,9 +34,9 @@ GEOMETRY_PROMPT_PREFIX="%F{$GEOMETRY_COLOR_DIR}$USER"
 source "$HOME/.zsh/aliases.sh"
 
 {{ if eq .chezmoi.os "darwin" }}
-source "$HOME/.scripts/startup/macos.sh"
+source "$HOME/.zsh/macos.sh"
 {{ else if eq .chezmoi.os "linux" }}
-source "$HOME/.scripts/startup/linux.sh"
+source "$HOME/.zsh/linux.sh"
 {{ end }}
 
 if [[ -f "$HOME/.zsh/remote.sh" ]]; then

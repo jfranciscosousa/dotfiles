@@ -1,10 +1,10 @@
 {{ if ne .chezmoi.os "linux" }}
 .scripts/bin/arch-update
-.scripts/startup/linux.sh
+.zsh/linux.sh
 {{ end }}
 
 {{ if ne .chezmoi.os "darwin" }}
-.scripts/startup/macos.sh
+.zsh/macos.sh
 {{ end }}
 
 {{ if not (hasPrefix "Remote-" .chezmoi.hostname) }}
