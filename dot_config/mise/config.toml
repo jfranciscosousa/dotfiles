@@ -3,5 +3,6 @@
 # Project mise.toml / .tool-versions files override these per-repo.
 [tools]
 node = "latest"
+pnpm = "latest"
 "npm:zx" = "latest"
 "npm:@earendil-works/pi-coding-agent" = "latest"

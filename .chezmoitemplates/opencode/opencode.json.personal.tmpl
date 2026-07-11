@@ -2,16 +2,75 @@
 {
   "$schema": "https://opencode.ai/config.json",
   "model": "opencode-go/kimi-k2.7-code",
+  "small_model": "opencode/deepseek-v4-flash-free",
+  "default_agent": "build",
   "agent": {
+    "build": {
+      "mode": "primary",
+      "description": "Default primary agent for full development work.",
+      "model": "opencode-go/kimi-k2.7-code"
+    },
+    "build-deep": {
+      "mode": "primary",
+      "description": "Like build, but uses GLM-5.2 for harder reasoning and deep refactoring.",
+      "model": "opencode-go/glm-5.2"
+    },
+    "build-fast": {
+      "mode": "primary",
+      "description": "Guided, low-exploration flow on MiniMax-M3 for quick edits and small tasks.",
+      "model": "opencode-go/minimax-m3",
+      "prompt": "{file:./prompts/build-fast.md}"
+    },
+    "plan": {
+      "mode": "primary",
+      "description": "Restricted agent for planning and analysis without making changes.",
+      "model": "opencode/deepseek-v4-flash-free"
+    },
     "research-fast": {
       "mode": "primary",
       "description": "Read-only explorer: fuzzy-finds files, reads code, and checks assumptions. Implements nothing.",
-      "model": "opencode-go/deepseek-v4-flash",
+      "model": "opencode/deepseek-v4-flash-free",
       "prompt": "{file:./prompts/research-fast.md}",
       "permission": {
         "edit": "deny",
         "bash": "ask"
       }
+    },
+    "general": {
+      "mode": "subagent",
+      "description": "General-purpose agent for researching complex questions and executing multi-step tasks.",
+      "model": "opencode-go/qwen3.7-plus"
+    },
+    "explore": {
+      "mode": "subagent",
+      "description": "Fast, read-only agent for exploring codebases.",
+      "model": "opencode/deepseek-v4-flash-free",
+      "permission": {
+        "edit": "deny"
+      }
+    },
+    "scout": {
+      "mode": "subagent",
+      "description": "Read-only agent for external docs and dependency research.",
+      "model": "opencode/deepseek-v4-flash-free",
+      "permission": {
+        "edit": "deny"
+      }
+    },
+    "title": {
+      "mode": "primary",
+      "description": "Hidden system agent that generates short session titles.",
+      "model": "opencode/deepseek-v4-flash-free"
+    },
+    "summary": {
+      "mode": "primary",
+      "description": "Hidden system agent that creates session summaries.",
+      "model": "opencode/deepseek-v4-flash-free"
+    },
+    "compaction": {
+      "mode": "primary",
+      "description": "Hidden system agent that compacts long context into a smaller summary.",
+      "model": "opencode/deepseek-v4-flash-free"
     }
   },
   "instructions": ["{{ .chezmoi.homeDir }}/.brains/RTK.md"],
