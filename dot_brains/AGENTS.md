@@ -55,6 +55,11 @@ intact when delegating.
 Whenever you use MCPs to create, read, update or delete anything, please provide an HTTP link to
 that resource when applicable.
 
+Never use these MCPs and instead reach out to CLIs:
+
+- Notion -> ntn
+- Gitlab -> glab
+
 ### Terminal file links
 
 When referencing files in terminal-facing responses, format them for editor cmd-click detection:
