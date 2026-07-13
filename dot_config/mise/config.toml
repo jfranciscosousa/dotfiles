@@ -2,6 +2,7 @@
 # Pinned runtime versions used by the shell + scripts.
 # Project mise.toml / .tool-versions files override these per-repo.
 [tools]
+remotectl = "5.9.0"
 node = "latest"
 pnpm = "latest"
 "npm:zx" = "latest"
