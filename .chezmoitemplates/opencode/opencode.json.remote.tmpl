@@ -100,12 +100,12 @@
     },
     "mcp-god": {
       "mode": "all",
-      "description": "Exclusive gateway to the remote-work MCP servers (Linear, Snowflake, Sentry, Honeycomb, Notion, Slack). The only agent allowed to call these tools.",
-      "model": "openai/gpt-5.6-terra",
+      "description": "MCP-only gateway that calls the services requested by parent agents and reports the results back.",
+      "model": "openai/gpt-5.6-luna",
       "options": {
         "reasoningEffort": "high"
       },
-      "prompt": "You are the MCP gateway. You alone can call the Linear, Snowflake, Sentry, Honeycomb, Notion, and Slack MCP tools. Use them to fulfill requests against those services and report results concisely.",
+      "prompt": "You are an MCP-only gateway for parent agents. Call only the requested Linear, Snowflake, Sentry, Honeycomb, Notion, or Slack MCP tools, then report the results back to the parent thorougly. Do not perform unrelated work or extend the task beyond the parent's request.",
       "permission": {
         "linear_*": "allow",
         "snowflake_*": "allow",
