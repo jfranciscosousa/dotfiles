@@ -43,5 +43,5 @@ exec_zx_relative_to_script() {
   shift 2
 
   target=$(script_relative_path "$caller" "$relative_path")
-  exec mise x node@latest npm:zx@latest -- zx "$target" "$@"
+  exec mise x npm:zx@latest -- zx "$target" "$@"
 }
