@@ -98,6 +98,20 @@
         "bash": "ask"
       }
     },
+    "code-review": {
+      "mode": "all",
+      "description": "Read-only adversarial code reviewer that uses repository review skills when available.",
+      "model": "openai/gpt-5.6-sol",
+      "options": {
+        "reasoningEffort": "xhigh",
+        "textVerbosity": "low"
+      },
+      "prompt": "{file:./prompts/code-review.md}",
+      "permission": {
+        "edit": "deny",
+        "bash": "deny"
+      }
+    },
     "mcp-god": {
       "mode": "all",
       "description": "MCP-only gateway that calls the services requested by parent agents and reports the results back.",
