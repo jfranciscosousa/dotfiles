@@ -2,8 +2,11 @@
 # Pinned runtime versions used by the shell + scripts.
 # Project mise.toml / .tool-versions files override these per-repo.
 [tools]
+{{- if hasPrefix "Remote-" .chezmoi.hostname -}}
 remotectl = "5.9.0"
+{{- end }}
 node = "latest"
 pnpm = "latest"
 "npm:zx" = "latest"
 "npm:@earendil-works/pi-coding-agent" = "latest"
+"npm:@typescript/native-preview" = "7.0.0-dev.20260707.2"
