@@ -14,8 +14,22 @@ if ! zgen saved; then
   zgen save
 fi
 
-# mise (runtime version manager) - activate manages PATH for interactive shells
-eval "$(mise activate zsh)"
+# mise (runtime version manager) - activate manages PATH for interactive shells.
+#
+# AppImage launchers export APPIMAGE/APPDIR/... plus ARGV0=<AppImage path>
+# into every subprocess. zsh uses ARGV0 as argv[0] for child execs, so mise
+# shims see "T3-Code-…AppImage" instead of the actual command and bail with
+# "X is not a valid shim", breaking real shim calls. Drop those vars only
+# when spawned by the T3-Code/opencode AppImage so normal terminals (and
+# other AppImages) are unaffected. .zshenv already strips them before mise
+# shims are used; this is a belt-and-braces guard that also clears them for
+# `mise activate zsh` if .zshenv didn't run.
+if [[ "$APPIMAGE" == */T3-Code-*.AppImage ]]; then
+  unset ARGV0 APPIMAGE APPDIR TARGET_APPIMAGE REDIRECT_APPIMAGE DESKTOPINTEGRATION
+fi
+if command -v mise >/dev/null; then
+  eval "$(mise activate zsh)"
+fi
 
 if [[ ! -f "${MISE_DATA_DIR:-$HOME/.local/share/mise}/completions/_mise" ]]; then
   mkdir -p "${MISE_DATA_DIR:-$HOME/.local/share/mise}/completions"

@@ -1,3 +1,16 @@
+# AppImage launchers (e.g. the T3-Code/opencode AppImage) export APPIMAGE /
+# APPDIR / TARGET_APPIMAGE / REDIRECT_APPIMAGE / DESKTOPINTEGRATION, AND also
+# ARGV0=<path-to-AppImage> into every subprocess. zsh uses ARGV0 as argv[0] for
+# every exec'd child, so mise shims (which derive the shim name from argv[0])
+# see "T3-Code-…AppImage" instead of e.g. "pnpm" and bail with
+# "X is not a valid shim", breaking pnpm/node/etc. Drop those vars only when
+# spawned by the T3-Code/opencode AppImage so normal terminals (and other
+# AppImages) are unaffected. This must run before any mise shim is invoked,
+# hence its placement at the top of .zshenv.
+if [[ "$APPIMAGE" == */T3-Code-*.AppImage ]]; then
+  unset ARGV0 APPIMAGE APPDIR TARGET_APPIMAGE REDIRECT_APPIMAGE DESKTOPINTEGRATION
+fi
+
 # Ensure that a non-login, non-interactive shell has a defined environment.
 if [[ ( "$SHLVL" -eq 1 && ! -o LOGIN ) && -s "${ZDOTDIR:-$HOME}/.zprofile" ]]; then
   source "${ZDOTDIR:-$HOME}/.zprofile"
