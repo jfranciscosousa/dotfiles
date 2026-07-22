@@ -1,0 +1,33 @@
+{{- $provider := "openai" -}}
+{{- $api := "openai-responses" -}}
+{{- if not (hasPrefix "Remote-" .chezmoi.hostname) -}}
+{{- $provider = "openai-codex" -}}
+{{- $api = "openai-codex-responses" -}}
+{{- end -}}
+{
+  "providers": {
+    "{{ $provider }}": {
+      "api": "{{ $api }}",
+      "models": [
+        {
+          "id": "gpt-5.6-luna",
+          "name": "GPT 5.6 Luna",
+          "reasoning": true,
+          "input": ["text", "image"]
+        },
+        {
+          "id": "gpt-5.6-sol",
+          "name": "GPT 5.6 Sol",
+          "reasoning": true,
+          "input": ["text", "image"]
+        },
+        {
+          "id": "gpt-5.6-terra",
+          "name": "GPT 5.6 Terra",
+          "reasoning": true,
+          "input": ["text", "image"]
+        }
+      ]
+    }
+  }
+}
