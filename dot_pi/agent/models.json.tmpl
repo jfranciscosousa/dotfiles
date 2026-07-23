@@ -1,36 +1,21 @@
 {{- $provider := "openai" -}}
-{{- $api := "openai-responses" -}}
 {{- if not (hasPrefix "Remote-" .chezmoi.hostname) -}}
 {{- $provider = "openai-codex" -}}
-{{- $api = "openai-codex-responses" -}}
 {{- end -}}
 {
   "providers": {
     "{{ $provider }}": {
-      "api": "{{ $api }}",
-      "models": [
-        {
-          "id": "gpt-5.6-luna",
-          "name": "GPT 5.6 Luna",
-          "reasoning": true,
-          "input": ["text", "image"],
+      "modelOverrides": {
+        "gpt-5.6-luna": {
           "contextWindow": 1050000
         },
-        {
-          "id": "gpt-5.6-sol",
-          "name": "GPT 5.6 Sol",
-          "reasoning": true,
-          "input": ["text", "image"],
+        "gpt-5.6-sol": {
           "contextWindow": 1050000
         },
-        {
-          "id": "gpt-5.6-terra",
-          "name": "GPT 5.6 Terra",
-          "reasoning": true,
-          "input": ["text", "image"],
+        "gpt-5.6-terra": {
           "contextWindow": 1050000
         }
-      ]
+      }
     }
   }
 }

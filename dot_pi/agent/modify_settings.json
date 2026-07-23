@@ -9,10 +9,11 @@
 {{- $existing = .chezmoi.stdin | fromJson -}}
 {{- end -}}
 
+{{- $defaultModel := index $existing "defaultModel" | default "gpt-5.6-terra" -}}
 {{- $managed := dict
   "theme" "dark"
   "defaultProvider" $provider
-  "defaultModel" "gpt-5.6-terra"
+  "defaultModel" $defaultModel
   "hideThinkingBlock" true
   "enabledModels" (list
     (printf "%s/gpt-5.6-luna" $provider)
