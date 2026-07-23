@@ -1,0 +1,25 @@
+{{- /* chezmoi:modify-template */ -}}
+{{- $provider := "openai" -}}
+{{- if not (hasPrefix "Remote-" .chezmoi.hostname) -}}
+{{- $provider = "openai-codex" -}}
+{{- end -}}
+
+{{- $existing := dict -}}
+{{- if .chezmoi.stdin -}}
+{{- $existing = .chezmoi.stdin | fromJson -}}
+{{- end -}}
+
+{{- $managed := dict
+  "theme" "dark"
+  "defaultProvider" $provider
+  "defaultModel" "gpt-5.6-terra"
+  "hideThinkingBlock" true
+  "enabledModels" (list
+    (printf "%s/gpt-5.6-luna" $provider)
+    (printf "%s/gpt-5.6-sol" $provider)
+    (printf "%s/gpt-5.6-terra" $provider)
+  )
+  "shellPath" "/bin/zsh"
+-}}
+
+{{ mergeOverwrite $existing $managed | toPrettyJson }}

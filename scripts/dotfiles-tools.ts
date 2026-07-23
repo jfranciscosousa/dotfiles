@@ -118,7 +118,10 @@ function classifyFile(file: string, groups: FileGroups): void {
   }
 
   const extension = extname(file).toLowerCase();
-  if (oxfmtExtensions.has(extension)) {
+  const shebang = firstLine(file);
+  const isChezMoiModifyTemplate = shebang.includes("chezmoi:modify-template");
+
+  if (oxfmtExtensions.has(extension) && !isChezMoiModifyTemplate) {
     groups.oxfmt.add(file);
   }
 
@@ -130,7 +133,6 @@ function classifyFile(file: string, groups: FileGroups): void {
     groups.oxlint.add(file);
   }
 
-  const shebang = firstLine(file);
   const shell = shellFor(file, shebang);
   if (shell === "bash") {
     groups.shellBash.add(file);
