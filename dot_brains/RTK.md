@@ -34,6 +34,9 @@ Example: `git status` → `rtk git status` (transparent, 0 tokens overhead).
 
 ## Prefer rtk wrappers explicitly
 
+For package scripts named exactly `lint`, use `rtk pnpm run lint`, never bare `pnpm run lint`. RTK
+incorrectly rewrites that bare command to `rtk lint` and attempts to run ESLint.
+
 The auto-rewriter only matches **bare commands**. Chained pipelines (`a; b; c`) bypass it because
 the leading verb is `echo` or similar. Reach for rtk wrappers directly:
 

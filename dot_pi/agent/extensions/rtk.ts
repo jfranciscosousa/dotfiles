@@ -5,6 +5,7 @@ import { join } from "node:path";
 
 const RTK_DOC_PATH = join(homedir(), ".brains", "RTK.md");
 const RTK_COMMAND_PREFIX = /^(?:env\s+\S+\s+)*rtk(?:\s|$)/;
+const PACKAGE_MANAGER_LINT_COMMAND = /^(?:env\s+\S+\s+)*(?:pnpm|npm|yarn|bun)\s+run\s+lint(?:\s|$)/;
 const RTK_REWRITE_CODES = new Set([0, 3]);
 
 export default function (pi: ExtensionAPI) {
@@ -28,7 +29,12 @@ export default function (pi: ExtensionAPI) {
     if (!isToolCallEventType("bash", event)) return;
 
     const command = event.input.command;
-    if (!command || RTK_COMMAND_PREFIX.test(command.trim())) return;
+    if (
+      !command ||
+      RTK_COMMAND_PREFIX.test(command.trim()) ||
+      PACKAGE_MANAGER_LINT_COMMAND.test(command.trim())
+    )
+      return;
 
     try {
       const result = await pi.exec("rtk", ["rewrite", command], {

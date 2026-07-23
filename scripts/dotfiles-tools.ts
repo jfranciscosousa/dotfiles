@@ -100,6 +100,7 @@ export async function formatGroups(groups: FileGroups): Promise<void> {
 }
 
 export async function lintGroups(groups: FileGroups): Promise<void> {
+  await validateChezmoiState();
   await runIfAny(["oxfmt", "--check", "--disable-nested-config"], groups.oxfmt);
   await runIfAny(["taplo", "check"], groups.taplo);
   await runIfAny(["oxlint"], groups.oxlint);
@@ -201,6 +202,11 @@ function toRelativePath(file: string): string {
 
 function sorted(files: Set<string>): string[] {
   return [...files].sort();
+}
+
+async function validateChezmoiState(): Promise<void> {
+  console.log("\n==> chezmoi apply --dry-run --no-tty --refresh-externals=never");
+  await $`chezmoi apply --dry-run --no-tty --refresh-externals=never --source ${root}`;
 }
 
 async function runIfAny(command: string[], files: Set<string>): Promise<void> {
