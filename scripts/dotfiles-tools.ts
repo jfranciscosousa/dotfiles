@@ -205,8 +205,8 @@ function sorted(files: Set<string>): string[] {
 }
 
 async function validateChezmoiState(): Promise<void> {
-  console.log("\n==> chezmoi apply --dry-run --no-tty --refresh-externals=never");
-  await $`chezmoi apply --dry-run --no-tty --refresh-externals=never --source ${root}`;
+  console.log("\n==> chezmoi -R apply --dry-run --verbose --force");
+  await $`chezmoi -R apply --dry-run --verbose --force --source ${root}`;
 }
 
 async function runIfAny(command: string[], files: Set<string>): Promise<void> {

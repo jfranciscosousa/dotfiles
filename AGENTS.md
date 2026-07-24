@@ -7,15 +7,14 @@ dotfiles by maintaining a source directory (this repo) and applying them to the 
 
 - Do not write to my home directory ever. You can read, but not write. All edits need to go through
   chezmoi
-- Do not apply or test commands manually unless I give you permission. By default, never chezmoi
-  apply and tell me to test things manually
 - All changes you make to a config must be made on my dotfiles repo, not to me home directory
   directly, ever
 - Standalone executable shell scripts must default to Bash for macOS/Linux portability: start with
   `#!/usr/bin/env bash` and `set -euo pipefail`, and stay compatible with macOS Bash 3.2 unless
   another non-shell runtime is explicitly required. zsh is only allowed for files sourced from zsh
   config files. POSIX sh is banned; use Bash instead.
-- After any change, run `rtk pnpm run lint`
+- On every turn that changes files, run `rtk pnpm exec lint-staged --diff="HEAD"` only on the
+  changed files. Never run the full-project lint command or `lint:staged` package script.
 
 ## Common Chezmoi Commands
 

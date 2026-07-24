@@ -10,16 +10,27 @@
 {{- end -}}
 
 {{- $defaultModel := index $existing "defaultModel" | default "gpt-5.6-terra" -}}
+{{- $enabledModels := list
+  (printf "%s/gpt-5.6-luna" $provider)
+  (printf "%s/gpt-5.6-sol" $provider)
+  (printf "%s/gpt-5.6-terra" $provider)
+-}}
+{{- if hasPrefix "Remote-" .chezmoi.hostname -}}
+{{- $anthropicModels := list
+  "anthropic/claude-fable-5"
+  "anthropic/claude-opus-4-8"
+  "anthropic/claude-sonnet-5"
+-}}
+{{- range $anthropicModels -}}
+{{- $enabledModels = append $enabledModels . -}}
+{{- end -}}
+{{- end -}}
 {{- $managed := dict
   "theme" "dark"
   "defaultProvider" $provider
   "defaultModel" $defaultModel
   "hideThinkingBlock" true
-  "enabledModels" (list
-    (printf "%s/gpt-5.6-luna" $provider)
-    (printf "%s/gpt-5.6-sol" $provider)
-    (printf "%s/gpt-5.6-terra" $provider)
-  )
+  "enabledModels" $enabledModels
   "shellPath" "/bin/zsh"
 -}}
 

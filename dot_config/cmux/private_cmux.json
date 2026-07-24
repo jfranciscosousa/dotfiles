@@ -3,6 +3,12 @@
   "schemaVersion": 1,
   "app": {
     "warnBeforeClosingTab": false
+  },
+  "shortcuts": {
+    "bindings": {
+      "nextSurface": "opt+→",
+      "prevSurface": "opt+←"
+    }
   }
 
   // This file uses JSON with comments (JSONC).
