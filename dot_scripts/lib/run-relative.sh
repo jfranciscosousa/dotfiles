@@ -43,5 +43,13 @@ exec_zx_relative_to_script() {
   shift 2
 
   target=$(script_relative_path "$caller" "$relative_path")
-  exec mise x node@latest npm:zx@latest -- zx "$target" "$@"
+
+  # Run zx itself with the latest Node without putting that Node first in PATH.
+  # Commands spawned by zx, including Git hooks, can then use the project's Node.
+  local node_bin
+  local zx_cli
+  node_bin="$(mise where node@latest)/bin/node"
+  zx_cli="$(mise where npm:zx@latest)/lib/node_modules/zx/build/cli.js"
+
+  exec "$node_bin" "$zx_cli" "$target" "$@"
 }
