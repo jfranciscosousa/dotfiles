@@ -72,3 +72,15 @@ terminals.
 Avoid commenting code. Write code that is self-explanatory. In the event you are writing some weird,
 complex and intricate logic you might place a comment but avoid that. Remember, we are writing code
 that Senior engineers can read. No need for comments that only beginners need.
+
+### Technical English
+
+When writing technical documentation or instructions:
+
+- Use ASD-STE100 Simplified Technical English.
+- Use short, clear sentences.
+- Use one term for one meaning.
+- Use simple grammar and active voice.
+- Avoid idioms, vague words, and unnecessary words.
+- Use "must" for requirements and "should" for recommendations.
+- Prefer concrete instructions over abstract explanations.
