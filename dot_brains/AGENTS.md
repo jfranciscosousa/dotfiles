@@ -1,86 +1,61 @@
 # Personal rules
 
-These are my personal styles. They bypass anything specific on project-level guidelines.
+Apply these preferences unless they conflict with system, developer, or project-specific
+instructions.
 
-### ssh
+### SSH
 
-Never ever debug ssh issues. Ever. Or I will uninstall you ok? If ssh fail the reason is always
-this: I failed to approve the 1password authorization prompt. If that happens I will ask you to
-retry and approve.
+If SSH authentication fails, stop and ask me to approve the 1Password prompt. Retry only when I ask.
+Do not investigate SSH failures unless I explicitly ask.
 
-### ast-grep
+### Code search
 
-Avoid grep and use faster and better ast-grep (if you can)
+Use ast-grep for structural source-code searches. Use text search for plain text, configuration,
+logs, and filenames.
 
-### Typechecks and builds
+### Verification
 
-On very large projects, do not run type checks, lints, or compiles.
-
-Only do this if there's a way to lint, verify, or equivalent for specific files and not the whole
-project.
+Do not run full-project type checks, lints, or builds on very large projects. Run file-scoped or
+package-scoped verification when available. If scoped verification is unavailable, report that you
+did not run it.
 
 ### Scripting
 
-For standalone shell scripts in my dotfiles or other cross macOS/Linux automation, default to Bash:
-start with `#!/usr/bin/env bash` and `set -euo pipefail`, and keep syntax compatible with macOS Bash
-3.2 unless another non-shell runtime is explicitly required. zsh is only allowed for files sourced
-from zsh config files. POSIX sh is banned; use Bash instead.
+For standalone cross-platform shell scripts, use Bash with `#!/usr/bin/env bash` and
+`set -euo pipefail`. Keep scripts compatible with macOS Bash 3.2 unless another runtime is required.
+Use zsh only for files sourced by zsh. Do not use POSIX sh.
 
 ### Git
 
-Never perform git, GitLab, GitHub, `git`, `gh`, or `glab` operations unless my current prompt
-explicitly asks for that exact operation.
+Read-only Git inspection, such as `status`, `diff`, `log`, and `show`, is allowed when needed. Do
+not change Git, GitHub, or GitLab state unless my current prompt explicitly requests the exact
+action. Approval applies only to the current prompt. Ask when the requested action is ambiguous.
+Prefix new branches with `fs/`.
 
-Approval is per prompt only. Prior approval earlier in the conversation does not carry forward. If
-my latest prompt does not explicitly ask you to commit, amend, branch, tag, push,
-open/update/merge/close a PR or MR, create/update/delete an issue or release, or run any other
-git/GitHub/GitLab operation, do not do it.
+### MCP
 
-If there is any ambiguity, ask for express approval first. Any branch you create must be prefixed
-with `fs/`.
+Read-only MCP access is allowed when needed. Do not create, update, delete, post, send, comment, or
+otherwise act on my behalf unless my current prompt explicitly requests that action. Approval
+applies only to the current prompt.
 
-### MCP guidelines
+In OpenCode, delegate MCP work to the `mcp-god` subagent when primary agents cannot access the
+required tools. Keep the approval rules intact when delegating.
 
-Never use MCPs to create, update, delete, post, send, comment, answer people, or otherwise act on my
-behalf unless my current prompt explicitly asks for that exact MCP action.
-
-Approval is per prompt only. Prior approval earlier in the conversation does not carry forward. If
-my latest prompt does not explicitly ask you to create, update, delete, post, send, comment, or
-answer via MCP, do not do it.
-
-In OpenCode, delegate MCP-backed work to the `mcp-god` subagent when it is available. Primary agents
-should not call MCP tools directly; use `mcp-god` as the gateway and keep the approval rules above
-intact when delegating.
-
-Whenever you use MCPs to create, read, update or delete anything, please provide an HTTP link to
-that resource when applicable.
-
-Never use these MCPs and instead reach out to CLIs:
-
-- Notion -> ntn
-- Gitlab -> glab
+Use the `ntn` CLI instead of the Notion MCP. Use the `glab` CLI instead of a GitLab MCP. When an MCP
+resource has an HTTP URL, include it in the response.
 
 ### Terminal file links
 
-When referencing files in terminal-facing responses, format them for editor cmd-click detection:
-prefer short repo-relative `path:line` references, put important file references on their own line
-when possible, and avoid tree decorations or long prose around the path that can wrap in narrow
-terminals.
+Use short repo-relative `path:line` references so terminal users can open files with cmd-click. Put
+important references on separate lines and avoid decorations that interfere with path detection.
 
-### Commenting code
+### Code comments
 
-Avoid commenting code. Write code that is self-explanatory. In the event you are writing some weird,
-complex and intricate logic you might place a comment but avoid that. Remember, we are writing code
-that Senior engineers can read. No need for comments that only beginners need.
+Prefer self-explanatory code. Add comments only to explain non-obvious intent, invariants,
+constraints, or workarounds. Do not restate what the code does.
 
 ### Technical English
 
-When writing technical documentation or instructions:
-
-- Use ASD-STE100 Simplified Technical English.
-- Use short, clear sentences.
-- Use one term for one meaning.
-- Use simple grammar and active voice.
-- Avoid idioms, vague words, and unnecessary words.
-- Use "must" for requirements and "should" for recommendations.
-- Prefer concrete instructions over abstract explanations.
+When writing technical documentation or instructions, apply ASD-STE100 principles: use short
+sentences, active voice, consistent terms, and concrete instructions. Avoid idioms, vague words, and
+unnecessary words. Use "must" for requirements and "should" for recommendations.
