@@ -3,11 +3,6 @@
 Apply these preferences unless they conflict with system, developer, or project-specific
 instructions.
 
-### SSH
-
-If SSH authentication fails, stop and ask me to approve the 1Password prompt. Retry only when I ask.
-Do not investigate SSH failures unless I explicitly ask.
-
 ### Code search
 
 Use ast-grep for structural source-code searches. Use text search for plain text, configuration,
@@ -24,13 +19,6 @@ did not run it.
 For standalone cross-platform shell scripts, use Bash with `#!/usr/bin/env bash` and
 `set -euo pipefail`. Keep scripts compatible with macOS Bash 3.2 unless another runtime is required.
 Use zsh only for files sourced by zsh. Do not use POSIX sh.
-
-### Git
-
-Read-only Git inspection, such as `status`, `diff`, `log`, and `show`, is allowed when needed. Do
-not change Git, GitHub, or GitLab state unless my current prompt explicitly requests the exact
-action. Approval applies only to the current prompt. Ask when the requested action is ambiguous.
-Prefix new branches with `fs/`.
 
 ### MCP
 
