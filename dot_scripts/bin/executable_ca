@@ -1,0 +1,6 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+# ca — tmux session manager for Cursor agent. See ~/.scripts/lib/tmux-session.sh.
+source "$HOME/.scripts/lib/tmux-session.sh"
+_octmux_main agent ca "$@"
