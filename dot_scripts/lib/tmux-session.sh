@@ -98,7 +98,6 @@ _octmux_main() {
 
   local session="${prefix}_${name}"
   local label="$name"
-  local status_left='[#{?#{==:#{@octmux_label},},#S,#{@octmux_label}}]'
 
   if [ "$delete" -eq 1 ]; then
     if tmux has-session -t "=${session}" 2>/dev/null; then
@@ -110,9 +109,9 @@ _octmux_main() {
     return 1
   fi
 
-  tmux set-option -gq status-left "${status_left}"
-  tmux set-option -gq status-right ""
-  tmux set-option -gq status-left-length 50
+  # Status bar options live in ~/.tmux.conf. Do not call `tmux set-option`
+  # before a session exists — with no server, that exits with
+  # "no server running" under `set -e` and never reaches new-session.
 
   if tmux has-session -t "=${session}" 2>/dev/null; then
     tmux set-option -t "${session}" -q @octmux_label "${label}"
