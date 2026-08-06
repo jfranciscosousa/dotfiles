@@ -36,6 +36,8 @@ type OpenAIResponse = {
 const MAX_RESPONSE_BYTES = 5 * 1024 * 1024;
 const SEARCH_TIMEOUT_MS = 60_000;
 const TOOL_NAME = "openai-web-search";
+const OPENAI_PROVIDERS = new Set(["openai", "openai-codex"]);
+const CHATGPT_CODEX_URL = "https://chatgpt.com/backend-api/codex";
 
 const parameters = Type.Object({
   query: Type.String({ description: "Question or topic to research on the web" }),
@@ -58,7 +60,7 @@ export default function (pi: ExtensionAPI) {
     name: TOOL_NAME,
     label: "OpenAI Web Search",
     description:
-      "Search the live web using OpenAI's hosted web_search tool and return a sourced answer. Only available while the active Pi model uses the OpenAI provider.",
+      "Search the live web using OpenAI's hosted web_search tool and return a sourced answer. Available while the active Pi model uses the OpenAI API or OpenAI Codex provider.",
     promptSnippet: "Search the live web with OpenAI and return an answer with sources",
     promptGuidelines: [
       "Use openai-web-search instead of ad-hoc search-engine requests through bash when current or externally sourced information is needed.",
@@ -67,8 +69,11 @@ export default function (pi: ExtensionAPI) {
     parameters,
 
     async execute(_toolCallId, params, signal, _onUpdate, ctx) {
-      if (ctx.model?.provider !== "openai") {
-        throw new Error("OpenAI web search is only available with an OpenAI model");
+      const provider = ctx.model?.provider;
+      if (!provider || !OPENAI_PROVIDERS.has(provider)) {
+        throw new Error(
+          "OpenAI web search is only available with an OpenAI API or OpenAI Codex model",
+        );
       }
 
       const query = params.query.trim();
@@ -76,10 +81,7 @@ export default function (pi: ExtensionAPI) {
         throw new Error("Search query cannot be empty");
       }
 
-      const apiKey = await ctx.modelRegistry.getApiKeyForProvider("openai");
-      if (!apiKey) {
-        throw new Error("No OpenAI API credentials are configured");
-      }
+      const request = await resolveRequest(provider, ctx);
 
       const tool: Record<string, unknown> = {
         type: "web_search",
@@ -98,20 +100,39 @@ export default function (pi: ExtensionAPI) {
 
       let response: Response;
       try {
-        response = await fetch("https://api.openai.com/v1/responses", {
+        response = await fetch(request.url, {
           method: "POST",
-          headers: {
-            accept: "application/json",
-            authorization: `Bearer ${apiKey}`,
-            "content-type": "application/json",
-          },
-          body: JSON.stringify({
-            model: ctx.model.id,
-            input: query,
-            tools: [tool],
-            tool_choice: "required",
-            include: ["web_search_call.action.sources"],
-          }),
+          headers: request.headers,
+          body: JSON.stringify(
+            provider === "openai"
+              ? {
+                  model: ctx.model.id,
+                  input: query,
+                  tools: [tool],
+                  tool_choice: "required",
+                  include: ["web_search_call.action.sources"],
+                }
+              : {
+                  model: ctx.model.id,
+                  include: ["web_search_call.action.sources"],
+                  input: [
+                    {
+                      content: [
+                        {
+                          text: `Perform a web search for the query: ${query}`,
+                          type: "input_text",
+                        },
+                      ],
+                      role: "user",
+                    },
+                  ],
+                  instructions: "You are an assistant for performing a web search tool use",
+                  store: false,
+                  stream: true,
+                  tool_choice: "auto",
+                  tools: [tool],
+                },
+          ),
           signal: requestSignal,
         });
       } catch (error) {
@@ -129,7 +150,7 @@ export default function (pi: ExtensionAPI) {
         throw new Error("OpenAI web search response exceeded 5 MB");
       }
 
-      const payload = parseResponse(body);
+      const payload = parseResponse(body, provider);
       if (!response.ok) {
         const reason = payload.error?.message ?? `${response.status} ${response.statusText}`;
         throw new Error(`OpenAI web search failed: ${reason}`);
@@ -189,8 +210,7 @@ function syncAvailability(
   provider = ctx?.model?.provider,
 ) {
   const activeTools = new Set(pi.getActiveTools());
-  // ChatGPT Codex subscription credentials cannot use OpenAI's hosted web_search tool.
-  if (provider === "openai") {
+  if (provider && OPENAI_PROVIDERS.has(provider)) {
     activeTools.add(TOOL_NAME);
   } else {
     activeTools.delete(TOOL_NAME);
@@ -198,12 +218,94 @@ function syncAvailability(
   pi.setActiveTools([...activeTools]);
 }
 
-function parseResponse(body: string): OpenAIResponse {
+async function resolveRequest(
+  provider: string,
+  ctx: ExtensionContext,
+): Promise<{ url: string; headers: Record<string, string> }> {
+  const auth = await ctx.modelRegistry.getProviderAuth(provider);
+  const apiKey = auth?.auth.apiKey;
+  if (!apiKey) throw new Error(`No credentials are configured for the ${provider} provider`);
+
+  if (provider === "openai") {
+    return {
+      url: "https://api.openai.com/v1/responses",
+      headers: {
+        accept: "application/json",
+        authorization: `Bearer ${apiKey}`,
+        "content-type": "application/json",
+      },
+    };
+  }
+
+  const accountId = getCodexAccountId(apiKey);
+  if (!accountId) throw new Error("OpenAI Codex credentials do not contain a ChatGPT account ID");
+
+  return {
+    url: `${CHATGPT_CODEX_URL}/responses`,
+    headers: {
+      accept: "text/event-stream",
+      authorization: `Bearer ${apiKey}`,
+      "chatgpt-account-id": accountId,
+      "content-type": "application/json",
+      "user-agent": "pi-openai-web-search",
+    },
+  };
+}
+
+function getCodexAccountId(token: string): string | undefined {
+  try {
+    const payload = token.split(".")[1];
+    if (!payload) return undefined;
+    const json = JSON.parse(Buffer.from(payload, "base64url").toString("utf8")) as {
+      "https://api.openai.com/auth"?: { chatgpt_account_id?: unknown };
+    };
+    const accountId = json["https://api.openai.com/auth"]?.chatgpt_account_id;
+    return typeof accountId === "string" && accountId ? accountId : undefined;
+  } catch {
+    return undefined;
+  }
+}
+
+function parseResponse(body: string, provider: string): OpenAIResponse {
+  if (provider === "openai-codex") return parseCodexResponse(body);
+
   try {
     return JSON.parse(body) as OpenAIResponse;
   } catch {
     throw new Error("OpenAI web search returned invalid JSON");
   }
+}
+
+function parseCodexResponse(body: string): OpenAIResponse {
+  const output: NonNullable<OpenAIResponse["output"]> = [];
+  let outputText = "";
+
+  for (const block of body.split("\n\n")) {
+    const event = block.match(/^event: (.+)$/m)?.[1];
+    const data = block
+      .split("\n")
+      .filter((line) => line.startsWith("data: "))
+      .map((line) => line.slice("data: ".length))
+      .join("\n");
+    if (!event || !data) continue;
+
+    try {
+      const payload = JSON.parse(data) as {
+        delta?: unknown;
+        item?: NonNullable<OpenAIResponse["output"]>[number];
+        error?: { message?: string };
+      };
+      if (event === "response.output_text.delta" && typeof payload.delta === "string") {
+        outputText += payload.delta;
+      }
+      if (event === "response.output_item.done" && payload.item) output.push(payload.item);
+      if (event === "error") return { error: payload.error };
+    } catch {
+      // Ignore malformed SSE events.
+    }
+  }
+
+  return { output, output_text: outputText };
 }
 
 function extractAnswer(payload: OpenAIResponse): string {
