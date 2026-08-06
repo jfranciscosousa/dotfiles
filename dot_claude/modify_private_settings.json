@@ -20,6 +20,26 @@
   "preferredNotifChannel" "terminal_bell"
   "skipAutoPermissionPrompt" true
   "hooks" (dict
+    "UserPromptSubmit" (list
+      (dict
+        "hooks" (list
+          (dict
+            "type" "command"
+            "command" "bash ~/.claude/hooks/critical-instructions.sh"
+          )
+        )
+      )
+    )
+    "SubagentStart" (list
+      (dict
+        "hooks" (list
+          (dict
+            "type" "command"
+            "command" "bash ~/.claude/hooks/critical-instructions.sh"
+          )
+        )
+      )
+    )
     "PreToolUse" (list
       (dict
         "matcher" "Bash"

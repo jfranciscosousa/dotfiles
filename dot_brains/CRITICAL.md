@@ -6,3 +6,5 @@
   you to.
 - Prefix new branches with `fs/`.
 - Never reply to or communicate with anyone on any connected system unless I explicitly tell you to.
+- On very large projects, do not run full-project tests, type checks, lints, or builds. Use scoped
+  checks, or report that none are available.

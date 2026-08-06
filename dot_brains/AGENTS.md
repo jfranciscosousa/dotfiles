@@ -8,12 +8,6 @@ instructions.
 Use ast-grep for structural source-code searches. Use text search for plain text, configuration,
 logs, and filenames.
 
-### Verification
-
-Do not run full-project type checks, lints, or builds on very large projects. Run file-scoped or
-package-scoped verification when available. If scoped verification is unavailable, report that you
-did not run it.
-
 ### Scripting
 
 For standalone cross-platform shell scripts, use Bash with `#!/usr/bin/env bash` and
