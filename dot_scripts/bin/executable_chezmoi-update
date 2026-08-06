@@ -1,33 +1,30 @@
-#!/usr/bin/env bash
-set -euo pipefail
+#!/usr/bin/env zx
 
-CHEZMOI_DIR="$HOME/.local/share/chezmoi"
-PREV_DIR=$(pwd)
-ERR_LOG=$(mktemp)
-trap 'rm -f "$ERR_LOG"' EXIT
+import os from "node:os";
+import path from "node:path";
 
-log_error() {
-  echo "[ERROR] $1" >&2
-}
+const sourceDir = path.join(os.homedir(), ".local", "share", "chezmoi");
 
-(
-  cd "$CHEZMOI_DIR" || {
-    log_error "Could not cd to $CHEZMOI_DIR"
-    exit 1
+try {
+  $.cwd = sourceDir;
+
+  const { stdout } = await $`git status --porcelain`;
+  if (stdout.trim()) {
+    echo(chalk.yellow("You have pending changes, please review before updating."));
+    process.exit(1);
   }
 
-  if ! git pull >/dev/null 2>"$ERR_LOG"; then
-    log_error "git pull failed. Original error: $(cat "$ERR_LOG")"
-    exit 1
-  fi
-) || exit 1
-
-if chezmoi apply >/dev/null 2>"$ERR_LOG"; then
-  echo "✅ Chezmoi updated and applied successfully!"
-  cd "$PREV_DIR" || exit
-  exec zsh
-fi
-
-log_error "chezmoi apply failed. Original error: $(cat "$ERR_LOG")"
-cd "$PREV_DIR" || exit
-exit 1
+  await $`git pull --ff-only`;
+  await $`chezmoi apply --source ${sourceDir}`;
+  echo("✅ Chezmoi updated and applied successfully!");
+} catch (error) {
+  const detail =
+    error !== null &&
+    typeof error === "object" &&
+    "stderr" in error &&
+    typeof error.stderr === "string"
+      ? error.stderr.trim()
+      : "";
+  echo(chalk.red(`chezmoi-update failed${detail ? `: ${detail}` : "."}`));
+  process.exitCode = 1;
+}
