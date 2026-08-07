@@ -103,7 +103,7 @@ async function ingestJsonl(
     session.cwd ??= stringField(record, "cwd") ?? basename(projectDir);
     session.date = earlierDate(session.date, date);
     incrementRecord(session.branchCounts, stringField(record, "gitBranch"), 1);
-    addUsage(session, model, usage, cost);
+    addUsage(session, model, usage, cost, "litellm");
     messageCount += 1;
   }
 

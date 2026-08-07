@@ -1,7 +1,7 @@
 import { spawn } from "node:child_process";
 import { readdir, stat } from "node:fs/promises";
 import { join } from "node:path";
-import type { Bucket, CommandResult, SessionCost, Source, Usage } from "./types.ts";
+import type { Bucket, CommandResult, PriceSource, SessionCost, Source, Usage } from "./types.ts";
 
 export function runCommand(command: string, args: string[]): Promise<CommandResult> {
   return new Promise((resolve) => {
@@ -136,6 +136,8 @@ export function getSession(
       sessionId,
       branchCounts: {},
       modelCosts: {},
+      priceSourceCosts: { recorded: 0, litellm: 0 },
+      priceSourceCounts: { recorded: 0, litellm: 0 },
       bucket: newBucket(),
     };
     sessions.set(key, session);
@@ -148,8 +150,16 @@ export function newBucket(): Bucket {
   return { input: 0, output: 0, cacheWrite: 0, cacheRead: 0, cost: 0 };
 }
 
-export function addUsage(session: SessionCost, model: string, usage: Usage, cost: number): void {
+export function addUsage(
+  session: SessionCost,
+  model: string,
+  usage: Usage,
+  cost: number,
+  priceSource: PriceSource,
+): void {
   incrementRecord(session.modelCosts, model, cost);
+  session.priceSourceCosts[priceSource] += cost;
+  session.priceSourceCounts[priceSource] += 1;
   session.bucket.input += usage.input;
   session.bucket.output += usage.output;
   session.bucket.cacheWrite += usage.cacheWrite;

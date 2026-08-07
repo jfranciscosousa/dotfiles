@@ -109,16 +109,14 @@ async function ingestJsonl(
       cacheWrite: numberField(usageRecord, "cacheWrite"),
       cacheRead: numberField(usageRecord, "cacheRead"),
     };
-    const cost = options.costFor(
-      model,
-      usage.input,
-      usage.output,
-      usage.cacheWrite,
-      usage.cacheRead,
-    );
+    const recordedCost = objectField(usageRecord, "cost")?.total;
+    const hasRecordedCost = typeof recordedCost === "number" && Number.isFinite(recordedCost);
+    const cost = hasRecordedCost
+      ? recordedCost
+      : options.costFor(model, usage.input, usage.output, usage.cacheWrite, usage.cacheRead);
 
     session.date = earlierDate(session.date, date);
-    addUsage(session, model, usage, cost);
+    addUsage(session, model, usage, cost, hasRecordedCost ? "recorded" : "litellm");
     messageCount += 1;
   }
 

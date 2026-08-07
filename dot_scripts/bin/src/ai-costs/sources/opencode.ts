@@ -47,6 +47,7 @@ async function collectMessages(
       json_extract(message.data, '$.tokens.output')      AS output,
       json_extract(message.data, '$.tokens.cache.write') AS cache_write,
       json_extract(message.data, '$.tokens.cache.read')  AS cache_read,
+      json_extract(message.data, '$.cost')               AS cost,
       json_extract(message.data, '$.time.created')       AS created_ms,
       json_extract(message.data, '$.path.cwd')           AS cwd,
       session.title                                      AS title
@@ -94,13 +95,17 @@ function ingestRow(
     cacheWrite: numberField(row, "cache_write"),
     cacheRead: numberField(row, "cache_read"),
   };
-  const cost = options.costFor(model, usage.input, usage.output, usage.cacheWrite, usage.cacheRead);
+  const recordedCost = row.cost;
+  const hasRecordedCost = typeof recordedCost === "number" && Number.isFinite(recordedCost);
+  const cost = hasRecordedCost
+    ? recordedCost
+    : options.costFor(model, usage.input, usage.output, usage.cacheWrite, usage.cacheRead);
   const session = getSession(sessions, "opencode", sessionId);
 
   session.cwd ??= stringField(row, "cwd") ?? "unknown";
   session.date = earlierDate(session.date, date);
   session.title ??= stringField(row, "title");
-  addUsage(session, model, usage, cost);
+  addUsage(session, model, usage, cost, hasRecordedCost ? "recorded" : "litellm");
   return true;
 }
 

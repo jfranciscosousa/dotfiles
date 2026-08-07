@@ -200,11 +200,14 @@ function renderSection(
       const tokenIn = formatTokens(bucket.input + bucket.cacheWrite + bucket.cacheRead);
       const tokenOut = formatTokens(bucket.output);
       const titleText = truncateTitle(session.title);
+      const priceSource = formatPriceSource(session);
 
       console.log(
         `    ${dim(session.date ?? "?")}  ${cyan(shortModel.padEnd(12))}${green(
           formatMoney(bucket.cost).padStart(9),
-        )}  ${bold(titleText.padEnd(46))} ${dim(`(${tokenIn} in / ${tokenOut} out)`)}`,
+        )}  ${bold(titleText.padEnd(46))} ${dim(
+          `(${tokenIn} in / ${tokenOut} out · ${priceSource})`,
+        )}`,
       );
     }
   }
@@ -550,6 +553,15 @@ function truncateTitle(title: string | undefined): string {
 function shortenPath(path: string): string {
   const home = homedir();
   return path.startsWith(home) ? path.replace(home, "~") : path;
+}
+
+function formatPriceSource(session: SessionCost): string {
+  const recorded = session.priceSourceCounts.recorded;
+  const litellm = session.priceSourceCounts.litellm;
+  if (recorded > 0 && litellm > 0) {
+    return "recorded + LiteLLM fallback";
+  }
+  return recorded > 0 ? "recorded" : "LiteLLM fallback";
 }
 
 function formatMoney(value: number): string {

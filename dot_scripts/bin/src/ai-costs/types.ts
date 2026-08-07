@@ -1,4 +1,5 @@
 export type Source = "claude" | "opencode" | "pi";
+export type PriceSource = "recorded" | "litellm";
 
 export type Bucket = {
   input: number;
@@ -30,6 +31,8 @@ export type SessionCost = {
   title?: string;
   branchCounts: Record<string, number>;
   modelCosts: Record<string, number>;
+  priceSourceCosts: Record<PriceSource, number>;
+  priceSourceCounts: Record<PriceSource, number>;
   bucket: Bucket;
 };
 
