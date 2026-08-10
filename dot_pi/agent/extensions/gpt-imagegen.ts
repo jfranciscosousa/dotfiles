@@ -10,7 +10,7 @@ import { dirname, extname, isAbsolute, resolve } from "node:path";
 import { Type } from "typebox";
 
 const CHATGPT_CODEX_URL = "https://chatgpt.com/backend-api/codex/responses";
-const IMAGE_MODEL = "gpt-5.5";
+const IMAGE_MODEL = "gpt-5.6-sol";
 const IMAGE_TIMEOUT_MS = 5 * 60_000;
 const MAX_RESPONSE_BYTES = 100 * 1024 * 1024;
 const MAX_VERSION_SUFFIX = 999;
