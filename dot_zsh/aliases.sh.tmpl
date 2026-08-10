@@ -1,6 +1,13 @@
 #!/usr/bin/env zsh
 
 alias vim="nvim"
+
+# Pi needs the current Node runtime, not the version selected by a project.
+pi() {
+  local pi_bin
+  pi_bin="$(mise which pi)" || return
+  mise exec node@latest -- node "$pi_bin" "$@"
+}
 {{ if eq .chezmoi.os "linux" }}
 alias arch-install="yay -S $1"
 alias arch-uninstall="yay -Rcuns $1"

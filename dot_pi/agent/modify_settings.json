@@ -31,6 +31,7 @@
   "defaultModel" $defaultModel
   "hideThinkingBlock" true
   "enabledModels" $enabledModels
+  "npmCommand" (list "mise" "exec" "node@latest" "pnpm@latest" "--" "pnpm")
   "shellPath" "/bin/zsh"
 -}}
 
