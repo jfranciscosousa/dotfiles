@@ -7,6 +7,7 @@ const SEARXNG_URL = "https://searxng.fell-mirach.ts.net";
 const SEARCH_TIMEOUT_MS = 30_000;
 const MAX_RESPONSE_BYTES = 5 * 1024 * 1024;
 const TOOL_NAME = "searxng_search";
+const GPT_SEARCH_PROVIDERS = new Set(["openai", "openai-codex"]);
 
 const parameters = Type.Object({
   query: Type.String({ description: "Search query" }),
@@ -159,6 +160,19 @@ export default function (pi: ExtensionAPI) {
       return new Text(text, 0, 0);
     },
   });
+
+  pi.on("session_start", (_event, ctx) => syncAvailability(pi, ctx.model?.provider));
+  pi.on("model_select", (event) => syncAvailability(pi, event.model.provider));
+}
+
+function syncAvailability(pi: ExtensionAPI, provider?: string) {
+  const activeTools = new Set(pi.getActiveTools());
+  if (provider && GPT_SEARCH_PROVIDERS.has(provider)) {
+    activeTools.delete(TOOL_NAME);
+  } else {
+    activeTools.add(TOOL_NAME);
+  }
+  pi.setActiveTools([...activeTools]);
 }
 
 function formatResults(results: SearxngResult[], suggestions: string[]): string {
