@@ -1,15 +1,19 @@
 # Global mise config (~/.config/mise/config.toml).
 # Pinned runtime versions used by the shell + scripts.
 # Project mise.toml / .tool-versions files override these per-repo.
+# Use pnpm for mise's npm backend. pnpm blocks dependency build scripts unless allowed.
+[settings.npm]
+package_manager = "pnpm"
+
 [tools]
 {{ if hasPrefix "Remote-" .chezmoi.hostname -}}
 remotectl = "5.9.0"
 {{ end -}}
-node = "latest"
-pnpm = "latest"
-deno = "latest"
-"npm:zx" = "latest"
-"npm:@earendil-works/pi-coding-agent" = "latest"
-"npm:vercel" = "latest"
+node = "26.7.0"
+pnpm = "11.21.0"
+deno = "2.9.5"
+"npm:zx" = "8.8.5"
+"npm:@earendil-works/pi-coding-agent" = "0.84.1"
+"npm:vercel" = "58.9.0"
 "npm:@typescript/native-preview" = "7.0.0-dev.20260707.2"
 postgres = "17.7"

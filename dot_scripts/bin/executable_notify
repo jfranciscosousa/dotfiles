@@ -1,0 +1,30 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+# notify - Send a desktop notification.
+
+if [ "$#" -ne 2 ]; then
+  echo "usage: notify TITLE MESSAGE" >&2
+  exit 2
+fi
+
+case "$(uname -s)" in
+  Linux)
+    if ! command -v notify-send >/dev/null 2>&1; then
+      echo "notify: notify-send is required (install the libnotify package)" >&2
+      exit 1
+    fi
+    exec notify-send "$1" "$2"
+    ;;
+  Darwin)
+    exec osascript - "$1" "$2" <<'APPLESCRIPT'
+on run argv
+  display notification (item 2 of argv) with title (item 1 of argv)
+end run
+APPLESCRIPT
+    ;;
+  *)
+    echo "notify: unsupported operating system: $(uname -s)" >&2
+    exit 1
+    ;;
+esac
