@@ -25,6 +25,13 @@
 {{- $enabledModels = append $enabledModels . -}}
 {{- end -}}
 {{- end -}}
+{{- $agentOverrides := dict
+  "scout" (dict "model" (printf "%s/gpt-5.6-luna" $provider))
+  "researcher" (dict "model" (printf "%s/gpt-5.6-luna" $provider))
+  "worker" (dict "model" (printf "%s/gpt-5.6-terra" $provider))
+  "reviewer" (dict "model" (printf "%s/gpt-5.6-terra" $provider))
+  "oracle" (dict "model" (printf "%s/gpt-5.6-terra" $provider))
+-}}
 {{- $managed := dict
   "theme" "dark"
   "defaultProvider" $provider
@@ -33,6 +40,7 @@
   "enabledModels" $enabledModels
   "npmCommand" (list "mise" "exec" "node@latest" "pnpm@latest" "--" "pnpm")
   "shellPath" "/bin/zsh"
+  "subagents" (dict "agentOverrides" $agentOverrides)
 -}}
 
 {{ mergeOverwrite $existing $managed | toPrettyJson }}

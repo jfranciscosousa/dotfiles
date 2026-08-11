@@ -12,6 +12,7 @@ import { existsSync } from "node:fs";
 import { mkdir, writeFile } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { basename, join } from "node:path";
+import { Text } from "@earendil-works/pi-tui";
 import { Type } from "typebox";
 
 const Effort = StringEnum(["off", "minimal", "low", "medium", "high", "xhigh", "max"] as const, {
@@ -82,6 +83,10 @@ export default function (pi: ExtensionAPI) {
       "Delegate a task to a synchronous subagent with an isolated context. The subagent uses the caller's working directory, active tools, model, and effort unless overridden. It can inspect and modify the project and run commands. Returns only its final report.",
     promptSnippet: "Delegate a task to a synchronous agent with an isolated context",
     parameters: Parameters,
+
+    renderCall(args, theme) {
+      return new Text(`${theme.fg("toolTitle", theme.bold("subagent"))} ${args.prompt}`, 0, 0);
+    },
 
     async execute(_toolCallId, params, signal, onUpdate, ctx) {
       if (!ctx.model)
