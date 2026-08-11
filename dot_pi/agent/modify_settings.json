@@ -39,6 +39,7 @@
   "hideThinkingBlock" true
   "enabledModels" $enabledModels
   "npmCommand" (list "mise" "exec" "node@latest" "pnpm@latest" "--" "pnpm")
+  "packages" (list "npm:pi-subagents")
   "shellPath" "/bin/zsh"
   "subagents" (dict "agentOverrides" $agentOverrides)
 -}}

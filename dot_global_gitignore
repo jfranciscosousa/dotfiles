@@ -50,5 +50,8 @@ exe/
 .tool-versions.local
 .claude/**/*.local.*
 
+# Pi subagents
+.pi_subagents/
+
 # Dexter elixir lsp
 .dexter.db*
