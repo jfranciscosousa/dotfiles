@@ -51,7 +51,7 @@ exe/
 .claude/**/*.local.*
 
 # Pi subagents
-.pi_subagents/
+.pi-subagents/
 
 # Dexter elixir lsp
 .dexter.db*
