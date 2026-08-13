@@ -10,6 +10,9 @@
       "nextSurface": "opt+right",
       "prevSurface": "opt+left"
     }
+  },
+  "automation": {
+    "workspaceAutoNaming": true
   }
 
   // This file uses JSON with comments (JSONC).
