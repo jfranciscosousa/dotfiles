@@ -29,6 +29,9 @@ All other commands are automatically rewritten:
 - **Claude Code**: via the `PreToolUse` Bash hook (`rtk hook claude`) in `~/.claude/settings.json`.
 - **OpenCode**: via the `tool.execute.before` plugin at `~/.config/opencode/plugins/rtk.ts`, which
   calls `rtk rewrite <command>`.
+- **Cursor**: via the `preToolUse` Shell hook (`rtk hook cursor`) in `~/.cursor/hooks.json`.
+- **Pi**: via the `tool_call` extension at `~/.pi/agent/extensions/rtk.ts`, which calls
+  `rtk rewrite <command>`.
 
 Example: `git status` → `rtk git status` (transparent, 0 tokens overhead).
 
