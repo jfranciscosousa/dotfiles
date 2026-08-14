@@ -12,7 +12,7 @@
     }
   },
   "automation": {
-    "workspaceAutoNaming": true
+    "workspaceAutoNaming": false
   }
 
   // This file uses JSON with comments (JSONC).
