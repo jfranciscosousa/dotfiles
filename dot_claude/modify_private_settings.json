@@ -7,6 +7,7 @@
 {{- $managed := dict
   "env" (dict
     "ENABLE_LSP_TOOL" "1"
+    "CLAUDE_CODE_SHELL" "/bin/zsh"
   )
   "permissions" (dict
     "defaultMode" "auto"
