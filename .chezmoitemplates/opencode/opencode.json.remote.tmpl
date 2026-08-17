@@ -122,12 +122,15 @@
       "options": {
         "reasoningEffort": "high"
       },
-      "prompt": "You are an MCP-only gateway for parent agents. Call only the requested Linear, Snowflake, Sentry, Honeycomb, Notion, or Slack MCP tools, then report the results back to the parent thorougly. Do not perform unrelated work or extend the task beyond the parent's request.",
+      "prompt": "You are an MCP-only gateway for parent agents. Call only the requested Linear, Snowflake, Sentry, Honeycomb, Datadog, Mixpanel, pganalyze, Notion, or Slack MCP tools, then report the results back to the parent thorougly. Do not perform unrelated work or extend the task beyond the parent's request.",
       "permission": {
         "linear_*": "allow",
         "snowflake_*": "allow",
         "sentry_*": "allow",
         "honeycomb_*": "allow",
+        "datadog_*": "allow",
+        "mixpanel_*": "allow",
+        "pganalyze_*": "allow",
         "notion_*": "allow",
         "slack_*": "allow"
       }
@@ -154,6 +157,21 @@
       "url": "https://mcp.eu1.honeycomb.io/mcp",
       "enabled": true
     },
+    "datadog": {
+      "type": "remote",
+      "url": "https://mcp.datadoghq.com/api/unstable/mcp-server/mcp?omit_tools=create_datadog_notebook,edit_datadog_notebook,upsert_datadog_dashboard",
+      "enabled": true
+    },
+    "mixpanel": {
+      "type": "remote",
+      "url": "https://mcp-eu.mixpanel.com/mcp",
+      "enabled": true
+    },
+    "pganalyze": {
+      "type": "remote",
+      "url": "https://pganalyze.eu-west-1.remote.com/mcp",
+      "enabled": true
+    },
     "notion": {
       "type": "remote",
       "url": "https://mcp.notion.com/mcp",
@@ -175,6 +193,9 @@
     "snowflake_*": "deny",
     "sentry_*": "deny",
     "honeycomb_*": "deny",
+    "datadog_*": "deny",
+    "mixpanel_*": "deny",
+    "pganalyze_*": "deny",
     "notion_*": "deny",
     "slack_*": "deny"
   },
