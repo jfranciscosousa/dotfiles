@@ -115,6 +115,20 @@
         "bash": "deny"
       }
     },
+    "bug-investigator": {
+      "mode": "all",
+      "description": "Fast, fully enabled bug investigator with maximum GPT-5.6 Sol reasoning and direct MCP access.",
+      "model": "openai/gpt-5.6-sol",
+      "options": {
+        "reasoningEffort": "xhigh",
+        "textVerbosity": "low",
+        "reasoningSummary": "auto"
+      },
+      "prompt": "Investigate bugs directly and quickly. Reproduce the failure, identify the root cause, implement the smallest correct fix, and run focused verification. Use all available tools, including MCP tools, when they can reduce investigation time. Do not stop at a hypothesis when you can verify it.",
+      "permission": {
+        "*": "allow"
+      }
+    },
     "mcp-god": {
       "mode": "all",
       "description": "MCP-only gateway that calls the services requested by parent agents and reports the results back.",
