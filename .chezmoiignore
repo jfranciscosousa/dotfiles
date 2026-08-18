@@ -1,0 +1,8 @@
+{{- if not (lookPath "cmux") }}
+.brains/skills/cmux/**
+.brains/skills/cmux-browser/**
+.brains/skills/cmux-customization/**
+.brains/skills/cmux-diagnostics/**
+.brains/skills/cmux-keyboard-shortcuts/**
+.brains/skills/cmux-settings/**
+{{- end }}
