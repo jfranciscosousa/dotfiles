@@ -32,7 +32,7 @@ NODE_VERSION="${NODE_VERSION:-26.3.0}"
 # Homebrew formulae (mirror of `brew leaves` on the reference machine).
 FORMULAE=(
   # core CLI used directly by the shell + scripts
-  chezmoi git gh glab mise direnv tmux neovim bat jq rtk
+  chezmoi git gh glab mise direnv tmux neovim bat jq rtk sox
   coreutils gawk curl pkgconf
   # build deps for mise-built runtimes (erlang/node native extensions)
   autoconf openssl@3 readline libxslt zlib ossp-uuid wxwidgets gcc
