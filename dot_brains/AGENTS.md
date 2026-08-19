@@ -20,9 +20,6 @@ Read-only MCP access is allowed when needed. Do not create, update, delete, post
 otherwise act on my behalf unless my current prompt explicitly requests that action. Approval
 applies only to the current prompt.
 
-In OpenCode, delegate MCP work to the `mcp-god` subagent when primary agents cannot access the
-required tools. Keep the approval rules intact when delegating.
-
 Use the `ntn` CLI instead of the Notion MCP. Use the `glab` CLI instead of a GitLab MCP. When an MCP
 resource has an HTTP URL, include it in the response.
 

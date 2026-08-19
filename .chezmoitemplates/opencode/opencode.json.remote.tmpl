@@ -1,12 +1,9 @@
 {{/* Remote work machines intentionally use GPT/OpenAI, not OpenCode Go. */}}
 {
   "$schema": "https://opencode.ai/config.json",
-  "enabled_providers": ["openai"],
   "model": "openai/gpt-5.6-terra",
-  "shell": {
-    "path": "/bin/zsh"
-  },
-  "provider": {
+  "shell": "/bin/zsh",
+  "providers": {
     "openai": {
       "models": {
         "gpt-5.6-sol": {
@@ -33,7 +30,7 @@
       }
     }
   },
-  "agent": {
+  "agents": {
     "plan": {
       "model": "openai/gpt-5.6-sol",
       "options": {
@@ -41,9 +38,9 @@
       }
     },
     "build": {
-      "model": "openai/gpt-5.6-terra",
+      "model": "openai/gpt-5.6-sol",
       "options": {
-        "reasoningEffort": "high"
+        "reasoningEffort": "medium"
       }
     },
     "general": {
@@ -75,146 +72,55 @@
       "options": {
         "reasoningEffort": "high"
       }
-    },
-    "build-deep": {
-      "mode": "primary",
-      "description": "Like build, but uses GPT-5.6 Sol",
-      "model": "openai/gpt-5.6-sol"
-    },
-    "build-fast": {
-      "mode": "primary",
-      "description": "Guided, low-exploration flow on GPT-5.6 Luna low reasoning",
-      "model": "openai/gpt-5.6-luna",
-      "prompt": "{file:./prompts/build-fast.md}",
-      "options": {
-        "reasoningEffort": "low",
-        "textVerbosity": "low"
-      }
-    },
-    "research-fast": {
-      "mode": "primary",
-      "description": "Read-only explorer: fuzzy-finds files, reads code, and checks assumptions. Implements nothing.",
-      "model": "openai/gpt-5.6-luna",
-      "prompt": "{file:./prompts/research-fast.md}",
-      "permission": {
-        "edit": "deny",
-        "bash": "ask"
-      }
-    },
-    "code-review": {
-      "mode": "all",
-      "description": "Read-only adversarial code reviewer that uses repository review skills when available.",
-      "model": "openai/gpt-5.6-sol",
-      "options": {
-        "reasoningEffort": "xhigh",
-        "textVerbosity": "low"
-      },
-      "prompt": "{file:./prompts/code-review.md}",
-      "permission": {
-        "edit": "deny",
-        "bash": "deny"
-      }
-    },
-    "bug-investigator": {
-      "mode": "all",
-      "description": "Fast, fully enabled bug investigator with maximum GPT-5.6 Sol reasoning and direct MCP access.",
-      "model": "openai/gpt-5.6-sol",
-      "options": {
-        "reasoningEffort": "xhigh",
-        "textVerbosity": "low",
-        "reasoningSummary": "auto"
-      },
-      "prompt": "Investigate bugs directly and quickly. Reproduce the failure, identify the root cause, implement the smallest correct fix, and run focused verification. Use all available tools, including MCP tools, when they can reduce investigation time. Do not stop at a hypothesis when you can verify it.",
-      "permission": {
-        "*": "allow"
-      }
-    },
-    "mcp-god": {
-      "mode": "all",
-      "description": "MCP-only gateway that calls the services requested by parent agents and reports the results back.",
-      "model": "openai/gpt-5.6-luna",
-      "options": {
-        "reasoningEffort": "high"
-      },
-      "prompt": "You are an MCP-only gateway for parent agents. Call only the requested Linear, Snowflake, Sentry, Honeycomb, Datadog, Mixpanel, pganalyze, Notion, or Slack MCP tools, then report the results back to the parent thorougly. Do not perform unrelated work or extend the task beyond the parent's request.",
-      "permission": {
-        "linear_*": "allow",
-        "snowflake_*": "allow",
-        "sentry_*": "allow",
-        "honeycomb_*": "allow",
-        "datadog_*": "allow",
-        "mixpanel_*": "allow",
-        "pganalyze_*": "allow",
-        "notion_*": "allow",
-        "slack_*": "allow"
-      }
     }
   },
   "mcp": {
-    "linear": {
-      "type": "remote",
-      "url": "https://mcp.linear.app/mcp",
-      "enabled": true
-    },
-    "snowflake": {
-      "type": "remote",
-      "url": "https://mcp-gateway.eu-west-1.data.remote.com/snowflake/mcp",
-      "enabled": true
-    },
-    "sentry": {
-      "type": "remote",
-      "url": "https://mcp.sentry.dev/mcp",
-      "enabled": true
-    },
-    "honeycomb": {
-      "type": "remote",
-      "url": "https://mcp.eu1.honeycomb.io/mcp",
-      "enabled": true
-    },
-    "datadog": {
-      "type": "remote",
-      "url": "https://mcp.datadoghq.com/api/unstable/mcp-server/mcp?omit_tools=create_datadog_notebook,edit_datadog_notebook,upsert_datadog_dashboard",
-      "enabled": true
-    },
-    "mixpanel": {
-      "type": "remote",
-      "url": "https://mcp-eu.mixpanel.com/mcp",
-      "enabled": true
-    },
-    "pganalyze": {
-      "type": "remote",
-      "url": "https://pganalyze.eu-west-1.remote.com/mcp",
-      "enabled": true
-    },
-    "notion": {
-      "type": "remote",
-      "url": "https://mcp.notion.com/mcp",
-      "enabled": true
-    },
-    "slack": {
-      "type": "remote",
-      "url": "https://mcp.slack.com/mcp",
-      "oauth": {
-        "clientId": "1601185624273.8899143856786",
-        "callbackPort": 3118,
-        "redirectUri": "http://localhost:3118/callback"
+    "servers": {
+      "linear": {
+        "type": "remote",
+        "url": "https://mcp.linear.app/mcp"
       },
-      "enabled": true
+      "snowflake": {
+        "type": "remote",
+        "url": "https://mcp-gateway.eu-west-1.data.remote.com/snowflake/mcp"
+      },
+      "sentry": {
+        "type": "remote",
+        "url": "https://mcp.sentry.dev/mcp"
+      },
+      "honeycomb": {
+        "type": "remote",
+        "url": "https://mcp.eu1.honeycomb.io/mcp"
+      },
+      "datadog": {
+        "type": "remote",
+        "url": "https://mcp.datadoghq.com/api/unstable/mcp-server/mcp?omit_tools=create_datadog_notebook,edit_datadog_notebook,upsert_datadog_dashboard"
+      },
+      "mixpanel": {
+        "type": "remote",
+        "url": "https://mcp-eu.mixpanel.com/mcp"
+      },
+      "pganalyze": {
+        "type": "remote",
+        "url": "https://pganalyze.eu-west-1.remote.com/mcp"
+      },
+      "notion": {
+        "type": "remote",
+        "url": "https://mcp.notion.com/mcp"
+      },
+      "slack": {
+        "type": "remote",
+        "url": "https://mcp.slack.com/mcp",
+        "oauth": {
+          "clientId": "1601185624273.8899143856786",
+          "callbackPort": 3118,
+          "redirectUri": "http://localhost:3118/callback"
+        }
+      }
     }
   },
-  "permission": {
-    "linear_*": "deny",
-    "snowflake_*": "deny",
-    "sentry_*": "deny",
-    "honeycomb_*": "deny",
-    "datadog_*": "deny",
-    "mixpanel_*": "deny",
-    "pganalyze_*": "deny",
-    "notion_*": "deny",
-    "slack_*": "deny"
-  },
   "instructions": ["{{ .chezmoi.homeDir }}/.brains/RTK.md"],
-  "plugin": [
+  "plugins": [
     ".\/plugins\/rtk.ts",
     ".\/plugins\/zed-bell.js",
     ".\/plugins\/critical.ts",
