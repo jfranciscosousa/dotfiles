@@ -1,0 +1,20 @@
+{
+  "schemaVersion": 1,
+  "id": "jfranciscosousa.notification-center",
+  "name": "Notification Center",
+  "version": "0.1.0",
+  "author": "jfranciscosousa",
+  "license": "MIT",
+  "description": "A simple notification history drawer with Focus mode.",
+  "kinds": ["bar-widget"],
+  "entryPoints": {
+    "barWidget": "Panel.qml"
+  },
+  "barWidget": {
+    "displayName": "Notification Center",
+    "description": "Open recent notifications and control Focus mode.",
+    "category": "System",
+    "allowMultiple": false,
+    "defaultSection": "right"
+  }
+}

@@ -6,3 +6,38 @@
 .brains/skills/cmux-keyboard-shortcuts/**
 .brains/skills/cmux-settings/**
 {{- end }}
+
+{{- if not (lookPath "omarchy") }}
+.config/omarchy/**
+{{- end }}
+
+{{- if ne .chezmoi.os "linux" }}
+.scripts/bin/arch-update
+.zsh/linux.sh
+{{- end }}
+
+{{- if ne .chezmoi.os "darwin" }}
+.zsh/macos.sh
+{{- end }}
+
+{{- if not (hasPrefix "Remote-" .chezmoi.hostname) }}
+.zsh/remote.sh
+{{- else }}
+.zsh/personal.sh
+{{- end }}
+
+AGENTS.md
+README.md
+.editorconfig
+.husky/
+.oxfmtrc.json
+.shellcheckrc
+mac-setup.sh
+node_modules/
+package.json
+package-lock.json
+pnpm-lock.yaml
+pnpm-workspace.yaml
+scripts/
+tsconfig.json
+yarn.lock
