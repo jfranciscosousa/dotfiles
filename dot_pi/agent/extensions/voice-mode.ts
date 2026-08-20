@@ -32,7 +32,6 @@ type RecorderCommand = {
 type SessionCallbacks = {
   onFatal: (error: Error) => void;
   onText: (text: string) => void;
-  onWarning: (error: Error) => void;
 };
 
 type TranscriptionAuth =
@@ -49,7 +48,7 @@ type TranscriptItem = {
 };
 
 type VoiceSession = {
-  readonly mode: "live" | "phrase";
+  readonly mode: "batch" | "live";
   cancel(): Promise<void>;
   start(): Promise<void>;
   stop(): Promise<string>;
@@ -145,11 +144,6 @@ class VoiceController {
       const callbacks: SessionCallbacks = {
         onFatal: (error) => void this.handleSessionFailure(generation, error),
         onText: (text) => this.updateTranscript(generation, text),
-        onWarning: (error) => {
-          if (this.isCurrent(generation)) {
-            this.ctx.ui.notify(`Voice transcription warning: ${error.message}`, "warning");
-          }
-        },
       };
 
       if (auth.kind === "api") {
@@ -163,7 +157,7 @@ class VoiceController {
           candidate = undefined;
           if (!this.isCurrent(generation) || this.cancelRequested) return;
           this.ctx.ui.notify(
-            `Realtime transcription unavailable; using phrase mode: ${errorMessage(error)}`,
+            `Realtime transcription unavailable; using final-transcript mode: ${errorMessage(error)}`,
             "warning",
           );
         }
@@ -188,10 +182,7 @@ class VoiceController {
       }
 
       this.phase = "listening";
-      this.setStatus(
-        `● Listening · ${candidate.mode === "live" ? "live" : "phrase"} · Enter sends · Esc cancels`,
-        "error",
-      );
+      this.setStatus(`● Listening · ${candidate.mode} · Enter sends · Esc cancels`, "error");
       this.timeout = setTimeout(() => void this.stopAndKeep(generation), MAX_RECORDING_MS);
 
       if (this.finishWhenStarted) await this.finishAndSubmit(generation);
@@ -313,7 +304,7 @@ class VoiceController {
 
     this.ctx.ui.setEditorText("");
     try {
-      this.pi.sendUserMessage(message);
+      this.pi.sendUserMessage(message, this.ctx.isIdle() ? undefined : { deliverAs: "steer" });
     } catch (error) {
       this.ctx.ui.setEditorText(message);
       this.ctx.ui.notify(`Could not send voice message: ${errorMessage(error)}`, "error");
@@ -634,19 +625,16 @@ class RealtimeVoiceSession implements VoiceSession {
 }
 
 class BatchVoiceSession implements VoiceSession {
-  readonly mode = "phrase" as const;
+  readonly mode = "batch" as const;
   private readonly abort = new AbortController();
   private readonly allAudio: Buffer[] = [];
   private readonly auth: TranscriptionAuth;
   private readonly callbacks: SessionCallbacks;
   private cancelled = false;
-  private enqueuedPhrases = 0;
-  private parts: string[] = [];
-  private queue: Promise<void> = Promise.resolve();
   private recorder?: RawRecorder;
-  private segmenter?: PhraseSegmenter;
   private stopping = false;
   private totalBytes = 0;
+  private transcript = "";
 
   constructor(auth: TranscriptionAuth, callbacks: SessionCallbacks) {
     this.auth = auth;
@@ -654,7 +642,6 @@ class BatchVoiceSession implements VoiceSession {
   }
 
   async start(): Promise<void> {
-    this.segmenter = new PhraseSegmenter((audio) => this.enqueue(audio));
     if (this.cancelled) return;
 
     const recorder = await RawRecorder.start(
@@ -669,18 +656,19 @@ class BatchVoiceSession implements VoiceSession {
   }
 
   async stop(): Promise<string> {
-    if (this.stopping) return joinTranscriptParts(this.parts);
+    if (this.stopping) return this.transcript;
     this.stopping = true;
     await this.recorder?.stop();
     this.recorder = undefined;
-    this.segmenter?.flush();
+    if (this.cancelled || this.totalBytes < FRAME_BYTES) return this.transcript;
 
-    if (this.enqueuedPhrases === 0 && this.totalBytes >= FRAME_BYTES) {
-      this.enqueue(Buffer.concat(this.allAudio));
-    }
-
-    await this.queue;
-    return joinTranscriptParts(this.parts);
+    this.transcript = await transcribe(
+      this.auth,
+      wavFromPcm(Buffer.concat(this.allAudio)),
+      this.abort.signal,
+    );
+    if (this.transcript && !this.cancelled) this.callbacks.onText(this.transcript);
+    return this.transcript;
   }
 
   async cancel(): Promise<void> {
@@ -690,7 +678,6 @@ class BatchVoiceSession implements VoiceSession {
     this.abort.abort();
     await this.recorder?.stop();
     this.recorder = undefined;
-    await this.queue;
   }
 
   private handleAudio(audio: Buffer): void {
@@ -702,87 +689,6 @@ class BatchVoiceSession implements VoiceSession {
     }
 
     this.allAudio.push(audio);
-    this.segmenter?.push(audio);
-  }
-
-  private enqueue(audio: Buffer): void {
-    if (this.cancelled || audio.length < FRAME_BYTES) return;
-    this.enqueuedPhrases += 1;
-    this.queue = this.queue.then(async () => {
-      if (this.cancelled) return;
-      try {
-        const transcript = await transcribe(this.auth, wavFromPcm(audio), this.abort.signal);
-        if (!transcript || this.cancelled) return;
-        this.parts.push(transcript);
-        this.callbacks.onText(joinTranscriptParts(this.parts));
-      } catch (error) {
-        if (!this.cancelled) this.callbacks.onWarning(toError(error));
-      }
-    });
-  }
-}
-
-class PhraseSegmenter {
-  private activeFrames: Buffer[] = [];
-  private readonly emit: (audio: Buffer) => void;
-  private frameCount = 0;
-  private preRoll: Buffer[] = [];
-  private remainder = Buffer.alloc(0);
-  private silenceFrames = 0;
-  private speaking = false;
-
-  constructor(emit: (audio: Buffer) => void) {
-    this.emit = emit;
-  }
-
-  push(chunk: Buffer): void {
-    this.remainder = Buffer.concat([this.remainder, chunk]);
-    while (this.remainder.length >= FRAME_BYTES) {
-      const frame = this.remainder.subarray(0, FRAME_BYTES);
-      this.remainder = this.remainder.subarray(FRAME_BYTES);
-      this.pushFrame(frame);
-    }
-  }
-
-  flush(): void {
-    if (this.speaking && this.activeFrames.length > 0) {
-      this.emit(Buffer.concat(this.activeFrames));
-    }
-    this.reset();
-  }
-
-  private pushFrame(frame: Buffer): void {
-    const speech = pcmRms(frame) >= 400;
-
-    if (!this.speaking) {
-      this.preRoll.push(frame);
-      if (this.preRoll.length > 10) this.preRoll.shift();
-      if (!speech) return;
-
-      this.speaking = true;
-      this.activeFrames = [...this.preRoll];
-      this.preRoll = [];
-      this.frameCount = this.activeFrames.length;
-      this.silenceFrames = 0;
-      return;
-    }
-
-    this.activeFrames.push(frame);
-    this.frameCount += 1;
-    this.silenceFrames = speech ? 0 : this.silenceFrames + 1;
-
-    if (this.silenceFrames >= 30 || this.frameCount >= 500) {
-      this.emit(Buffer.concat(this.activeFrames));
-      this.reset();
-    }
-  }
-
-  private reset(): void {
-    this.activeFrames = [];
-    this.frameCount = 0;
-    this.preRoll = [];
-    this.silenceFrames = 0;
-    this.speaking = false;
   }
 }
 
@@ -1033,16 +939,6 @@ function wavFromPcm(pcm: Buffer): Buffer {
   return Buffer.concat([header, pcm]);
 }
 
-function pcmRms(frame: Buffer): number {
-  let sum = 0;
-  const samples = Math.floor(frame.length / 2);
-  for (let offset = 0; offset + 1 < frame.length; offset += 2) {
-    const sample = frame.readInt16LE(offset);
-    sum += sample * sample;
-  }
-  return samples > 0 ? Math.sqrt(sum / samples) : 0;
-}
-
 function parseRealtimeEvent(data: unknown): Record<string, unknown> | undefined {
   if (typeof data !== "string") return undefined;
   try {
@@ -1155,10 +1051,6 @@ function recorderExitMessage(result: RecorderExit, stderr: string): string {
   if (stderr) return stderr;
   if (result.signal) return `recorder terminated by ${result.signal}`;
   return `recorder exited with code ${result.code ?? "unknown"}`;
-}
-
-function toError(error: unknown): Error {
-  return error instanceof Error ? error : new Error(String(error));
 }
 
 function errorMessage(error: unknown): string {
