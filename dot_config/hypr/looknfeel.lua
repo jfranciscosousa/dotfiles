@@ -51,3 +51,6 @@
 
 -- Make 1Password approvals 35% larger than Omarchy's 875x600 floating default.
 o.window("^1[Pp]assword$", { size = { 1180, 810 } })
+
+-- Use a dedicated class so Omarchy's default 875x600 btop rule cannot override this size.
+o.window([[^TUI\.system-usage$]], { float = true, size = { 1480, 1014 }, center = true })

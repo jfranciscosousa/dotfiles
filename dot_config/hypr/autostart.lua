@@ -1,4 +1,6 @@
--- Extra autostart processes.
--- Launch in this order so dwindle places Discord on the left and ZapZap on the right.
-o.launch_on_start("omarchy-launch-webapp https://discord.com/channels/@me")
-o.launch_on_start("flatpak run com.rtosta.zapzap")
+-- Extra autostart processes. Workspace placement applies only at login.
+hl.on("hyprland.start", function()
+  hl.exec_cmd(o.launch("discord"), { workspace = "1 silent" })
+  hl.exec_cmd(o.launch("omarchy-launch-webapp https://web.whatsapp.com/"), { workspace = "1 silent" })
+  hl.exec_cmd(o.launch("zen-browser"), { workspace = "2 silent" })
+end)

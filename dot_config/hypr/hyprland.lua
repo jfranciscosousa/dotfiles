@@ -29,7 +29,4 @@ require("default.hypr.toggles")
 -- Use a dedicated class so Omarchy's default 875x600 btop rule cannot override this size.
 o.window([[^TUI\.system-usage$]], { float = true, size = { 1480, 1014 }, center = true })
 
--- Keep messaging apps on the first workspace. Their launch order tiles Discord left, ZapZap right.
-o.window("^discord$", { workspace = "1" })
-o.window("^com%.rtosta%.zapzap$", { workspace = "1" })
 
