@@ -8,6 +8,7 @@
 {{- end }}
 
 {{- if not (lookPath "omarchy") }}
+.config/hypr/**
 .config/omarchy/**
 {{- end }}
 

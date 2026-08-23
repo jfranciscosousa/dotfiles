@@ -1,0 +1,49 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+direction=${1:-}
+action=${2:-focus}
+current=$(hyprctl -j activeworkspace | jq -r '.id')
+workspaces=$(hyprctl -j workspaces)
+
+case "$direction" in
+  next)
+    target=$((current + 1))
+    next_exists=$(jq --argjson target "$target" 'any(.[]; .id == $target)' <<<"$workspaces")
+    current_has_windows=$(jq --argjson current "$current" \
+      'any(.[]; .id == $current and .windows > 0)' <<<"$workspaces")
+
+    # Create the next workspace only when leaving a workspace with windows.
+    if [[ "$next_exists" != true && "$current_has_windows" != true ]]; then
+      target=""
+    fi
+    ;;
+  previous)
+    if [[ "$action" == move ]]; then
+      # Moving should create the adjacent workspace when it is currently empty.
+      ((current > 1)) && target=$((current - 1)) || target=""
+    else
+      target=$(jq -r --argjson current "$current" \
+        '[.[] | select(.id > 0 and .id < $current) | .id] | max // empty' <<<"$workspaces")
+    fi
+    ;;
+  *)
+    printf 'Usage: %s {next|previous}\n' "${0##*/}" >&2
+    exit 2
+    ;;
+esac
+
+if [[ -n "$target" ]]; then
+  case "$action" in
+    focus)
+      hyprctl dispatch "hl.dsp.focus({ workspace = \"$target\" })" >/dev/null
+      ;;
+    move)
+      hyprctl dispatch "hl.dsp.window.move({ workspace = \"$target\" })" >/dev/null
+      ;;
+    *)
+      printf 'Usage: %s {next|previous} [focus|move]\n' "${0##*/}" >&2
+      exit 2
+      ;;
+  esac
+fi

@@ -1,0 +1,12 @@
+{{- if and (eq .chezmoi.os "linux") (lookPath "omarchy") (lookPath "hyprctl") -}}
+#!/usr/bin/env bash
+set -euo pipefail
+
+# A file-by-file apply can cause Hyprland to reload before all imported modules exist.
+# Reload once after chezmoi finishes, but never fail a headless apply.
+[[ -n ${HYPRLAND_INSTANCE_SIGNATURE:-} ]] || exit 0
+hyprctl reload >/dev/null 2>&1 || true
+{{- else -}}
+#!/usr/bin/env bash
+exit 0
+{{- end }}
