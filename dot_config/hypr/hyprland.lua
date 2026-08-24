@@ -24,9 +24,3 @@ require("hypr.autostart")
 
 -- Toggle config flags dynamically.
 require("default.hypr.toggles")
-
--- Add any other personal Hyprland configuration below.
--- Use a dedicated class so Omarchy's default 875x600 btop rule cannot override this size.
-o.window([[^TUI\.system-usage$]], { float = true, size = { 1480, 1014 }, center = true })
-
-
