@@ -1,0 +1,8 @@
+.pi/agent/npm
+.pi/agent/missions
+.config/opencode/prompts
+.scripts/bin/ac
+.scripts/bin/orchestrate-review
+.scripts/git/git-better-branch.ts
+.scripts/git/utils.rb
+.scripts/startup

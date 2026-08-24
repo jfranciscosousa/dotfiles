@@ -25,13 +25,7 @@
 {{- $enabledModels = append $enabledModels . -}}
 {{- end -}}
 {{- end -}}
-{{- $agentOverrides := dict
-  "scout" (dict "model" (printf "%s/gpt-5.6-luna" $provider))
-  "researcher" (dict "model" (printf "%s/gpt-5.6-luna" $provider))
-  "worker" (dict "model" (printf "%s/gpt-5.6-terra" $provider))
-  "reviewer" (dict "model" (printf "%s/gpt-5.6-terra" $provider))
-  "oracle" (dict "model" (printf "%s/gpt-5.6-terra" $provider))
--}}
+{{- $_ := unset $existing "subagents" -}}
 {{- $managed := dict
   "theme" "dark"
   "defaultProvider" $provider
@@ -39,9 +33,8 @@
   "hideThinkingBlock" true
   "enabledModels" $enabledModels
   "npmCommand" (list "mise" "exec" "pnpm@11.21.0" "--" "pnpm")
-  "packages" (list "npm:pi-subagents@0.46.0")
+  "packages" (list)
   "shellPath" "/bin/zsh"
-  "subagents" (dict "agentOverrides" $agentOverrides)
 -}}
 
 {{ mergeOverwrite $existing $managed | toPrettyJson }}
