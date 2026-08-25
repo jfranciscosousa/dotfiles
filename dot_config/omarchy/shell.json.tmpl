@@ -1,0 +1,57 @@
+{{/*
+Generate the user-owned Omarchy shell config from the installed defaults.
+Omarchy does not merge a user shell.json with its defaults, so keeping only
+these customizations here lets upstream layout changes apply on chezmoi apply.
+*/}}
+{{/*
+External plugins are installed out-of-band and must be restored manually on a
+new machine:
+  omarchy plugin add https://github.com/thisisgm/omarchy-pods --enable
+  ~/.config/omarchy/plugins/io.github.thisisgm.omapods/setup
+setup installs build deps, builds librepods into ~/.local, and enables
+librepods.service (user unit). Only the enable state below is managed here.
+*/}}
+{{- output "bash" "-c" `
+set -euo pipefail
+
+# Apply the customizations below to the current Omarchy package default.
+jq '
+# Remove an entry before re-inserting it. This makes the patch idempotent.
+def remove_id($id):
+  map(select(.id != $id));
+
+# Insert an entry after its anchor, or append it if a future default removes
+# that anchor.
+def insert_after($anchor; $item):
+  if any(.[]; .id == $anchor) then
+    reduce .[] as $entry (
+      [];
+      . + [$entry] + (if $entry.id == $anchor then [$item] else [] end)
+    )
+  else
+    . + [$item]
+  end;
+
+# Keep personal widgets in their preferred positions in the right bar section.
+# Keep AirPods directly after the audio widget, followed by Tailscale.
+.bar.layout.right |= (
+  remove_id("io.github.thisisgm.omapods")
+  | remove_id("omarchy.tailscale")
+  | remove_id("jfranciscosousa.spotify-player")
+  | remove_id("jfranciscosousa.system-usage")
+  | remove_id("jfranciscosousa.notification-center")
+  | insert_after("omarchy.audio"; {"id": "jfranciscosousa.system-usage"})
+  | insert_after("omarchy.audio"; {"id": "io.github.thisisgm.omapods"})
+  | insert_after("io.github.thisisgm.omapods"; {"id": "omarchy.tailscale"})
+  | insert_after("omarchy.tailscale"; {"id": "jfranciscosousa.spotify-player"})
+  | insert_after("omarchy.power"; {"id": "jfranciscosousa.notification-center"})
+)
+# Enable the cloned lock plugin and disable the built-in plugin it replaces.
+| .plugins = ((.plugins // [] | map(select(.id != "jfranciscosousa.lock"))) + [{"id": "jfranciscosousa.lock"}])
+# Enable the external AirPods plugin (source installed out-of-band, see above).
+| .plugins = ((.plugins // [] | map(select(.id != "io.github.thisisgm.omapods"))) + [{"id": "io.github.thisisgm.omapods"}])
+| .disabledPlugins = ((.disabledPlugins // [] | map(select(. != "omarchy.lock"))) + ["omarchy.lock"])
+# Restore the built-in lock plugin if the cloned plugin is removed later.
+| .cloneSourceRestores = ((.cloneSourceRestores // [] | map(select(. != "jfranciscosousa.lock"))) + ["jfranciscosousa.lock"])
+' /usr/share/omarchy/config/omarchy/shell.json
+` -}}
