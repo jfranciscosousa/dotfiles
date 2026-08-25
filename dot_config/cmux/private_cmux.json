@@ -13,6 +13,11 @@
   },
   "automation": {
     "workspaceAutoNaming": false
+  },
+  "browser": {
+    "openTerminalLinksInCmuxBrowser": true,
+    "interceptTerminalOpenCommandInCmuxBrowser": true,
+    "urlsToAlwaysOpenExternally": []
   }
 
   // This file uses JSON with comments (JSONC).
