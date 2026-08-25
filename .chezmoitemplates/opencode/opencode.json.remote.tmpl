@@ -120,7 +120,9 @@
     }
   },
   "instructions": ["{{ .chezmoi.homeDir }}/.brains/RTK.md"],
+  {{- if lookPath "cmux" }}
   "plugin": [".\/plugins\/cmux-session.js"],
+  {{- end }}
   "plugins": [
     ".\/plugins\/rtk.ts",
     ".\/plugins\/zed-bell.js",

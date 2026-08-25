@@ -1,4 +1,5 @@
 {{- if not (lookPath "cmux") }}
+.config/cmux/**
 .brains/skills/cmux/**
 .brains/skills/cmux-browser/**
 .brains/skills/cmux-customization/**
