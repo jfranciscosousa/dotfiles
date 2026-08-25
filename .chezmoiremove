@@ -1,6 +1,9 @@
 .pi/agent/npm
 .pi/agent/missions
 .config/opencode/prompts
+.brains/skills/orchestrate-create
+.brains/skills/orchestrate-implement
+.brains/skills/orchestrate-review
 .scripts/bin/ac
 .scripts/bin/orchestrate-review
 .scripts/git/git-better-branch.ts
