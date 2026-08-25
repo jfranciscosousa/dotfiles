@@ -12,7 +12,21 @@
     }
   },
   "automation": {
-    "workspaceAutoNaming": false
+    "claudeCodeIntegration": true,
+    "workspaceAutoNaming": true
+  },
+  "sidebar": {
+    "hideAllDetails": false,
+    "showAgentActivity": true,
+    "showWorkspaceDescription": false,
+    "showNotificationMessage": false,
+    "showBranchDirectory": true,
+    "showPullRequests": false,
+    "showSSH": false,
+    "showPorts": false,
+    "showLog": false,
+    "showProgress": false,
+    "showCustomMetadata": false
   },
   "browser": {
     "openTerminalLinksInCmuxBrowser": true,
