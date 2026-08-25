@@ -1,0 +1,29 @@
+{{- if and (eq .chezmoi.os "linux") (lookPath "omarchy") -}}
+#!/usr/bin/env bash
+set -euo pipefail
+
+flags_file="$HOME/.config/chromium-flags.conf"
+extension_dir="$HOME/.config/chromium/extensions/open-webapp-links"
+default_flags="/usr/share/omarchy/config/chromium-flags.conf"
+
+if [[ ! -e $flags_file ]]; then
+  mkdir -p "$(dirname "$flags_file")"
+  if [[ -f $default_flags ]]; then
+    cp "$default_flags" "$flags_file"
+  else
+    : >"$flags_file"
+  fi
+fi
+
+grep -Fq -- "$extension_dir" "$flags_file" && exit 0
+
+if grep -q '^--load-extension=' "$flags_file"; then
+  sed -i --follow-symlinks "s|^--load-extension=\(.*\)$|--load-extension=\1,$extension_dir|" "$flags_file"
+else
+  [[ ! -s $flags_file || -z $(tail -c1 "$flags_file") ]] || printf '\n' >>"$flags_file"
+  printf '%s\n' "--load-extension=$extension_dir" >>"$flags_file"
+fi
+{{- else -}}
+#!/usr/bin/env bash
+exit 0
+{{- end }}

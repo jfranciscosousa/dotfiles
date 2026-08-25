@@ -1,0 +1,19 @@
+{
+  "manifest_version": 3,
+  "name": "Open Webapp Links in Default Browser",
+  "version": "1.0.0",
+  "key": "MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEA0Vwp1ZA7hEMyZE2TNmSfm1V8irl1LBN7KjOxMGRPXz1LBwomYODDTTFO8G7zKQg+TFN6gxuSK0BxL2q10Le4rZkNbqUykHgE9+cgzj9kk4QrcgozUMdksRySubl4lAdd55SeinsyPYyzbUs8ucF+8Se0niESp0CopwvNwy8FnaZAhobEyQcU9cAjuAbkR+9Y/jGnFo+V+YE6DPRrVS9FCoi+G4y/I1DfO2NWvUSKnC5Rar0blaVlWm4Jklz5clXWXgLYbQaCPSAuEudEcO6EayjuIM1/nbRl/Gz+q9/dZH9Mf4KwFN473CLgmEb4aUd2ntvXB+pkZRuZj03FSUqNvQIDAQAB",
+  "description": "Open external links from Chromium app windows in the system browser.",
+  "permissions": ["nativeMessaging"],
+  "background": {
+    "service_worker": "worker.js"
+  },
+  "content_scripts": [
+    {
+      "matches": ["http://*/*", "https://*/*"],
+      "js": ["content.js"],
+      "run_at": "document_start",
+      "all_frames": false
+    }
+  ]
+}

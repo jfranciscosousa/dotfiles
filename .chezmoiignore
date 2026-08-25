@@ -13,6 +13,12 @@
 .config/omarchy/**
 {{- end }}
 
+{{- if or (ne .chezmoi.os "linux") (not (lookPath "omarchy")) }}
+.config/chromium/extensions/open-webapp-links/**
+.config/chromium/NativeMessagingHosts/com.jfranciscosousa.open_webapp_link.json
+.scripts/bin/chromium-open-webapp-link-host
+{{- end }}
+
 {{- if ne .chezmoi.os "linux" }}
 .scripts/bin/arch-update
 .zsh/linux.sh
@@ -30,6 +36,7 @@
 
 AGENTS.md
 README.md
+features/
 .editorconfig
 .husky/
 .oxfmtrc.json

@@ -1,0 +1,24 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+export PATH="/usr/share/omarchy/bin:/usr/local/bin:/usr/bin:${PATH:-}"
+
+reply() {
+  if [[ $1 == "true" ]]; then
+    printf '\x0f\x00\x00\x00{"opened":true}'
+  else
+    printf '\x10\x00\x00\x00{"opened":false}'
+  fi
+}
+
+length=$(head -c4 | od -An -v -tu4 --endian=little | tr -d ' ')
+[[ -n ${length:-} ]] && ((length > 0)) || exit 0
+
+payload=$(head -c "$length")
+url=$(jq -r 'if (.url | type) == "string" then .url else empty end' <<<"$payload" 2>/dev/null || true)
+
+if [[ $url =~ ^https?://[^[:space:]]+$ ]] && omarchy launch browser "$url" >/dev/null 2>&1; then
+  reply true
+else
+  reply false
+fi
