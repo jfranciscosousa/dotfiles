@@ -16,23 +16,21 @@ if [[ ( "$SHLVL" -eq 1 && ! -o LOGIN ) && -s "${ZDOTDIR:-$HOME}/.zprofile" ]]; t
   source "${ZDOTDIR:-$HOME}/.zprofile"
 fi
 
-# PATH exports here so they're available to all shells (interactive and non-interactive).
-# This is needed for tools like Claude Code that spawn non-interactive shells.
-#
-# Add my custom scripts to path
-export PATH="$PATH:$HOME/.scripts/git"
-export PATH="$PATH:$HOME/.scripts/bin"
-export PATH=/usr/local/bin:$PATH
-export PATH="$PATH:$HOME/.local/bin"
-# mise (runtime version manager) - shims keep runtimes on PATH for
-# non-interactive shells (Claude Code, IDEs). Interactive shells additionally
-# get `mise activate` in .zshrc.
-export PATH="${MISE_DATA_DIR:-$HOME/.local/share/mise}/shims:$PATH"
-# PNPM (the pnpm CLI + global bins live in $PNPM_HOME/bin)
+# Keep PATH available in every shell without accumulating duplicates in nested
+# shells. zsh keeps the exported PATH scalar synchronized with the path array.
+typeset -gU path
+
 export PNPM_HOME="$HOME/.local/share/pnpm"
-export PATH="$PNPM_HOME/bin:$PATH"
-# Opencode
-export PATH=$HOME/.opencode/bin:$PATH
+path=(
+  "$HOME/.opencode/bin"
+  "$PNPM_HOME/bin"
+  "${MISE_DATA_DIR:-$HOME/.local/share/mise}/shims"
+  /usr/local/bin
+  $path
+  "$HOME/.scripts/git"
+  "$HOME/.scripts/bin"
+  "$HOME/.local/bin"
+)
 
 # Source private env file if it exists
 [[ -f "${ZDOTDIR:-$HOME}/.private.sh" ]] && source "${ZDOTDIR:-$HOME}/.private.sh"

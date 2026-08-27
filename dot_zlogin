@@ -1,7 +1,10 @@
 {
-  # Compile the completion dump to increase startup speed.
-  zcompdump="${ZDOTDIR:-$HOME}/.zcompdump"
-  if [[ -s "$zcompdump" && (! -s "${zcompdump}.zwc" || "$zcompdump" -nt "${zcompdump}.zwc") ]]; then
-    zcompile "$zcompdump"
-  fi
+  # Compile Prezto's normal dump and the fallback used by dumb terminals.
+  for zcompdump in \
+    "${XDG_CACHE_HOME:-$HOME/.cache}/prezto/zcompdump" \
+    "${ZDOTDIR:-$HOME}/.zcompdump"; do
+    if [[ -s "$zcompdump" && (! -s "${zcompdump}.zwc" || "$zcompdump" -nt "${zcompdump}.zwc") ]]; then
+      zcompile "$zcompdump"
+    fi
+  done
 } &!

@@ -1,18 +1,78 @@
-if [ -n "${ZSH_DEBUGRC+1}" ]; then
-    zmodload zsh/zprof
+if [[ -n "${ZSH_DEBUGRC+1}" ]]; then
+  zmodload zsh/zprof
 fi
 
-source "${HOME}/.zgen/zgen.zsh"
 {{ if eq .chezmoi.os "darwin" }}
-eval "$(/opt/homebrew/bin/brew shellenv)"
+# `brew shellenv` is deterministic for this installation; setting its values
+# directly avoids launching brew and path_helper for every interactive shell.
+export HOMEBREW_PREFIX=/opt/homebrew
+export HOMEBREW_CELLAR=/opt/homebrew/Cellar
+export HOMEBREW_REPOSITORY=/opt/homebrew
+export INFOPATH="/opt/homebrew/share/info:${INFOPATH:-}"
+path=(/opt/homebrew/bin /opt/homebrew/sbin $path)
+fpath=(/opt/homebrew/share/zsh/site-functions $fpath)
+export FPATH
+[[ -z "${MANPATH:-}" ]] || export MANPATH=":${MANPATH#:}"
 {{ end }}
 
-if ! zgen saved; then
+# Put every custom completion directory on fpath before Prezto performs the one
+# compinit pass. The old generated init and explicit pass could initialize
+# completion more than once.
+fpath=(
+  "$HOME/.zsh/completions"
+  "${MISE_DATA_DIR:-$HOME/.local/share/mise}/completions"
+  $fpath
+)
+
+# Generate mise's completion once on a new machine, before the single compinit
+# pass indexes it. This branch has no process cost after the file exists.
+mise_completion="${MISE_DATA_DIR:-$HOME/.local/share/mise}/completions/_mise"
+if [[ ! -f "$mise_completion" ]] && (( $+commands[mise] )); then
+  mkdir -p "$mise_completion:h"
+  mise completion zsh >| "$mise_completion"
+fi
+unset mise_completion
+
+zgen_dir="${ZGEN_DIR:-$HOME/.zgen}"
+prezto_dir="$zgen_dir/sorin-ionescu/prezto-master"
+geometry_dir="$zgen_dir/geometry-zsh/geometry-master"
+
+if [[ -r "$prezto_dir/init.zsh" && -r "$geometry_dir/geometry.plugin.zsh" ]]; then
+  # Load the resolved plugin trees directly instead of parsing the zgen manager
+  # and its generated init on every shell. Define zgen lazily so update/reset
+  # commands continue to work exactly when requested.
+  zgen() {
+    unfunction zgen
+    source "${ZGEN_DIR:-$HOME/.zgen}/zgen.zsh"
+    zgen "$@"
+  }
+
+  ZSH="$prezto_dir"
+  fpath=("$prezto_dir" "$geometry_dir" $fpath)
+  source "$prezto_dir/init.zsh"
+  source "$geometry_dir/geometry.plugin.zsh"
+  pmodload environment terminal editor history directory spectrum utility completion prompt
+else
+  # Bootstrap zgen on a new machine, preserving the original install path.
+  source "$zgen_dir/zgen.zsh"
   zgen prezto
   zgen load geometry-zsh/geometry
-
   zgen save
 fi
+unset zgen_dir prezto_dir geometry_dir
+
+# Prezto skips its completion module for dumb terminals. Keep completion
+# available there too, but never initialize it a second time.
+if (( ! ${+_comps} )); then
+  autoload -Uz compinit
+  compinit -u
+fi
+
+# Register the repository-local completion immediately even when Prezto reuses
+# a dump created before this fpath entry existed.
+autoload -Uz _mise _octmux
+compdef _mise mise
+compdef _octmux oc pc tiger-dev dragon-dev
 
 # mise (runtime version manager) - activate manages PATH for interactive shells.
 #
@@ -27,21 +87,27 @@ fi
 if [[ "$APPIMAGE" == */T3-Code-*.AppImage ]]; then
   unset ARGV0 APPIMAGE APPDIR TARGET_APPIMAGE REDIRECT_APPIMAGE DESKTOPINTEGRATION
 fi
-if command -v mise >/dev/null; then
+if (( $+commands[mise] )); then
   eval "$(mise activate zsh)"
 fi
 
-if [[ ! -f "${MISE_DATA_DIR:-$HOME/.local/share/mise}/completions/_mise" ]]; then
-  mkdir -p "${MISE_DATA_DIR:-$HOME/.local/share/mise}/completions"
-  mise completion zsh > "${MISE_DATA_DIR:-$HOME/.local/share/mise}/completions/_mise"
+# Keep direnv's standard hook inline to avoid spawning it merely to print this
+# function on every startup. The hook itself still runs before every prompt and
+# directory change, so environment behavior is unchanged.
+if (( $+commands[direnv] )); then
+  _direnv_hook() {
+    trap -- '' SIGINT
+    eval "$(command direnv export zsh)"
+    trap - SIGINT
+  }
+  typeset -ag precmd_functions chpwd_functions
+  if (( ! ${precmd_functions[(I)_direnv_hook]} )); then
+    precmd_functions=(_direnv_hook $precmd_functions)
+  fi
+  if (( ! ${chpwd_functions[(I)_direnv_hook]} )); then
+    chpwd_functions=(_direnv_hook $chpwd_functions)
+  fi
 fi
-
-fpath=("$HOME/.zsh/completions" ${MISE_DATA_DIR:-$HOME/.local/share/mise}/completions $fpath)
-autoload -Uz compinit
-compinit -u
-
-# direnv
-eval "$(direnv hook zsh)"
 # Geometry stuff
 GEOMETRY_PROMPT_PREFIX="%F{$GEOMETRY_COLOR_DIR}$USER"
 # Custom aliases
