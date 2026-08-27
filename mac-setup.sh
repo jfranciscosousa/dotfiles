@@ -4,7 +4,7 @@ set -euo pipefail
 # mac-setup.sh - Bootstrap a fresh macOS machine for these dotfiles.
 #
 # Installs Homebrew, every CLI tool / GUI app / runtime the dotfiles expect,
-# the zsh plugin manager, and the standalone installers (Claude, pnpm).
+# the zsh plugin manager, and standalone installers not managed by mise.
 # It does NOT run `chezmoi apply` - it only prepares the machine. The final
 # section prints the exact command to deploy the configs.
 #
@@ -147,23 +147,16 @@ else
 fi
 
 # ----------------------------------------------------------------------------
-# 5. AI CLIs (official installers)
+# 5. AI CLI bootstrap
 # ----------------------------------------------------------------------------
+# Claude Code is installed by mise after its chezmoi-managed config is applied.
 # opencode -> ~/.opencode/bin (already first on PATH via dot_zshenv)
-# claude   -> ~/.local/bin
 
 log "opencode CLI"
 if have opencode; then
   ok "already installed ($(command -v opencode))"
 else
   curl -fsSL https://opencode.ai/install | bash
-fi
-
-log "Claude Code"
-if have claude; then
-  ok "already installed ($(command -v claude))"
-else
-  curl -fsSL https://claude.ai/install.sh | bash
 fi
 
 # ----------------------------------------------------------------------------
@@ -220,6 +213,7 @@ cat <<'EOF'
   # If it already is (cloned at ~/.local/share/chezmoi):
   chezmoi diff      # review what will change
   chezmoi apply     # deploy configs
+  mise install      # install the globally pinned tools, including Claude Code
 
   # Then open a fresh shell (zgen pulls prezto + geometry on first start):
   exec zsh
