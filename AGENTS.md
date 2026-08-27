@@ -5,10 +5,10 @@ dotfiles by maintaining a source directory (this repo) and applying them to the 
 
 ## Key guidelines you must respect at all times
 
-- Do not write to my home directory ever. You can read, but not write. All edits need to go through
-  chezmoi
-- All changes you make to a config must be made on my dotfiles repo, not to me home directory
-  directly, ever
+- Do not write to my home directory unless my current prompt explicitly permits it. Permission
+  applies only to the paths and actions that the prompt specifies, and only for the current prompt.
+- Without explicit permission, make all config changes in this dotfiles repository through chezmoi.
+  Do not edit the corresponding files in my home directory directly.
 - Standalone executable shell scripts must default to Bash for macOS/Linux portability: start with
   `#!/usr/bin/env bash` and `set -euo pipefail`, and stay compatible with macOS Bash 3.2 unless
   another non-shell runtime is explicitly required. zsh is only allowed for files sourced from zsh
