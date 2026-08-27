@@ -126,7 +126,7 @@ function classifyFile(file: string, groups: FileGroups): void {
     groups.oxfmt.add(file);
   }
 
-  if (extension === ".toml") {
+  if (extension === ".toml" && !isChezMoiModifyTemplate) {
     groups.taplo.add(file);
   }
 

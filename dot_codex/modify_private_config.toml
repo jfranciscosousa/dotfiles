@@ -1,0 +1,15 @@
+{{- /* chezmoi:modify-template */ -}}
+{{- $existing := dict -}}
+{{- if hasKey .chezmoi "stdin" -}}
+{{- $existing = index .chezmoi "stdin" | fromToml -}}
+{{- end -}}
+
+{{- if hasPrefix "Remote-" .chezmoi.hostname -}}
+{{- $mcpServers := dict
+  "linear" (dict "url" "https://mcp.linear.app/mcp")
+  "slack" (dict "url" "https://mcp.slack.com/mcp")
+-}}
+{{- $_ := set $existing "mcp_servers" $mcpServers -}}
+{{- end -}}
+
+{{ $existing | toToml }}
