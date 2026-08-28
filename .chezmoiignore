@@ -11,7 +11,6 @@
 {{- if not (lookPath "omarchy") }}
 .config/hypr/**
 .config/omarchy/**
-.config/zed/themes/**
 {{- end }}
 
 {{- if or (ne .chezmoi.os "linux") (not (lookPath "omarchy")) }}
