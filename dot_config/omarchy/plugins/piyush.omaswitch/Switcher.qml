@@ -120,8 +120,12 @@ Item {
     root.filterText = ""
     root.selectedIndex = 0
     root.refresh()
-    if (root.cycleMode && root.rows.length > 1 && Model.isCurrent(root.rows[0]))
-      root.selectedIndex = direction < 0 ? root.rows.length - 1 : 1
+    if (root.cycleMode && root.rows.length > 0) {
+      var activeIndex = Model.currentIndex(root.rows)
+      root.selectedIndex = activeIndex >= 0
+        ? activeIndex
+        : (direction < 0 ? root.rows.length - 1 : 0)
+    }
     Qt.callLater(function() { keyCatcher.forceActiveFocus() })
   }
 

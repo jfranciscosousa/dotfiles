@@ -33,6 +33,41 @@ if [[ ! -f "$mise_completion" ]] && (( $+commands[mise] )); then
 fi
 unset mise_completion
 
+{{ if and (eq .chezmoi.os "linux") (lookPath "omarchy") -}}
+omarchy_colors="$HOME/.local/state/omarchy/current/theme/colors.toml"
+[[ -r "$omarchy_colors" ]] || omarchy_colors="$HOME/.config/omarchy/current/theme/colors.toml"
+
+if [[ -r "$omarchy_colors" ]]; then
+  while IFS='=' read -r color_name color_value; do
+    color_name=${color_name//[[:space:]]/}
+    color_value=${color_value//[[:space:]]/}
+    color_value=${color_value//\"/}
+
+    case "$color_name" in
+      foreground|dark_foreground|red|yellow|green|blue|magenta)
+        typeset "omarchy_$color_name=$color_value"
+        ;;
+    esac
+  done < "$omarchy_colors"
+
+  GEOMETRY_COLOR_PROMPT=${omarchy_foreground:-white}
+  GEOMETRY_COLOR_ROOT=${omarchy_red:-red}
+  GEOMETRY_COLOR_DIR=${omarchy_blue:-blue}
+  GEOMETRY_COLOR_EXIT_VALUE=${omarchy_red:-red}
+  GEOMETRY_COLOR_GIT_DIRTY=${omarchy_yellow:-yellow}
+  GEOMETRY_COLOR_GIT_CLEAN=${omarchy_green:-green}
+  GEOMETRY_COLOR_GIT_BARE=${omarchy_blue:-blue}
+  GEOMETRY_COLOR_GIT_CONFLICTS_UNSOLVED=${omarchy_red:-red}
+  GEOMETRY_COLOR_GIT_CONFLICTS_SOLVED=${omarchy_green:-green}
+  GEOMETRY_COLOR_GIT_BRANCH=${omarchy_dark_foreground:-242}
+  GEOMETRY_COLOR_GIT_STASHES=${omarchy_magenta:-144}
+fi
+
+unset omarchy_colors color_name color_value
+unset omarchy_foreground omarchy_dark_foreground omarchy_red omarchy_yellow
+unset omarchy_green omarchy_blue omarchy_magenta
+{{ end -}}
+
 zgen_dir="${ZGEN_DIR:-$HOME/.zgen}"
 prezto_dir="$zgen_dir/sorin-ionescu/prezto-master"
 geometry_dir="$zgen_dir/geometry-zsh/geometry-master"

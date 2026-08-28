@@ -23,41 +23,42 @@ function detail(window) {
   return boundedText(value);
 }
 
-// Hyprland's focusHistoryID is a rank in the compositor's global focus-history
-// list: 0 = currently focused, 1 = most recent before that, ascending = older.
-// Transient/popup windows not meaningfully in that history can report null or
-// an empty string. Number(null) === 0 and Number("") === 0, so we must guard
-// before coercion — otherwise such windows are ranked 0 (treated as current)
-// and surface above genuinely recent ones.
-function historyRank(window) {
+function workspaceRank(window) {
+  var raw = window && window.workspace ? Number(window.workspace.id) : NaN;
+  return isFinite(raw) && raw >= 0 ? raw : 1000000;
+}
+
+function position(window, axis) {
   var ipc = window && window.lastIpcObject ? window.lastIpcObject : {};
-  var raw = ipc.focusHistoryID;
-  if (raw === null || raw === undefined) return 1000000;
-  // "" and " " both coerce to 0; discard empty/whitespace values (transient
-  // windows not meaningfully in the focus history).
-  if (typeof raw !== "number" && String(raw).trim() === "") return 1000000;
-  var rank = Number(raw);
-  return isFinite(rank) && rank >= 0 ? rank : 1000000;
+  var coordinates = ipc.at || (window && window.at);
+  var value = coordinates && coordinates.length > axis ? Number(coordinates[axis]) : NaN;
+  return isFinite(value) ? value : 1000000;
 }
 
-function isCurrent(window) {
-  return !!(window && window.activated) || historyRank(window) === 0;
-}
-
-function focusRank(window) {
-  return isCurrent(window) ? -1 : historyRank(window);
-}
-
+// Sort workspaces numerically from 1 through N. Within each workspace, sort
+// windows spatially from left to right, then top to bottom for equal x values.
 function sortedWindows(values) {
   var source = values && typeof values.slice === "function" ? values.slice() : [];
   var decorated = [];
   for (var i = 0; i < source.length; i++) decorated.push({ value: source[i], index: i });
   decorated.sort(function (left, right) {
-    return focusRank(left.value) - focusRank(right.value) || left.index - right.index;
+    return (
+      workspaceRank(left.value) - workspaceRank(right.value) ||
+      position(left.value, 0) - position(right.value, 0) ||
+      position(left.value, 1) - position(right.value, 1) ||
+      left.index - right.index
+    );
   });
   var result = [];
   for (var j = 0; j < decorated.length; j++) result.push(decorated[j].value);
   return result;
+}
+
+function currentIndex(values) {
+  for (var i = 0; i < values.length; i++) {
+    if (values[i] && values[i].activated) return i;
+  }
+  return -1;
 }
 
 function filteredWindows(values, query) {
@@ -95,8 +96,8 @@ if (typeof module !== "undefined")
     appId: appId,
     label: label,
     detail: detail,
-    isCurrent: isCurrent,
     sortedWindows: sortedWindows,
+    currentIndex: currentIndex,
     filteredWindows: filteredWindows,
     focusCommand: focusCommand,
   };
