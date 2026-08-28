@@ -3,8 +3,8 @@ Generate the user-owned Omarchy shell config from the installed defaults.
 Omarchy does not merge a user shell.json with its defaults, so keeping only
 these customizations here lets upstream layout changes apply on chezmoi apply.
 
-External plugins are installed out-of-band and must be restored manually on a
-new machine:
+OmaSwitch is vendored in this repository and enabled below. Other external
+plugins are installed out-of-band and must be restored manually on a new machine:
   omarchy plugin add https://github.com/thisisgm/omarchy-pods --enable
   ~/.config/omarchy/plugins/io.github.thisisgm.omapods/setup
 setup installs build deps, builds librepods into ~/.local, and enables
@@ -49,6 +49,8 @@ def insert_after($anchor; $item):
 )
 # Enable the cloned lock plugin and disable the built-in plugin it replaces.
 | .plugins = ((.plugins // [] | map(select(.id != "jfranciscosousa.lock"))) + [{"id": "jfranciscosousa.lock"}])
+# Enable the vendored OmaSwitch overlay.
+| .plugins = ((.plugins // [] | map(select(.id != "piyush.omaswitch"))) + [{"id": "piyush.omaswitch"}])
 # Enable the external AirPods plugin (source installed out-of-band, see above).
 | .plugins = ((.plugins // [] | map(select(.id != "io.github.thisisgm.omapods"))) + [{"id": "io.github.thisisgm.omapods"}])
 | .disabledPlugins = ((.disabledPlugins // [] | map(select(. != "omarchy.lock"))) + ["omarchy.lock"])
