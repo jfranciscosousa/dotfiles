@@ -1,16 +1,15 @@
-{{/*
+{{- /*
 Generate the user-owned Omarchy shell config from the installed defaults.
 Omarchy does not merge a user shell.json with its defaults, so keeping only
 these customizations here lets upstream layout changes apply on chezmoi apply.
-*/}}
-{{/*
+
 External plugins are installed out-of-band and must be restored manually on a
 new machine:
   omarchy plugin add https://github.com/thisisgm/omarchy-pods --enable
   ~/.config/omarchy/plugins/io.github.thisisgm.omapods/setup
 setup installs build deps, builds librepods into ~/.local, and enables
 librepods.service (user unit). Only the enable state below is managed here.
-*/}}
+*/ -}}
 {{- output "bash" "-c" `
 set -euo pipefail
 
@@ -40,6 +39,8 @@ def insert_after($anchor; $item):
   | remove_id("jfranciscosousa.spotify-player")
   | remove_id("jfranciscosousa.system-usage")
   | remove_id("jfranciscosousa.notification-center")
+  | remove_id("37signals.hey")
+  | insert_after("omarchy.tray"; {"id": "37signals.hey", "openAction": "browser"})
   | insert_after("omarchy.audio"; {"id": "jfranciscosousa.system-usage"})
   | insert_after("omarchy.audio"; {"id": "io.github.thisisgm.omapods"})
   | insert_after("io.github.thisisgm.omapods"; {"id": "omarchy.tailscale"})
