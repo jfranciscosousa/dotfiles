@@ -86,16 +86,25 @@ If a safe environment cannot be identified, stop and report what is missing.
 Use the repository’s installed Playwright dependency, browser binary, and established configuration
 when available.
 
+If the repository lacks a usable Playwright setup, check for an existing global Playwright
+installation. Confirm that the `playwright` command is available. If Chromium is missing, install
+only Chromium with `playwright install chromium` before using the global installation.
+
+Use the global installation only for the current run. Do not add it to the repository, modify the
+repository's package or configuration files, or use package runners that can download it implicitly.
+
 Do not silently:
 
 - Install Playwright
-- Download browser binaries
 - Invoke package runners that download missing packages
 - Install another browser framework
 - Modify package manifests or lockfiles
 
-If the repository lacks a usable Playwright setup, report the missing prerequisite and ask before
-modifying the repository.
+When using an existing global Playwright installation, `playwright install chromium` is the only
+permitted prerequisite change. Do not make repository or configuration changes to prepare it.
+
+If neither the repository setup nor the global installation is usable after that Chromium install,
+report the missing prerequisite.
 
 ## Seed and authentication policy
 
