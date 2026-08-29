@@ -1,6 +1,9 @@
 # Ghostty Configuration
 # Place this in ~/.config/ghostty/config
 
+# Keep Ghostty's base palette in sync with the current Omarchy theme.
+config-file = ?"~/.local/state/omarchy/current/theme/ghostty.conf"
+
 # Tab management
 keybind = ctrl+w=close_tab
 keybind = ctrl+t=new_tab

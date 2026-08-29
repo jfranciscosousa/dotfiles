@@ -34,38 +34,7 @@ fi
 unset mise_completion
 
 {{ if and (eq .chezmoi.os "linux") (lookPath "omarchy") -}}
-omarchy_colors="$HOME/.local/state/omarchy/current/theme/colors.toml"
-[[ -r "$omarchy_colors" ]] || omarchy_colors="$HOME/.config/omarchy/current/theme/colors.toml"
-
-if [[ -r "$omarchy_colors" ]]; then
-  while IFS='=' read -r color_name color_value; do
-    color_name=${color_name//[[:space:]]/}
-    color_value=${color_value//[[:space:]]/}
-    color_value=${color_value//\"/}
-
-    case "$color_name" in
-      foreground|dark_foreground|red|yellow|green|blue|magenta)
-        typeset "omarchy_$color_name=$color_value"
-        ;;
-    esac
-  done < "$omarchy_colors"
-
-  GEOMETRY_COLOR_PROMPT=${omarchy_foreground:-white}
-  GEOMETRY_COLOR_ROOT=${omarchy_red:-red}
-  GEOMETRY_COLOR_DIR=${omarchy_blue:-blue}
-  GEOMETRY_COLOR_EXIT_VALUE=${omarchy_red:-red}
-  GEOMETRY_COLOR_GIT_DIRTY=${omarchy_yellow:-yellow}
-  GEOMETRY_COLOR_GIT_CLEAN=${omarchy_green:-green}
-  GEOMETRY_COLOR_GIT_BARE=${omarchy_blue:-blue}
-  GEOMETRY_COLOR_GIT_CONFLICTS_UNSOLVED=${omarchy_red:-red}
-  GEOMETRY_COLOR_GIT_CONFLICTS_SOLVED=${omarchy_green:-green}
-  GEOMETRY_COLOR_GIT_BRANCH=${omarchy_dark_foreground:-242}
-  GEOMETRY_COLOR_GIT_STASHES=${omarchy_magenta:-144}
-fi
-
-unset omarchy_colors color_name color_value
-unset omarchy_foreground omarchy_dark_foreground omarchy_red omarchy_yellow
-unset omarchy_green omarchy_blue omarchy_magenta
+[[ -r "$HOME/.zsh/omarchy-theme.zsh" ]] && source "$HOME/.zsh/omarchy-theme.zsh"
 {{ end -}}
 
 zgen_dir="${ZGEN_DIR:-$HOME/.zgen}"
@@ -95,6 +64,13 @@ else
   zgen save
 fi
 unset zgen_dir prezto_dir geometry_dir
+
+{{ if and (eq .chezmoi.os "linux") (lookPath "omarchy") -}}
+if (( $+functions[_omarchy_zsh_theme_finish] )); then
+  _omarchy_zsh_theme_finish
+  unfunction _omarchy_zsh_theme_finish
+fi
+{{ end -}}
 
 # Prezto skips its completion module for dumb terminals. Keep completion
 # available there too, but never initialize it a second time.
@@ -144,7 +120,7 @@ if (( $+commands[direnv] )); then
   fi
 fi
 # Geometry stuff
-GEOMETRY_PROMPT_PREFIX="%F{$GEOMETRY_COLOR_DIR}$USER"
+GEOMETRY_PROMPT_PREFIX="%F{$GEOMETRY_COLOR_PROMPT}$USER%f"
 # Custom aliases
 source "$HOME/.zsh/aliases.sh"
 
