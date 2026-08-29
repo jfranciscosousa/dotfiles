@@ -362,8 +362,10 @@ Rerun the recording when a material presentation defect makes it difficult to fo
 
 Do not install media-inspection or conversion tools without permission.
 
-Keep Playwright’s native video format unless the user requests another format. Convert only with
-already available tooling, and preserve the original until conversion succeeds.
+Deliver every saved video as MP4 unless the user requests another format. Convert Playwright’s
+native video with already available tooling, preserve the original until conversion succeeds, then
+remove it unless the user requested the native file. If no available tooling can produce MP4, report
+the missing prerequisite instead of delivering the native video as the requested result.
 
 ## Teardown
 
