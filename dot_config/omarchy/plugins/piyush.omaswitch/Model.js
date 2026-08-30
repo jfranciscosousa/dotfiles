@@ -40,7 +40,11 @@ function position(window, axis) {
 function sortedWindows(values) {
   var source = values && typeof values.slice === "function" ? values.slice() : [];
   var decorated = [];
-  for (var i = 0; i < source.length; i++) decorated.push({ value: source[i], index: i });
+  for (var i = 0; i < source.length; i++) {
+    // Ignore foreign toplevel helper surfaces that have no Hyprland client.
+    if (!source[i] || !source[i].address) continue;
+    decorated.push({ value: source[i], index: i });
+  }
   decorated.sort(function (left, right) {
     return (
       workspaceRank(left.value) - workspaceRank(right.value) ||
