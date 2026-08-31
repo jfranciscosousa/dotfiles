@@ -11,7 +11,9 @@ Panel {
   ipcTarget: moduleName
 
   readonly property string historyDir: Quickshell.env("HOME") + "/.local/state/omarchy/notifications/history"
+  readonly property string imagesDir: Quickshell.env("HOME") + "/.local/state/omarchy/notifications/images"
   readonly property string focusStatePath: Quickshell.env("HOME") + "/.local/state/omarchy/notification-center.json"
+  readonly property string focusAppCommand: Quickshell.env("OMARCHY_PATH") + "/bin/omarchy-hyprland-focus-app"
   readonly property var notificationService: bar && bar.shell
     ? bar.shell.firstPartyServiceFor("omarchy.notifications")
     : null
@@ -26,6 +28,8 @@ Panel {
   property double focusUntil: 0
   property bool focusStateLoaded: false
   property bool applyingFocusState: false
+  property var groupedHistory: []
+  property var expandedGroups: ({})
 
   readonly property bool timedFocus: focusMode === "1h" || focusMode === "4h"
   readonly property string focusStatus: focusMode === "off"
@@ -50,10 +54,21 @@ Panel {
         var entry = JSON.parse(line)
         var sourceApp = String(entry.app || "Notification")
         var sourceBody = String(entry.body || "")
+        var app = webAppName(sourceApp, sourceBody)
+        var summary = String(entry.summary || "Notification")
+        var body = displayBody(sourceBody, sourceApp)
+
+        if (summary.toLowerCase() === app.toLowerCase() && body !== "") {
+          summary = body
+          body = ""
+        }
+
         rows.push({
-          app: webAppName(sourceApp, sourceBody),
-          summary: String(entry.summary || "Notification"),
-          body: displayBody(sourceBody, sourceApp),
+          app: app,
+          summary: summary,
+          body: body,
+          focusPattern: notificationFocusPattern(sourceApp, sourceBody),
+          fileName: String(entry.timestamp || 0) + "-" + String(entry.originalId || 0) + ".json",
           timestamp: Number(entry.timestamp || 0)
         })
       } catch (error) {
@@ -62,8 +77,40 @@ Panel {
     }
 
     rows.sort(function(a, b) { return b.timestamp - a.timestamp })
+
+    var groups = []
+    var groupByApp = {}
+    for (var row = 0; row < rows.length; row++) {
+      var notification = rows[row]
+      var groupKey = "$" + notification.app.toLowerCase()
+      var groupIndex = groupByApp[groupKey]
+      if (groupIndex === undefined) {
+        groupIndex = groups.length
+        groupByApp[groupKey] = groupIndex
+        groups.push({
+          key: groupKey,
+          app: notification.app,
+          notifications: []
+        })
+      }
+      groups[groupIndex].notifications.push(notification)
+    }
+
+    groupedHistory = groups
     historyModel.clear()
-    for (var row = 0; row < rows.length; row++) historyModel.append(rows[row])
+    for (var historyRow = 0; historyRow < rows.length; historyRow++)
+      historyModel.append(rows[historyRow])
+  }
+
+  function isGroupExpanded(groupKey) {
+    return !!expandedGroups[groupKey]
+  }
+
+  function toggleGroup(groupKey) {
+    var next = {}
+    for (var key in expandedGroups) next[key] = expandedGroups[key]
+    next[groupKey] = !next[groupKey]
+    expandedGroups = next
   }
 
   function formatTimestamp(timestamp) {
@@ -82,6 +129,32 @@ Panel {
     return name.indexOf("chrom") >= 0 || name.indexOf("brave") >= 0
       || name.indexOf("vivaldi") >= 0 || name.indexOf("edge") >= 0
       || name.indexOf("opera") >= 0
+  }
+
+  function notificationFocusPattern(app, body) {
+    if (!isChromiumApp(app)) return String(app || "")
+
+    var match = String(body || "").match(/<a\b[^>]*\bhref=["'](?:https?:\/\/)?([^\/"'?#]+)[^"']*["']/i)
+    return match ? String(match[1] || "").replace(/:\d+$/, "") : String(app || "")
+  }
+
+  function focusNotification(pattern) {
+    if (!pattern || focusAppProcess.running) return
+    focusAppProcess.command = [root.focusAppCommand, String(pattern)]
+    focusAppProcess.running = true
+  }
+
+  function dismissGroup(notifications) {
+    if (dismissGroupProcess.running || !notifications || notifications.length === 0) return
+
+    var command = [
+      "bash", "-c",
+      "history=$1 images=$2; shift 2; for name; do [[ $name == *.json && $name != */* ]] || continue; stem=${name%.json}; rm -f -- \"$history/$name\" \"$images/$stem\"-*; done",
+      "--", root.historyDir, root.imagesDir
+    ]
+    for (var i = 0; i < notifications.length; i++) command.push(notifications[i].fileName)
+    dismissGroupProcess.command = command
+    dismissGroupProcess.running = true
   }
 
   function webAppName(app, body) {
@@ -141,6 +214,10 @@ Panel {
 
   function toggleFocus() {
     setFocusMode(focusEnabled ? "off" : "on")
+  }
+
+  function expireTimedFocusIfNeeded() {
+    if (timedFocus && focusUntil <= Date.now()) setFocusMode("off")
   }
 
   function loadFocusState(raw) {
@@ -206,6 +283,8 @@ Panel {
 
   function clearHistory() {
     if (notificationService) notificationService.clearHistory()
+    groupedHistory = []
+    expandedGroups = ({})
     historyModel.clear()
     refreshAfterClear.restart()
   }
@@ -213,7 +292,10 @@ Panel {
   implicitWidth: button.implicitWidth
   implicitHeight: button.implicitHeight
 
-  onOpenedChanged: if (opened) refreshHistory()
+  onOpenedChanged: if (opened) {
+    expireTimedFocusIfNeeded()
+    refreshHistory()
+  }
   onNotificationServiceChanged: applyLoadedFocusState()
   onFocusEnabledChanged: syncExternalFocusState()
   Component.onCompleted: focusStateFile.reload()
@@ -230,6 +312,15 @@ Panel {
     printErrors: false
     onLoaded: root.loadFocusState(text())
     onLoadFailed: root.loadFocusState("")
+  }
+
+  Process {
+    id: focusAppProcess
+  }
+
+  Process {
+    id: dismissGroupProcess
+    onExited: root.refreshHistory()
   }
 
   Process {
@@ -259,10 +350,10 @@ Panel {
   }
 
   Timer {
-    interval: Math.max(250, root.focusUntil - Date.now())
-    running: root.focusStateLoaded && root.timedFocus && root.focusUntil > Date.now()
-    repeat: false
-    onTriggered: root.setFocusMode("off")
+    interval: 1000
+    running: root.focusStateLoaded && root.timedFocus
+    repeat: true
+    onTriggered: root.expireTimedFocusIfNeeded()
   }
 
   BarIconButton {
@@ -496,78 +587,172 @@ Panel {
           }
 
           Repeater {
-            model: historyModel
+            model: root.groupedHistory
 
-            Rectangle {
-              required property string app
-              required property string summary
-              required property string body
-              required property double timestamp
+            Column {
+              id: appGroup
+              required property var modelData
+              readonly property bool expanded: root.isGroupExpanded(modelData.key)
 
               width: historyColumn.width
-              height: notificationContent.implicitHeight + Style.space(24)
-              radius: Style.cornerRadius
-              color: Color.notifications.background
-              border.width: 1
-              border.color: Util.alpha(Color.notifications.border, 0.45)
+              spacing: Style.space(6)
 
-              Column {
-                id: notificationContent
-                anchors.top: parent.top
-                anchors.left: parent.left
-                anchors.right: parent.right
-                anchors.margins: Style.space(12)
-                spacing: Style.space(4)
+              Rectangle {
+                width: parent.width
+                height: Style.space(38)
+                radius: Style.cornerRadius
+                color: groupArea.containsMouse
+                  ? Util.alpha(root.foreground, 0.12)
+                  : Color.menu.selectedBackground
 
                 Row {
-                  width: parent.width
+                  anchors.left: parent.left
+                  anchors.right: parent.right
+                  anchors.verticalCenter: parent.verticalCenter
+                  anchors.leftMargin: Style.space(12)
+                  anchors.rightMargin: Style.space(48)
+                  spacing: Style.space(8)
 
                   Text {
-                    width: parent.width - timeLabel.implicitWidth - Style.space(8)
-                    text: app
-                    color: root.dim
+                    width: parent.width - groupCount.implicitWidth - expandIndicator.implicitWidth - parent.spacing * 2
+                    text: appGroup.modelData.app
+                    color: root.foreground
                     font.family: root.fontFamily
-                    font.pixelSize: Style.font.caption
+                    font.pixelSize: Style.font.bodySmall
+                    font.bold: true
                     elide: Text.ElideRight
                   }
 
                   Text {
-                    id: timeLabel
-                    text: root.formatTimestamp(timestamp)
+                    id: groupCount
+                    text: appGroup.modelData.notifications.length
                     color: root.dim
                     font.family: root.fontFamily
                     font.pixelSize: Style.font.caption
                   }
+
+                  Text {
+                    id: expandIndicator
+                    text: appGroup.expanded ? "▾" : "›"
+                    color: root.dim
+                    font.family: root.fontFamily
+                    font.pixelSize: Style.font.body
+                  }
                 }
 
-                Text {
-                  width: parent.width
-                  text: summary
-                  color: root.foreground
-                  font.family: "Liberation Sans"
-                  font.pixelSize: Style.font.body
-                  font.bold: true
-                  wrapMode: Text.WordWrap
-                  maximumLineCount: 2
-                  elide: Text.ElideRight
+                MouseArea {
+                  id: groupArea
+                  anchors.fill: parent
+                  hoverEnabled: true
+                  cursorShape: Qt.PointingHandCursor
+                  onClicked: root.toggleGroup(appGroup.modelData.key)
                 }
 
-                Text {
-                  visible: body !== ""
-                  width: parent.width
-                  text: body
-                  textFormat: Text.StyledText
-                  color: root.dim
-                  font.family: "Liberation Sans"
-                  font.pixelSize: Style.font.bodySmall
-                  wrapMode: Text.WordWrap
-                  maximumLineCount: 2
-                  elide: Text.ElideRight
+                Rectangle {
+                  width: Style.space(30)
+                  height: width
+                  anchors.right: parent.right
+                  anchors.rightMargin: Style.space(4)
+                  anchors.verticalCenter: parent.verticalCenter
+                  radius: width / 2
+                  color: dismissGroupArea.containsMouse
+                    ? Util.alpha(root.foreground, 0.14)
+                    : "transparent"
+
+                  Text {
+                    anchors.centerIn: parent
+                    text: "󰅖"
+                    color: root.dim
+                    font.family: root.fontFamily
+                    font.pixelSize: Style.font.body
+                  }
+
+                  MouseArea {
+                    id: dismissGroupArea
+                    anchors.fill: parent
+                    hoverEnabled: true
+                    cursorShape: Qt.PointingHandCursor
+                    onClicked: root.dismissGroup(appGroup.modelData.notifications)
+                  }
+                }
+              }
+
+              Column {
+                width: parent.width
+                spacing: Style.space(6)
+                visible: appGroup.expanded
+
+                Repeater {
+                  model: appGroup.modelData.notifications
+
+                  Rectangle {
+                  required property var modelData
+
+                  width: historyColumn.width
+                  height: notificationContent.implicitHeight + Style.space(24)
+                  radius: Style.cornerRadius
+                  color: notificationArea.containsMouse
+                    ? Util.alpha(Color.notifications.background, 0.82)
+                    : Color.notifications.background
+                  border.width: 1
+                  border.color: Util.alpha(Color.notifications.border, 0.45)
+
+                  Column {
+                    id: notificationContent
+                    anchors.top: parent.top
+                    anchors.left: parent.left
+                    anchors.right: parent.right
+                    anchors.margins: Style.space(12)
+                    spacing: Style.space(4)
+
+                    Text {
+                      width: parent.width
+                      text: root.formatTimestamp(modelData.timestamp)
+                      color: root.dim
+                      font.family: root.fontFamily
+                      font.pixelSize: Style.font.caption
+                      horizontalAlignment: Text.AlignRight
+                    }
+
+                    Text {
+                      width: parent.width
+                      text: modelData.summary
+                      color: root.foreground
+                      font.family: "Liberation Sans"
+                      font.pixelSize: Style.font.body
+                      font.bold: true
+                      wrapMode: Text.WordWrap
+                      maximumLineCount: 2
+                      elide: Text.ElideRight
+                    }
+
+                    Text {
+                      visible: modelData.body !== ""
+                      width: parent.width
+                      text: modelData.body
+                      textFormat: Text.StyledText
+                      color: root.dim
+                      font.family: "Liberation Sans"
+                      font.pixelSize: Style.font.bodySmall
+                      wrapMode: Text.WordWrap
+                      maximumLineCount: 4
+                      elide: Text.ElideRight
+                    }
+                  }
+
+                  MouseArea {
+                    id: notificationArea
+                    anchors.fill: parent
+                    hoverEnabled: true
+                    cursorShape: Qt.PointingHandCursor
+                    onClicked: root.focusNotification(modelData.focusPattern)
+                  }
                 }
               }
             }
           }
         }
+      }
       }
 
       Item {

@@ -47,14 +47,15 @@ def insert_after($anchor; $item):
   | insert_after("omarchy.tailscale"; {"id": "jfranciscosousa.spotify-player"})
   | insert_after("omarchy.power"; {"id": "jfranciscosousa.notification-center"})
 )
-# Enable the cloned lock plugin and disable the built-in plugin it replaces.
+# Enable cloned services and disable the built-in plugins they replace.
 | .plugins = ((.plugins // [] | map(select(.id != "jfranciscosousa.lock"))) + [{"id": "jfranciscosousa.lock"}])
+| .plugins = ((.plugins // [] | map(select(.id != "jfranciscosousa.notifications"))) + [{"id": "jfranciscosousa.notifications"}])
 # Enable the vendored OmaSwitch overlay.
 | .plugins = ((.plugins // [] | map(select(.id != "piyush.omaswitch"))) + [{"id": "piyush.omaswitch"}])
 # Enable the external AirPods plugin (source installed out-of-band, see above).
 | .plugins = ((.plugins // [] | map(select(.id != "io.github.thisisgm.omapods"))) + [{"id": "io.github.thisisgm.omapods"}])
-| .disabledPlugins = ((.disabledPlugins // [] | map(select(. != "omarchy.lock"))) + ["omarchy.lock"])
-# Restore the built-in lock plugin if the cloned plugin is removed later.
-| .cloneSourceRestores = ((.cloneSourceRestores // [] | map(select(. != "jfranciscosousa.lock"))) + ["jfranciscosousa.lock"])
+| .disabledPlugins = ((.disabledPlugins // [] | map(select(. != "omarchy.lock" and . != "omarchy.notifications"))) + ["omarchy.lock", "omarchy.notifications"])
+# Restore each built-in plugin if its clone is removed later.
+| .cloneSourceRestores = ((.cloneSourceRestores // [] | map(select(. != "jfranciscosousa.lock" and . != "jfranciscosousa.notifications"))) + ["jfranciscosousa.lock", "jfranciscosousa.notifications"])
 ' /usr/share/omarchy/config/omarchy/shell.json
 ` -}}
