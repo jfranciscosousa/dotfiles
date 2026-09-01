@@ -32,7 +32,7 @@
   "defaultModel" $defaultModel
   "hideThinkingBlock" true
   "enabledModels" $enabledModels
-  "npmCommand" (list "mise" "exec" "pnpm@11.21.0" "--" "pnpm")
+  "npmCommand" (list "mise" "exec" "pnpm@12.1.0" "--" "pnpm" "--ignore-scripts")
   "packages" (list
     "git:github.com/sting8k/pi-vcc@f7b80bbbe22315acf9f7925c0c3be2d4ae9feee5"
   )
