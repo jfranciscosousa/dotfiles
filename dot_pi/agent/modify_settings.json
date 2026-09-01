@@ -30,6 +30,7 @@
   "theme" "dark"
   "defaultProvider" $provider
   "defaultModel" $defaultModel
+  "defaultThinkingLevel" "medium"
   "hideThinkingBlock" true
   "enabledModels" $enabledModels
   "npmCommand" (list "mise" "exec" "pnpm@12.1.0" "--" "pnpm" "--ignore-scripts")
