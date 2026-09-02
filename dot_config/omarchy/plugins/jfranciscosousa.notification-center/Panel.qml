@@ -605,38 +605,50 @@ Panel {
                   ? Util.alpha(root.foreground, 0.12)
                   : Color.menu.selectedBackground
 
-                Row {
+                Text {
                   anchors.left: parent.left
-                  anchors.right: parent.right
-                  anchors.verticalCenter: parent.verticalCenter
+                  anchors.right: groupMeta.left
                   anchors.leftMargin: Style.space(12)
-                  anchors.rightMargin: Style.space(48)
-                  spacing: Style.space(8)
+                  anchors.rightMargin: Style.space(8)
+                  anchors.verticalCenter: parent.verticalCenter
+                  text: appGroup.modelData.app
+                  color: root.foreground
+                  font.family: root.fontFamily
+                  font.pixelSize: Style.font.bodySmall
+                  font.bold: true
+                  elide: Text.ElideRight
+                }
 
-                  Text {
-                    width: parent.width - groupCount.implicitWidth - expandIndicator.implicitWidth - parent.spacing * 2
-                    text: appGroup.modelData.app
-                    color: root.foreground
-                    font.family: root.fontFamily
-                    font.pixelSize: Style.font.bodySmall
-                    font.bold: true
-                    elide: Text.ElideRight
+                Row {
+                  id: groupMeta
+                  height: parent.height
+                  anchors.right: dismissGroupButton.left
+                  spacing: Style.space(2)
+
+                  Item {
+                    width: Style.space(24)
+                    height: parent.height
+
+                    Text {
+                      anchors.centerIn: parent
+                      text: appGroup.modelData.notifications.length
+                      color: root.dim
+                      font.family: root.fontFamily
+                      font.pixelSize: Style.font.caption
+                    }
                   }
 
-                  Text {
-                    id: groupCount
-                    text: appGroup.modelData.notifications.length
-                    color: root.dim
-                    font.family: root.fontFamily
-                    font.pixelSize: Style.font.caption
-                  }
+                  Item {
+                    width: Style.space(24)
+                    height: parent.height
 
-                  Text {
-                    id: expandIndicator
-                    text: appGroup.expanded ? "▾" : "›"
-                    color: root.dim
-                    font.family: root.fontFamily
-                    font.pixelSize: Style.font.body
+                    Text {
+                      anchors.centerIn: parent
+                      text: appGroup.expanded ? "󰅀" : "󰅂"
+                      color: root.dim
+                      font.family: root.fontFamily
+                      font.pixelSize: Style.font.icon
+                    }
                   }
                 }
 
@@ -649,6 +661,7 @@ Panel {
                 }
 
                 Rectangle {
+                  id: dismissGroupButton
                   width: Style.space(30)
                   height: width
                   anchors.right: parent.right
@@ -705,25 +718,34 @@ Panel {
                     anchors.margins: Style.space(12)
                     spacing: Style.space(4)
 
-                    Text {
+                    Item {
                       width: parent.width
-                      text: root.formatTimestamp(modelData.timestamp)
-                      color: root.dim
-                      font.family: root.fontFamily
-                      font.pixelSize: Style.font.caption
-                      horizontalAlignment: Text.AlignRight
-                    }
+                      height: Math.max(notificationSummary.implicitHeight, notificationTimestamp.implicitHeight)
 
-                    Text {
-                      width: parent.width
-                      text: modelData.summary
-                      color: root.foreground
-                      font.family: "Liberation Sans"
-                      font.pixelSize: Style.font.body
-                      font.bold: true
-                      wrapMode: Text.WordWrap
-                      maximumLineCount: 2
-                      elide: Text.ElideRight
+                      Text {
+                        id: notificationSummary
+                        anchors.left: parent.left
+                        anchors.right: notificationTimestamp.left
+                        anchors.rightMargin: Style.space(12)
+                        text: modelData.summary
+                        color: root.foreground
+                        font.family: "Liberation Sans"
+                        font.pixelSize: Style.font.body
+                        font.bold: true
+                        wrapMode: Text.WordWrap
+                        maximumLineCount: 2
+                        elide: Text.ElideRight
+                      }
+
+                      Text {
+                        id: notificationTimestamp
+                        anchors.top: parent.top
+                        anchors.right: parent.right
+                        text: root.formatTimestamp(modelData.timestamp)
+                        color: root.dim
+                        font.family: root.fontFamily
+                        font.pixelSize: Style.font.caption
+                      }
                     }
 
                     Text {
