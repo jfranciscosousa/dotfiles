@@ -3,16 +3,20 @@ if [[ -n "${ZSH_DEBUGRC+1}" ]]; then
 fi
 
 {{ if eq .chezmoi.os "darwin" }}
-# `brew shellenv` is deterministic for this installation; setting its values
-# directly avoids launching brew and path_helper for every interactive shell.
-export HOMEBREW_PREFIX=/opt/homebrew
-export HOMEBREW_CELLAR=/opt/homebrew/Cellar
-export HOMEBREW_REPOSITORY=/opt/homebrew
-export INFOPATH="/opt/homebrew/share/info:${INFOPATH:-}"
-path=(/opt/homebrew/bin /opt/homebrew/sbin $path)
-fpath=(/opt/homebrew/share/zsh/site-functions $fpath)
-export FPATH
-[[ -z "${MANPATH:-}" ]] || export MANPATH=":${MANPATH#:}"
+if [[ -x /opt/workbrew/bin/brew ]]; then
+  eval "$(/opt/workbrew/bin/brew shellenv)"
+else
+  # `brew shellenv` is deterministic for this installation; setting its values
+  # directly avoids launching brew and path_helper for every interactive shell.
+  export HOMEBREW_PREFIX=/opt/homebrew
+  export HOMEBREW_CELLAR=/opt/homebrew/Cellar
+  export HOMEBREW_REPOSITORY=/opt/homebrew
+  export INFOPATH="/opt/homebrew/share/info:${INFOPATH:-}"
+  path=(/opt/homebrew/bin /opt/homebrew/sbin $path)
+  fpath=(/opt/homebrew/share/zsh/site-functions $fpath)
+  export FPATH
+  [[ -z "${MANPATH:-}" ]] || export MANPATH=":${MANPATH#:}"
+fi
 {{ end }}
 
 # Put every custom completion directory on fpath before Prezto performs the one
