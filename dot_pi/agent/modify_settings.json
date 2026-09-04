@@ -14,6 +14,7 @@
   (printf "%s/gpt-5.6-luna" $provider)
   (printf "%s/gpt-5.6-sol" $provider)
   (printf "%s/gpt-5.6-terra" $provider)
+  (printf "%s/gpt-6-astra" $provider)
 -}}
 {{- if hasPrefix "Remote-" .chezmoi.hostname -}}
 {{- $anthropicModels := list
@@ -33,7 +34,7 @@
   "defaultThinkingLevel" "medium"
   "hideThinkingBlock" true
   "enabledModels" $enabledModels
-  "npmCommand" (list "mise" "exec" "pnpm@12.1.0" "--" "pnpm" "--ignore-scripts")
+  "npmCommand" (list "mise" "exec" "pnpm@11.22.0" "--" "pnpm" "--ignore-scripts")
   "packages" (list
     "git:github.com/sting8k/pi-vcc@f7b80bbbe22315acf9f7925c0c3be2d4ae9feee5"
   )
