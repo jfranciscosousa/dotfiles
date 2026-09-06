@@ -39,6 +39,39 @@ unset mise_completion
 
 {{ if and (eq .chezmoi.os "linux") (lookPath "omarchy") -}}
 [[ -r "$HOME/.zsh/omarchy-theme.zsh" ]] && source "$HOME/.zsh/omarchy-theme.zsh"
+{{ else if eq .chezmoi.os "darwin" -}}
+# Match Ghostty's macOS fallback palette before Geometry loads its plugins.
+typeset -g GEOMETRY_COLOR_PROMPT='#7aa2f7'
+typeset -g GEOMETRY_COLOR_ROOT='#f7768e'
+typeset -g GEOMETRY_COLOR_DIR='#7aa2f7'
+typeset -g GEOMETRY_COLOR_EXIT_VALUE='#f7768e'
+typeset -g GEOMETRY_COLOR_GIT_DIRTY='#e0af68'
+typeset -g GEOMETRY_COLOR_GIT_CLEAN='#9ece6a'
+typeset -g GEOMETRY_COLOR_GIT_BARE='#7aa2f7'
+typeset -g GEOMETRY_COLOR_GIT_CONFLICTS_UNSOLVED='#f7768e'
+typeset -g GEOMETRY_COLOR_GIT_CONFLICTS_SOLVED='#9ece6a'
+typeset -g GEOMETRY_COLOR_GIT_BRANCH='#565f89'
+typeset -g GEOMETRY_COLOR_GIT_STASHES='#bb9af7'
+typeset -g GEOMETRY_COLOR_HG_DIRTY='#e0af68'
+typeset -g GEOMETRY_COLOR_HG_CLEAN='#9ece6a'
+typeset -g GEOMETRY_COLOR_HG_BRANCH='#565f89'
+typeset -g GEOMETRY_COLOR_JOBS='#7dcfff'
+typeset -g GEOMETRY_COLOR_TIME_SHORT='#9ece6a'
+typeset -g GEOMETRY_COLOR_TIME_NEUTRAL='#a9b1d6'
+typeset -g GEOMETRY_COLOR_TIME_LONG='#f7768e'
+typeset -g GEOMETRY_COLOR_NO_TIME='#565f89'
+typeset -g GEOMETRY_COLOR_DOCKER_MACHINE='#7aa2f7'
+typeset -g GEOMETRY_COLOR_KUBE='#7dcfff'
+typeset -g GEOMETRY_COLOR_PACKAGER_VERSION='#9ece6a'
+typeset -g GEOMETRY_COLOR_RUBY_RVM_VERSION='#f7768e'
+typeset -g GEOMETRY_COLOR_RUSTUP_STABLE='#9ece6a'
+typeset -g GEOMETRY_COLOR_RUSTUP_BETA='#e0af68'
+typeset -g GEOMETRY_COLOR_RUSTUP_NIGHTLY='#f7768e'
+typeset -g GEOMETRY_COLOR_RUSTUP_stable='#9ece6a'
+typeset -g GEOMETRY_COLOR_RUSTUP_beta='#e0af68'
+typeset -g GEOMETRY_COLOR_RUSTUP_nightly='#f7768e'
+typeset -g GEOMETRY_COLOR_VIRTUALENV='#bb9af7'
+typeset -g GEOMETRY_COLOR_CONDA='#7dcfff'
 {{ end -}}
 
 zgen_dir="${ZGEN_DIR:-$HOME/.zgen}"
