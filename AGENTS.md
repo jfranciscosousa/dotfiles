@@ -13,10 +13,41 @@ dotfiles by maintaining a source directory (this repo) and applying them to the 
   `#!/usr/bin/env bash` and `set -euo pipefail`, and stay compatible with macOS Bash 3.2 unless
   another non-shell runtime is explicitly required. zsh is only allowed for files sourced from zsh
   config files. POSIX sh is banned; use Bash instead.
-- On every turn that changes files, run `rtk pnpm exec lint-staged --diff="HEAD"` only on the
-  changed files. Never run the full-project lint command or `lint:staged` package script.
+- Validate only task changes using the scoped checks below. Never run the full-project lint command
+  or `lint:staged` package script.
+
+## Agent instruction sources
+
+- `dot_brains/AGENTS.md`: personal tool, installation, shell, and writing preferences.
+- `dot_brains/CRITICAL.md`: approval restrictions injected by supported agent integrations.
+- `dot_brains/RTK.md`: output-filter guidance.
+- `dot_brains/skills/`: shared on-demand workflows and their references.
+- `features/agent-guidelines.md`: instruction routing, audit findings, sources, and evaluation
+  cases. Read it when maintaining agent instructions, not for ordinary dotfile edits.
+
+Edit these canonical sources rather than home-directory symlink targets or duplicated generated
+rules. Keep always-loaded rules broadly applicable; put task-specific detail in skills or
+references. Do not edit externally installed skills or vendor documentation merely to make wording
+consistent.
+
+Before editing, inspect `git status --short`. Preserve unrelated changes. Inspect the final diff and
+report checks that passed, failed, or were not run. Do not commit, stage, or apply changes unless
+explicitly requested.
+
+## Scoped validation
+
+Use `rtk pnpm exec lint-staged --diff="HEAD"` only with explicit staging approval: it can change the
+index. Restrict its config to exact task paths when unrelated changes exist. Without approval,
+report that the chain was skipped and run known read-only checks on exact paths; for Markdown, use
+`rtk pnpm exec oxfmt --check --disable-nested-config <paths>`. Check untracked task files
+separately. Check that validation leaves the index unchanged unless staging was authorized. See
+`features/agent-guidelines.md` for the staging incident and validation limitations.
 
 ## Common Chezmoi Commands
+
+Read-only inspection and previews are allowed. The apply, add, re-add, and edit commands below
+change state and require explicit authorization for their effects. Prefer source-file edits for this
+work.
 
 ```sh
 # Apply dotfiles to home directory
@@ -43,12 +74,12 @@ chezmoi apply --verbose
 
 Chezmoi uses filename prefixes to encode metadata:
 
-| Prefix         | Meaning                                            |
-| -------------- | -------------------------------------------------- |
-| `dot_`         | Maps to a dotfile (e.g., `dot_zshrc` → `~/.zshrc`) |
-| `private_`     | Encrypted/sensitive file                           |
-| `executable_`  | File should be executable (chmod +x)               |
-| `.tmpl` suffix | Chezmoi template — processed before applying       |
+| Prefix         | Meaning                                                |
+| -------------- | ------------------------------------------------------ |
+| `dot_`         | Maps to a dotfile (e.g., `dot_zshrc` → `~/.zshrc`)     |
+| `private_`     | Restricts target permissions; does not encrypt content |
+| `executable_`  | File should be executable (chmod +x)                   |
+| `.tmpl` suffix | Chezmoi template — processed before applying           |
 
 Directories follow the same pattern (e.g., `dot_config/` → `~/.config/`).
 

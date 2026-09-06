@@ -2,13 +2,24 @@
 
 Personal dotfiles managed with [chezmoi](https://www.chezmoi.io/).
 
+## Agent guidelines
+
+Shared instructions and skills live in `dot_brains/`. Edit the chezmoi sources, not their deployed
+home-directory targets. See [agent guideline maintenance](features/agent-guidelines.md) for routing,
+review findings, official references, and behavioral evaluation cases. Changes are not active in
+installed agents until separately applied and reloaded as required by each host.
+
 ## Linting
 
 Install repo-local tooling with `pnpm install`. `pnpm install` also installs the Husky pre-commit
 hook.
 
 - `pnpm lint` checks Oxfmt-managed formatting, TOML, JavaScript/TypeScript, Bash, and Zsh syntax.
-- `pnpm lint:staged` checks only currently staged files through lint-staged.
+- `pnpm lint:staged` runs the project type check, then checks staged files through lint-staged.
+- The agent check is `rtk pnpm exec lint-staged --diff="HEAD"`, scoped to task changes. It can stage
+  files, including with `--fail-on-changes`. Without explicit staging approval, use known read-only
+  checks on exact paths instead; see `AGENTS.md`. Check new untracked files too. Agents must not run
+  either full-project script above.
 - `pnpm fmt` runs Oxfmt on supported non-template files.
 
 Oxfmt manages Markdown formatting and prose wrapping at the configured print width, plus

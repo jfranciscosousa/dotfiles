@@ -1,56 +1,55 @@
 # RTK - Rust Token Killer
 
-**Usage**: Token-optimized CLI proxy (60-90% savings on dev operations)
+RTK reduces CLI output sent to the model. It is an output filter, not a permission boundary or a
+substitute for verification.
 
-## Meta Commands (always use rtk directly)
+## Usage
+
+Prefer explicit wrappers for supported commands:
+
+- `rtk git status`, `rtk git diff`, `rtk git log`, `rtk git show`
+- `rtk gh`, `rtk glab`
+- `rtk grep`, `rtk find`, `rtk ls`, `rtk tree`, `rtk diff`
+- `rtk test`, `rtk jest`, `rtk vitest`, `rtk tsc`, `rtk pnpm`
+- `rtk docker`, `rtk kubectl`, `rtk aws`, `rtk psql`
+
+Use native file-reading and search tools when available. In a shell-only environment, use
+`rtk read <file>` for compact inspection. Retain ast-grep for structural searches.
+
+For package scripts named exactly `lint`, use `rtk pnpm run lint`, never bare `pnpm run lint`: RTK
+can rewrite the bare command to `rtk lint` and attempt to run ESLint. Repository-specific check
+scope still applies; this example does not authorize a full-project lint.
+
+Use `rtk proxy <command>` when filtering hides diagnostics or exact output is required. Inspect
+truncated files and diffs completely before making claims that depend on the omitted content. Do not
+rerun a mutating command just to recover its output; inspect existing results or logs instead.
+
+If RTK is unavailable, report it and use the underlying command with the same permission limits. Do
+not install or reconfigure RTK implicitly.
+
+## Automatic rewriting
+
+This repository configures RTK integrations for:
+
+- Claude Code: `PreToolUse` Bash hook in `~/.claude/settings.json`.
+- OpenCode: `tool.execute.before` plugin at `~/.config/opencode/plugins/rtk.ts`.
+- Cursor: `preToolUse` Shell hook in `~/.cursor/hooks.json`.
+- Pi: `tool_call` extension at `~/.pi/agent/extensions/rtk.ts`.
+
+Rewriting depends on the installed version, active hook, and command shape. Do not assume compound
+commands or pipelines are rewritten. Prefer separate tool calls for independent commands and
+explicit wrappers where supported. Never bypass approval restrictions through a wrapper.
+
+## Diagnostics
+
+Use these only when diagnosing RTK, not at the start of every task:
 
 ```bash
-rtk gain              # Show token savings analytics
-rtk gain --history    # Show command usage history with savings
-rtk discover          # Analyze Claude Code history for missed opportunities
-rtk proxy <cmd>       # Execute raw command without filtering (for debugging)
+rtk --version
+rtk gain
+rtk gain --history
+rtk discover
 ```
 
-## Installation Verification
-
-```bash
-rtk --version         # Should show: rtk X.Y.Z
-rtk gain              # Should work (not "command not found")
-which rtk             # Verify correct binary
-```
-
-⚠️ **Name collision**: If `rtk gain` fails, you may have reachingforthejack/rtk (Rust Type Kit)
-installed instead.
-
-## Hook-Based Usage
-
-All other commands are automatically rewritten:
-
-- **Claude Code**: via the `PreToolUse` Bash hook (`rtk hook claude`) in `~/.claude/settings.json`.
-- **OpenCode**: via the `tool.execute.before` plugin at `~/.config/opencode/plugins/rtk.ts`, which
-  calls `rtk rewrite <command>`.
-- **Cursor**: via the `preToolUse` Shell hook (`rtk hook cursor`) in `~/.cursor/hooks.json`.
-- **Pi**: via the `tool_call` extension at `~/.pi/agent/extensions/rtk.ts`, which calls
-  `rtk rewrite <command>`.
-
-Example: `git status` → `rtk git status` (transparent, 0 tokens overhead).
-
-## Prefer rtk wrappers explicitly
-
-For package scripts named exactly `lint`, use `rtk pnpm run lint`, never bare `pnpm run lint`. RTK
-incorrectly rewrites that bare command to `rtk lint` and attempts to run ESLint.
-
-The auto-rewriter only matches **bare commands**. Chained pipelines (`a; b; c`) bypass it because
-the leading verb is `echo` or similar. Reach for rtk wrappers directly:
-
-- `rtk git status/diff/log/branch/show/...`
-- `rtk read <file>` (instead of `cat`/`head`/`tail`)
-- `rtk grep`, `rtk find`, `rtk ls`, `rtk tree`
-- `rtk gh`, `rtk glab` (GitHub/GitLab CLIs)
-- `rtk json` (key-only or compact JSON)
-- `rtk wc`, `rtk env`, `rtk diff`
-- `rtk test`, `rtk jest`, `rtk vitest`, `rtk tsc`, `rtk lint`
-- `rtk docker`, `rtk kubectl`, `rtk aws`, `rtk psql`, `rtk pnpm`
-
-When you need multiple outputs, prefer **separate tool calls** over chained pipelines so each
-command can be rewritten individually.
+`rtk gain` identifies the intended CLI. If it fails, check for a name collision with
+`reachingforthejack/rtk` (Rust Type Kit) before proposing installation changes.

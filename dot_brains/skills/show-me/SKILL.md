@@ -8,6 +8,17 @@ description:
 Help the user understand the current topic of conversation visually. Skip the preamble and keep
 prose brief. Pick the smallest view that makes the key point clear.
 
+## Scope and evidence
+
+Use an inline diagram by default. Inspect relevant code before depicting an existing system. Label
+proposed behavior and illustrative data; do not present them as observed implementation. A request
+for an explanation does not authorize product changes, package installation, or external uploads.
+
+Use code-native tools for diagrams, SVG, HTML, and CSS. Generate raster images only when requested
+or necessary for the visual task and supported by an available authorized tool.
+
+## Choose a view
+
 - Show logic or an algorithm as pseudocode:
 
 ```text
@@ -122,14 +133,23 @@ function expandSkill(command: string): string {
 - For a visual UI, layout, state comparison, or concept too dense for Mermaid, write one focused
   HTML file — a diagram, an infographic, or a short slide deck, whichever fits the point. Match the
   product's colors, type, spacing, and components; use real labels and data; support desktop and
-  mobile. Then open it for the user:
+  mobile. Keep it self-contained where practical; do not load remote scripts, fonts, analytics, or
+  private data into external services. Escape dynamic text rather than inserting unsafe HTML.
 
-```
-Bash(open path/to/show-me-{description}.html)
-```
+  Write only to a repository-approved artifact location or an authorized temporary directory, not to
+  home-directory configs. Provide the local file path. Open it with an available platform-specific
+  tool only when the user requests opening it; do not assume macOS `open` or a visible browser is
+  available. Do not upload it to obtain a shareable URL.
 
 - Place each visual next to the short text it supports. Keep only the calls, files, props, states,
   and boundaries needed to answer the user's current question.
 
 You may use one of these, you may use several, it is unlikely you will use all of them. Use your
 judgement and don't overwhelm the user.
+
+## Verify and deliver
+
+Check labels, arrows, ownership, and ordering against the source or explicitly stated proposal. For
+HTML, check readable contrast, semantic structure, and overflow at the intended viewport sizes with
+available tooling. Report when rendering was not checked. Deliver only the requested views and local
+artifact links; do not install a browser to verify them without permission.
