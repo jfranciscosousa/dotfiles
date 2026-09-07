@@ -140,6 +140,7 @@ Panel {
 
   function focusNotification(pattern) {
     if (!pattern || focusAppProcess.running) return
+    root.close()
     focusAppProcess.command = [root.focusAppCommand, String(pattern)]
     focusAppProcess.running = true
   }
