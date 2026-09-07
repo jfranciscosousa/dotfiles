@@ -12,8 +12,30 @@ function appId(window) {
   return String(ipc.class || ipc.initialClass || "");
 }
 
-function label(window) {
-  return boundedText(window && window.title ? window.title : appId(window) || "Untitled");
+function label(window, desktopEntries) {
+  var id = appId(window);
+  var entry = desktopEntries && id ? desktopEntries.heuristicLookup(id) : null;
+  if (entry && entry.name) return boundedText(entry.name);
+  var webApp = id.match(/^(?:chrome|msedge)-([^/]+)__-/i);
+  var name = webApp ? webApp[1].replace(/^web\./i, "").split(".")[0] : id.split(".").pop();
+  var names = {
+    whatsapp: "WhatsApp",
+    instagram: "Instagram",
+    discord: "Discord",
+    spotify: "Spotify",
+    omawrite: "Omawrite",
+  };
+  return boundedText(
+    names[name.toLowerCase()] ||
+      (name ? name.charAt(0).toUpperCase() + name.slice(1) : "Unknown app"),
+  );
+}
+
+function workspaceLabel(window) {
+  var workspace = window && window.workspace;
+  if (!workspace || workspace.id === undefined || workspace.id === null) return "";
+  if (Number(workspace.id) < 0) return " · " + String(workspace.name || "special");
+  return " · ws " + String(workspace.id);
 }
 
 function detail(window) {
@@ -65,13 +87,23 @@ function currentIndex(values) {
   return -1;
 }
 
-function filteredWindows(values, query) {
+function filteredWindows(values, query, desktopEntries) {
   var q = String(query || "")
     .trim()
     .toLowerCase();
   if (!q) return values.slice();
   return values.filter(function (window) {
-    return (label(window) + " " + detail(window)).toLowerCase().indexOf(q) !== -1;
+    return (
+      (
+        label(window, desktopEntries) +
+        " " +
+        detail(window) +
+        " " +
+        String((window && window.title) || "")
+      )
+        .toLowerCase()
+        .indexOf(q) !== -1
+    );
   });
 }
 

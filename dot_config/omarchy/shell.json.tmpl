@@ -51,7 +51,7 @@ def insert_after($anchor; $item):
 | .plugins = ((.plugins // [] | map(select(.id != "jfranciscosousa.lock"))) + [{"id": "jfranciscosousa.lock"}])
 | .plugins = ((.plugins // [] | map(select(.id != "jfranciscosousa.notifications"))) + [{"id": "jfranciscosousa.notifications"}])
 # Enable the vendored OmaSwitch overlay.
-| .plugins = ((.plugins // [] | map(select(.id != "piyush.omaswitch"))) + [{"id": "piyush.omaswitch"}])
+| .plugins = ((.plugins // [] | map(select(.id != "piyush.omaswitch" and .id != "francisco.omaswitch"))) + [{"id": "francisco.omaswitch"}])
 # Enable the external AirPods plugin (source installed out-of-band, see above).
 | .plugins = ((.plugins // [] | map(select(.id != "io.github.thisisgm.omapods"))) + [{"id": "io.github.thisisgm.omapods"}])
 | .disabledPlugins = ((.disabledPlugins // [] | map(select(. != "omarchy.lock" and . != "omarchy.notifications"))) + ["omarchy.lock", "omarchy.notifications"])

@@ -1,0 +1,14 @@
+{
+  "schemaVersion": 1,
+  "id": "francisco.omaswitch",
+  "name": "OmaSwitch (Francisco's clone)",
+  "version": "1.1.1",
+  "author": "Francisco Sousa (based on original work by Piyush Mehta)",
+  "license": "MIT",
+  "description": "Francisco's clone of OmaSwitch, based on original work by Piyush Mehta.",
+  "kinds": ["overlay"],
+  "keepLoaded": true,
+  "entryPoints": {
+    "overlay": "Switcher.qml"
+  }
+}

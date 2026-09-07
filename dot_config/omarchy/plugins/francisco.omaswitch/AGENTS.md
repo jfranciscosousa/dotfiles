@@ -1,6 +1,9 @@
 # OmaSwitch maintenance
 
-Apply these instructions whenever the user asks to update this plugin.
+## Upstream updates
+
+Apply the following review procedure when updating the vendored upstream revision, not when making
+local UI changes.
 
 1. Read the currently pinned revision in `README.md`.
 2. Fetch the remote repository into a temporary directory. Do not execute fetched code yet.

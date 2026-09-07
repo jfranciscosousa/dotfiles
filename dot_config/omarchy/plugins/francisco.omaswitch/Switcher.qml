@@ -8,7 +8,7 @@ import "Model.js" as Model
 
 // Keyboard-first window switcher overlay with a live window peek.
 //
-// Opened with `omarchy-shell shell toggle piyush.omaswitch` (bind it to
+// Opened with `omarchy-shell shell toggle francisco.omaswitch` (bind it to
 // a key in ~/.config/hypr/bindings.lua). Lists Hyprland toplevels from the
 // Quickshell Hyprland singleton, filters live as you type, and focuses the
 // selection through the native Wayland toplevel API, with hyprctl as fallback.
@@ -37,7 +37,7 @@ Item {
   property var rows: []
 
   readonly property int headerHeight: Math.max(Style.space(34), Style.font.title + Style.spacing.controlPaddingY * 2)
-  readonly property int rowHeight: Math.max(Style.space(48), Style.font.body + Style.font.caption + Style.spacing.rowPaddingX * 2)
+  readonly property int rowHeight: Math.max(Style.space(48), Style.font.body + Style.spacing.rowPaddingX * 2)
   readonly property int contentMargin: Style.spacing.panelPadding
   readonly property int listGap: Style.space(4)
   readonly property int gap: Style.space(12)
@@ -70,7 +70,7 @@ Item {
   property string fontFamily: Style.font.menuFamily
 
   function rebuildRows() {
-    rows = Model.filteredWindows(allWindows, filterText)
+    rows = Model.filteredWindows(allWindows, filterText, DesktopEntries)
     if (selectedIndex >= rows.length) selectedIndex = Math.max(0, rows.length - 1)
     if (selectedIndex < 0 && rows.length > 0) selectedIndex = 0
   }
@@ -139,7 +139,7 @@ Item {
     root.opened = false
     root.cycleMode = false
     if (root.shell && typeof root.shell.hide === "function")
-      root.shell.hide((root.manifest && root.manifest.id) || "piyush.omaswitch")
+      root.shell.hide((root.manifest && root.manifest.id) || "francisco.omaswitch")
   }
 
   // Keep the list fresh while open (windows open/close/rename).
@@ -160,7 +160,7 @@ Item {
     visible: root.opened
     anchors { top: true; bottom: true; left: true; right: true }
     color: "transparent"
-    WlrLayershell.namespace: "piyush-omaswitch"
+    WlrLayershell.namespace: "francisco-omaswitch"
     WlrLayershell.layer: WlrLayer.Overlay
     WlrLayershell.keyboardFocus: WlrKeyboardFocus.Exclusive
     exclusionMode: ExclusionMode.Ignore
@@ -242,21 +242,11 @@ Item {
                 spacing: 2
 
                 Text {
-                  text: Model.label(modelData)
+                  text: Model.label(modelData, DesktopEntries) + Model.workspaceLabel(modelData)
                   textFormat: Text.PlainText
                   color: index === root.selectedIndex ? root.selectedText : root.foreground
                   font.family: root.fontFamily
                   font.pixelSize: Style.font.body
-                  elide: Text.ElideRight
-                  width: parent.width
-                }
-                Text {
-                  text: Model.detail(modelData)
-                  textFormat: Text.PlainText
-                  color: index === root.selectedIndex ? root.selectedText : root.foreground
-                  opacity: 0.6
-                  font.family: root.fontFamily
-                  font.pixelSize: Style.font.caption
                   elide: Text.ElideRight
                   width: parent.width
                 }
