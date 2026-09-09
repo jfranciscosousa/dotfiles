@@ -16,6 +16,13 @@ dotfiles by maintaining a source directory (this repo) and applying them to the 
 - Validate only task changes using the scoped checks below. Never run the full-project lint command
   or `lint:staged` package script.
 
+## Tooling updates
+
+Explicitly invoking `francisco-tooling-update`, including through `tooling-update`, authorizes
+package upgrades, chezmoi synchronization, global mise config changes and scoped apply, and
+committing/pushing workflow-owned changes. Run without confirmation unless blocked. Preserve
+unrelated work; existing authentication and destructive-action restrictions still apply.
+
 ## Agent instruction sources
 
 - `dot_brains/AGENTS.md`: personal tool, installation, shell, and writing preferences.
