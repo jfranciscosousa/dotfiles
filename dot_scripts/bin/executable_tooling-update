@@ -1,18 +1,7 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-# Update brew and all brew packages (mise itself is brew-managed)
-brew update && brew upgrade
+source_dir=$(chezmoi source-path)
+cd "$source_dir"
 
-# Update mise plugin/backend metadata
-mise plugins update || true
-
-# Upgrade installed tools to the latest version and bump the pinned versions
-# in the mise config files (~/.config/mise/config.toml + any project configs).
-mise upgrade --bump || true
-
-# The global config (~/.config/mise/config.toml) is managed by chezmoi. If
-# --bump changed it, fold the new versions back into the dotfiles source:
-if ! chezmoi verify "$HOME/.config/mise/config.toml" 2>/dev/null; then
-  echo "mise global versions changed; run: chezmoi re-add ~/.config/mise/config.toml"
-fi
+exec pi --name "tooling update" "/skill:francisco-tooling-update"
