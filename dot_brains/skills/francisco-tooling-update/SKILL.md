@@ -20,6 +20,13 @@ A failure blocks dependent steps, not independent work. Always produce the final
 guidance only when required authorization is missing, authentication requires user action, intent is
 ambiguous, or further recovery risks losing work.
 
+Run the complete workflow non-interactively. Use each command's native assume-yes or no-TTY option
+for every update, upgrade, cleanup, prune, apply, and recovery operation. Redirect standard input
+from `/dev/null` when a command has no explicit non-interactive option. Never open a selector, wait
+for a `y` response, or pipe `yes` into a command. If a command cannot continue safely without user
+input, let it fail and report the blocker instead of switching to an interactive mode.
+Authentication that requires user action remains subject to the restrictions above.
+
 ## 1. Preflight and synchronize
 
 State the plan and start immediately. Warn that Homebrew cask upgrades can close or restart GUI
@@ -81,9 +88,9 @@ to `latest`.
 For Homebrew, after a successful metadata refresh, run:
 
 ```bash
-brew upgrade
-brew doctor
-brew cleanup
+env NONINTERACTIVE=1 brew upgrade </dev/null
+env NONINTERACTIVE=1 brew doctor </dev/null
+env NONINTERACTIVE=1 brew cleanup </dev/null
 ```
 
 Report doctor warnings and continue. If an upgrade fails, inspect the result and attempt only safe
@@ -94,8 +101,8 @@ what already changed.
 With a reconciled global mise baseline, run:
 
 ```bash
-mise plugins update
-mise up --bump --minimum-release-age 0d
+mise plugins update --yes </dev/null
+mise up --yes --bump --minimum-release-age 0d </dev/null
 ```
 
 Ensure this updates the global configuration, not a project config discovered from the working
