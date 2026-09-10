@@ -10,7 +10,7 @@ package_manager = "pnpm"
 
 [tools]
 {{ if hasPrefix "Remote-" .chezmoi.hostname -}}
-remotectl = "5.9.0"
+remotectl = "latest"
 {{ end -}}
 node = "26.8.2"
 usage = "6.8.0"
