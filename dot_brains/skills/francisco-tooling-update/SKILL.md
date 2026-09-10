@@ -137,7 +137,37 @@ attempt limit, and preserve the local commit when pushing remains blocked.
 Verify the final branch/upstream relationship and confirm that unrelated working-tree and index
 changes remain intact.
 
-## 5. Always summarize
+## 5. Apply chezmoi changes
+
+At the end of the workflow, apply the complete chezmoi source state without prompting:
+
+```bash
+chezmoi apply --error-on-conflict --keep-going --no-tty
+```
+
+`--error-on-conflict` must prevent replacement of a target that changed since chezmoi last wrote it.
+`--keep-going` must continue to unaffected targets. Capture the command output and exit status. A
+conflict does not mean that all applies failed.
+
+For each conflict, identify the target path and leave it unchanged. Do not retry the complete apply
+with `--force`. Report every skipped target and suggest a specific safe resolution, such as
+reviewing `chezmoi diff <target>` and then either preserving the target edit in the source or
+applying that one target after approval.
+
+The only exception is the global mise target, `~/.config/mise/config.toml`. If it is a reported
+conflict, overwrite it non-interactively with:
+
+```bash
+chezmoi apply --force ~/.config/mise/config.toml
+```
+
+Apply this exception only to that exact global target. Never use it for a project-level mise config
+or another conflicted target. Report that the global mise conflict was overwritten.
+
+After applying, inspect `chezmoi status`. Confirm which targets applied, which were skipped, and
+whether the global mise exception was used.
+
+## 6. Always summarize
 
 Report:
 
