@@ -47,6 +47,8 @@ def insert_after($anchor; $item):
   | insert_after("omarchy.tailscale"; {"id": "jfranciscosousa.spotify-player"})
   | insert_after("omarchy.power"; {"id": "jfranciscosousa.notification-center"})
 )
+# Replace the stock workspace widget with the per-monitor clone.
+| .bar.layout.left |= map(if .id == "omarchy.workspaces" then .id = "jfranciscosousa.workspaces" else . end)
 # Enable cloned services and disable the built-in plugins they replace.
 | .plugins = ((.plugins // [] | map(select(.id != "jfranciscosousa.lock"))) + [{"id": "jfranciscosousa.lock"}])
 | .plugins = ((.plugins // [] | map(select(.id != "jfranciscosousa.notifications"))) + [{"id": "jfranciscosousa.notifications"}])
