@@ -4,6 +4,23 @@
 {{- $existing = index .chezmoi "stdin" | fromToml -}}
 {{- end -}}
 
+{{- $enableRemoteLiteLLM := false -}}
+{{- if and $enableRemoteLiteLLM (hasPrefix "Remote-" .chezmoi.hostname) -}}
+{{- $_ := set $existing "model_provider" "litellm" -}}
+{{- $_ = set $existing "cli_auth_credentials_store" "keyring" -}}
+{{- $modelProviders := dict -}}
+{{- if hasKey $existing "model_providers" -}}
+{{- $modelProviders = index $existing "model_providers" -}}
+{{- end -}}
+{{- $_ = set $modelProviders "litellm" (dict
+  "name" "litellm"
+  "base_url" "https://ai-gateway-internal.eu-west-1.remote.com/v1"
+  "wire_api" "responses"
+  "requires_openai_auth" true
+) -}}
+{{- $_ = set $existing "model_providers" $modelProviders -}}
+{{- end -}}
+
 {{- if hasPrefix "Remote-" .chezmoi.hostname -}}
 {{- $mcpServers := dict
   "linear" (dict "url" "https://mcp.linear.app/mcp")
