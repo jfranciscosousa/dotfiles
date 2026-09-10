@@ -30,5 +30,5 @@
     "*": "zx scripts/lint-staged-dotfiles.ts",
     ".*": "zx scripts/lint-staged-dotfiles.ts"
   },
-  "packageManager": "pnpm@11.8.0"
+  "packageManager": "pnpm@12.3.4"
 }
