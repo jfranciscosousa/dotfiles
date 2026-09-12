@@ -1,6 +1,0 @@
-{
-  "name": "critical-instructions",
-  "description": "Always-applied critical instructions",
-  "version": "1.0.0",
-  "rules": ["rules/critical.mdc"]
-}

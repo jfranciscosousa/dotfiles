@@ -1,6 +1,12 @@
 .pi/agent/npm
 .pi/agent/missions
+.pi/agent/extensions/critical.ts
 .config/opencode/prompts
+.config/opencode/plugins/critical.ts
+.brains/CRITICAL.md
+.claude/hooks/critical-instructions.sh
+.cursor/rules/critical.mdc
+.cursor/plugins/local/critical-instructions
 .brains/skills/orchestrate-create
 .brains/skills/orchestrate-implement
 .brains/skills/orchestrate-review

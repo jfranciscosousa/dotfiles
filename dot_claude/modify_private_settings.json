@@ -3,6 +3,10 @@
 {{- if .chezmoi.stdin -}}
 {{- $existing = .chezmoi.stdin | fromJson -}}
 {{- end -}}
+{{- if hasKey $existing "hooks" -}}
+{{- $_ := unset (index $existing "hooks") "UserPromptSubmit" -}}
+{{- $_ := unset (index $existing "hooks") "SubagentStart" -}}
+{{- end -}}
 
 {{- $managed := dict
   "env" (dict
@@ -21,26 +25,6 @@
   "preferredNotifChannel" "terminal_bell"
   "skipAutoPermissionPrompt" true
   "hooks" (dict
-    "UserPromptSubmit" (list
-      (dict
-        "hooks" (list
-          (dict
-            "type" "command"
-            "command" "bash ~/.claude/hooks/critical-instructions.sh"
-          )
-        )
-      )
-    )
-    "SubagentStart" (list
-      (dict
-        "hooks" (list
-          (dict
-            "type" "command"
-            "command" "bash ~/.claude/hooks/critical-instructions.sh"
-          )
-        )
-      )
-    )
     "PreToolUse" (list
       (dict
         "matcher" "Bash"

@@ -1,8 +1,7 @@
 ---
 name: francisco-tooling-update
 description:
-  Update the chezmoi source, Homebrew packages, and mise-managed tools. Use when the user asks to
-  update local developer tooling.
+  Update the chezmoi source, Homebrew packages, and mise-managed tools. Should be manually invoked.
 ---
 
 # Francisco tooling update

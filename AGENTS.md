@@ -15,6 +15,8 @@ dotfiles by maintaining a source directory (this repo) and applying them to the 
   config files. POSIX sh is banned; use Bash instead.
 - Validate only task changes using the scoped checks below. Never run the full-project lint command
   or `lint:staged` package script.
+- When removing files and features tracked on this chezmoi repo, make sure chezmoiremove is updated
+  so that `chezmoi apply` clears the target home directories.
 
 ## Tooling updates
 
@@ -26,7 +28,6 @@ unrelated work; existing authentication and destructive-action restrictions stil
 ## Agent instruction sources
 
 - `dot_brains/AGENTS.md`: personal tool, installation, shell, and writing preferences.
-- `dot_brains/CRITICAL.md`: approval restrictions injected by supported agent integrations.
 - `dot_brains/RTK.md`: output-filter guidance.
 - `dot_brains/skills/`: shared on-demand workflows and their references.
 - `features/agent-guidelines.md`: instruction routing, audit findings, sources, and evaluation

@@ -19,8 +19,7 @@ hooks were not changed.
 
 Keep three layers:
 
-1. **Always-loaded rules:** setup-specific preferences, with critical restrictions injected
-   separately.
+1. **Always-loaded rules:** setup-specific preferences.
 2. **On-demand skills:** task triggers, inputs, workflow, failure handling, and completion evidence.
 3. **References:** detailed examples and procedures loaded only for the selected workflow.
 
@@ -39,7 +38,6 @@ validation task.
 | Source                              | Managed consumers                                                                        |
 | ----------------------------------- | ---------------------------------------------------------------------------------------- |
 | `dot_brains/AGENTS.md`              | Claude's imported symlink; Pi and OpenCode global symlinks; Cursor global rule template  |
-| `dot_brains/CRITICAL.md`            | Claude prompt/subagent hook; Pi and OpenCode prompt integrations; Cursor rule templates  |
 | `dot_brains/RTK.md`                 | Claude import; OpenCode instruction list; Cursor rule template; Pi RTK extension context |
 | `dot_brains/skills/`                | Claude, Pi, OpenCode, and Cursor skill-directory symlinks                                |
 | `dot_brains/skills/francisco-demo/` | Additional individual Codex skill symlink                                                |
@@ -55,15 +53,10 @@ The repository does not currently manage a Codex global `AGENTS.md` or a complet
 collection. Do not assume Codex receives the shared rules from this repository. Adding that routing
 is a separate configuration decision; this audit does not overwrite an existing unmanaged target.
 
-Cursor contains both a main critical rule and a local-plugin critical rule. Keep them sourced from
-one canonical document. Whether both load depends on the active plugin configuration; verify before
-removing either route.
-
 ## Changes made
 
 - Reduced shared `AGENTS.md` to personal tool, installation, shell, file-link, comment, and writing
-  preferences. Removed the initially added generic work loop and duplicated restrictions. Preserved
-  the separate critical-rule injection and its SSH, Git, branch naming, and communication limits.
+  preferences. Removed the initially added generic work loop and duplicated restrictions.
 - Added task-specific safety checks to the retained skills and explicit permission requirements for
   installation and publication.
 - Replaced unconditional RTK rewriting and savings claims with version-aware behavior and guidance
