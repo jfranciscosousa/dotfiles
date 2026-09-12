@@ -112,7 +112,7 @@ Key template files:
 
 ### Shell Setup
 
-- **Framework**: Prezto + zgen plugin manager
+- **Framework**: Prezto + Antidote plugin manager
 - **Prompt**: geometry-zsh/geometry
 - **Load order**: `dot_zshenv` → `dot_zprofile` → `dot_zshrc.tmpl` → `dot_zlogin`
 - Custom aliases live in `dot_zsh/aliases.sh.tmpl`

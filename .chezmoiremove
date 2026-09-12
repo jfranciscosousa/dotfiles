@@ -9,3 +9,4 @@
 .scripts/git/git-better-branch.ts
 .scripts/git/utils.rb
 .scripts/startup
+.zgen

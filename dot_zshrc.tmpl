@@ -74,33 +74,35 @@ typeset -g GEOMETRY_COLOR_VIRTUALENV='#bb9af7'
 typeset -g GEOMETRY_COLOR_CONDA='#7dcfff'
 {{ end -}}
 
-zgen_dir="${ZGEN_DIR:-$HOME/.zgen}"
-prezto_dir="$zgen_dir/sorin-ionescu/prezto-master"
-geometry_dir="$zgen_dir/geometry-zsh/geometry-master"
+# Geometry no longer supports GEOMETRY_PROMPT_PREFIX. Set the prompt parts
+# before its plugin loads so the user name remains visible.
+geometry_username() {
+  print -n -- "%F{$GEOMETRY_COLOR_PROMPT}$USER%f"
+}
+GEOMETRY_PROMPT=(geometry_username geometry_echo geometry_status geometry_path)
 
-if [[ -r "$prezto_dir/init.zsh" && -r "$geometry_dir/geometry.plugin.zsh" ]]; then
-  # Load the resolved plugin trees directly instead of parsing the zgen manager
-  # and its generated init on every shell. Define zgen lazily so update/reset
-  # commands continue to work exactly when requested.
-  zgen() {
-    unfunction zgen
-    source "${ZGEN_DIR:-$HOME/.zgen}/zgen.zsh"
-    zgen "$@"
-  }
+# Chezmoi installs Antidote and compiles this plugin list during `chezmoi apply`.
+# The compiled bundle avoids manager work on normal shell startup. Fall back to
+# Antidote's dynamic loader if a shell opens before its first apply completes.
+zsh_plugins="${ZDOTDIR:-$HOME}/.zsh_plugins.txt"
+zsh_plugins_bundle="${zsh_plugins%.txt}.zsh"
+antidote="${ZDOTDIR:-$HOME}/.antidote/antidote.zsh"
 
-  ZSH="$prezto_dir"
-  fpath=("$prezto_dir" "$geometry_dir" $fpath)
-  source "$prezto_dir/init.zsh"
-  source "$geometry_dir/geometry.plugin.zsh"
-  pmodload environment terminal editor history directory spectrum utility completion prompt
-else
-  # Bootstrap zgen on a new machine, preserving the original install path.
-  source "$zgen_dir/zgen.zsh"
-  zgen prezto
-  zgen load geometry-zsh/geometry
-  zgen save
+if [[ -r "$antidote" ]]; then
+  source "$antidote"
+  if [[ -r "$zsh_plugins_bundle" ]]; then
+    source "$zsh_plugins_bundle"
+  else
+    antidote load "$zsh_plugins"
+  fi
 fi
-unset zgen_dir prezto_dir geometry_dir
+unset zsh_plugins zsh_plugins_bundle antidote
+
+# Geometry adds a leading space by default. Keep the prefix flush left.
+geometry::prompt() {
+  export GEOMETRY_STATUS=$status
+  PROMPT="$(geometry::wrap $PWD $GEOMETRY_PROMPT) "
+}
 
 {{ if and (eq .chezmoi.os "linux") (lookPath "omarchy") -}}
 if (( $+functions[_omarchy_zsh_theme_finish] )); then
@@ -156,8 +158,6 @@ if (( $+commands[direnv] )); then
     chpwd_functions=(_direnv_hook $chpwd_functions)
   fi
 fi
-# Geometry stuff
-GEOMETRY_PROMPT_PREFIX="%F{$GEOMETRY_COLOR_PROMPT}$USER%f"
 # Custom aliases
 source "$HOME/.zsh/aliases.sh"
 

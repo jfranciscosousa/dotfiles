@@ -4,7 +4,7 @@ set -euo pipefail
 # mac-setup.sh - Bootstrap a fresh macOS machine for these dotfiles.
 #
 # Installs Homebrew, every CLI tool / GUI app / runtime the dotfiles expect,
-# the zsh plugin manager, and standalone installers not managed by mise.
+# and standalone installers not managed by mise.
 # It does NOT run `chezmoi apply` - it only prepares the machine. The final
 # section prints the exact command to deploy the configs.
 #
@@ -160,19 +160,7 @@ else
 fi
 
 # ----------------------------------------------------------------------------
-# 6. zsh plugin manager (zgen) - prezto + geometry self-install on first shell
-# ----------------------------------------------------------------------------
-
-log "zgen (zsh plugin manager)"
-if [[ -d "$HOME/.zgen" ]]; then
-  ok "already cloned"
-else
-  git clone https://github.com/tarjoilija/zgen.git "$HOME/.zgen"
-  ok "cloned (prezto + geometry-zsh install on first shell start)"
-fi
-
-# ----------------------------------------------------------------------------
-# 7. mise runtimes (node, erlang, elixir, postgres, yarn)
+# 6. mise runtimes (node, erlang, elixir, postgres, yarn)
 # ----------------------------------------------------------------------------
 
 log "mise runtimes"
@@ -186,7 +174,7 @@ else
 fi
 
 # ----------------------------------------------------------------------------
-# 8. pnpm (standalone installer -> ~/.local/share/pnpm, matches PNPM_HOME)
+# 7. pnpm (standalone installer -> ~/.local/share/pnpm, matches PNPM_HOME)
 # ----------------------------------------------------------------------------
 
 log "pnpm"
@@ -215,7 +203,7 @@ cat <<'EOF'
   chezmoi apply     # deploy configs
   mise install      # install the globally pinned tools, including Claude Code
 
-  # Then open a fresh shell (zgen pulls prezto + geometry on first start):
+  # Then open a fresh shell:
   exec zsh
 
 Notes:

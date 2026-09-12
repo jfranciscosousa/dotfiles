@@ -1,0 +1,17 @@
+# Prezto compatibility bridge. This must load before all Prezto modules.
+getantidote/use-prezto
+
+# Prezto modules
+sorin-ionescu/prezto path:modules/environment
+sorin-ionescu/prezto path:modules/helper
+sorin-ionescu/prezto path:modules/terminal
+sorin-ionescu/prezto path:modules/editor
+sorin-ionescu/prezto path:modules/history
+sorin-ionescu/prezto path:modules/directory
+sorin-ionescu/prezto path:modules/spectrum
+sorin-ionescu/prezto path:modules/utility
+sorin-ionescu/prezto path:modules/completion
+sorin-ionescu/prezto path:modules/prompt
+
+# Prompt theme
+geometry-zsh/geometry
