@@ -5,8 +5,7 @@ Personal dotfiles managed with [chezmoi](https://www.chezmoi.io/).
 ## Agent guidelines
 
 Shared instructions and skills live in `dot_brains/`. Edit the chezmoi sources, not their deployed
-home-directory targets. See [agent guideline maintenance](features/agent-guidelines.md) for routing,
-review findings, official references, and behavioral evaluation cases. Changes are not active in
+home-directory targets. Repository-specific rules live in `AGENTS.md`. Changes are not active in
 installed agents until separately applied and reloaded as required by each host.
 
 ## Linting

@@ -1,148 +1,64 @@
-# AGENTS.md
+# Dotfiles repository
 
-A personal dotfiles repository managed by [chezmoi](https://www.chezmoi.io/). Chezmoi manages
-dotfiles by maintaining a source directory (this repo) and applying them to the home directory.
+This is the **chezmoi source repository**, not the live home-directory configuration. Edit source
+files here; `chezmoi apply` deploys them to the home directory.
 
-## Key guidelines you must respect at all times
+## Instruction scope
 
-- Do not write to my home directory unless my current prompt explicitly permits it. Permission
-  applies only to the paths and actions that the prompt specifies, and only for the current prompt.
-- Without explicit permission, make all config changes in this dotfiles repository through chezmoi.
-  Do not edit the corresponding files in my home directory directly.
-- Standalone executable shell scripts must default to Bash for macOS/Linux portability: start with
-  `#!/usr/bin/env bash` and `set -euo pipefail`, and stay compatible with macOS Bash 3.2 unless
-  another non-shell runtime is explicitly required. zsh is only allowed for files sourced from zsh
-  config files. POSIX sh is banned; use Bash instead.
-- Validate only task changes using the scoped checks below. Never run the full-project lint command
-  or `lint:staged` package script.
-- When removing files and features tracked on this chezmoi repo, make sure chezmoiremove is updated
-  so that `chezmoi apply` clears the target home directories.
+- This file contains repository-specific rules only.
+- Read `dot_brains/AGENTS.md` for shared coding and tool rules used across agent harnesses.
+- `dot_brains/RTK.md` contains output-filter guidance; `dot_brains/skills/` contains shared
+  workflows.
+- Edit shared guidelines in `dot_brains/` and harness routing in its source configuration, not
+  deployed symlink targets or generated copies. Keep task-specific procedures in skills or
+  references, not always-loaded rules.
 
-## Tooling updates
+## Source and deployment boundaries
 
-Explicitly invoking `francisco-tooling-update`, including through `tooling-update`, authorizes
-package upgrades, chezmoi synchronization, global mise config changes and scoped apply, and
-committing/pushing workflow-owned changes. Run without confirmation unless blocked. Preserve
-unrelated work; existing authentication and destructive-action restrictions still apply.
+- Make changes in this repository. Do not write to home-directory targets unless the current prompt
+  explicitly permits the specific paths and actions. Source edits do not authorize deployment.
+- `chezmoi diff` and `chezmoi status` are read-only. `apply`, `add`, `re-add`, and `edit` require
+  explicit approval for their effects; prefer editing source files directly.
+- When removing a managed file or feature, update `.chezmoiremove` so a later apply removes the
+  deployed targets too.
+- Do not edit externally installed skills or vendor documentation as part of local rule cleanup.
 
-## Agent instruction sources
+## Repository map
 
-- `dot_brains/AGENTS.md`: personal tool, installation, shell, and writing preferences.
-- `dot_brains/RTK.md`: output-filter guidance.
-- `dot_brains/skills/`: shared on-demand workflows and their references.
-- `features/agent-guidelines.md`: instruction routing, audit findings, sources, and evaluation
-  cases. Read it when maintaining agent instructions, not for ordinary dotfile edits.
+| Path                                                  | Purpose                                           |
+| ----------------------------------------------------- | ------------------------------------------------- |
+| `dot_brains/`                                         | Shared agent guidelines, RTK guidance, and skills |
+| `dot_claude/`, `dot_codex/`, `dot_cursor/`, `dot_pi/` | Harness-specific configuration and routing        |
+| `dot_config/`                                         | Application config, including mise and OpenCode   |
+| `dot_zsh*`, `dot_zprofile`, `dot_zlogin`              | Shell configuration                               |
+| `dot_scripts/`                                        | Custom commands deployed to `~/.scripts/`         |
+| `private_dot_ssh/`                                    | SSH configuration                                 |
+| `features/`                                           | Living documentation of implemented features      |
 
-Edit these canonical sources rather than home-directory symlink targets or duplicated generated
-rules. Keep always-loaded rules broadly applicable; put task-specific detail in skills or
-references. Do not edit externally installed skills or vendor documentation merely to make wording
-consistent.
+Chezmoi names encode deployment: `dot_` → `.`, `private_` → restricted permissions (not encryption),
+`executable_` → executable file, and `.tmpl` → Go template. Directories use the same prefixes.
+Preserve macOS/Linux branches in templates.
 
-Before editing, inspect `git status --short`. Preserve unrelated changes. Inspect the final diff and
-report checks that passed, failed, or were not run. Do not commit, stage, or apply changes unless
-explicitly requested.
+## Workflow and checks
 
-## Scoped validation
+- Before editing, inspect `git status --short`. Preserve unrelated changes.
+- Read relevant `features/` docs before changing a feature. Update them in the same change when
+  behavior, configuration, or usage changes. Document the current implementation, not audit logs or
+  completed work. Remove obsolete documentation; add a feature doc only when it provides useful
+  context beyond the code.
+- Do not stage, commit, push, or apply unless explicitly requested.
+- Validate only task paths. Never run full-project lint or the `lint:staged` package script.
+- For Markdown, run `rtk pnpm exec oxfmt --check --disable-nested-config <paths>`.
+- `lint-staged --diff="HEAD"` can change the index, even with check-only tasks. Use it only with
+  explicit staging approval and restrict it to task paths. Otherwise skip it and use known read-only
+  checks. Check untracked task files separately.
+- Inspect the final diff and verify that checks left the index unchanged unless staging was
+  authorized. Report checks that passed, failed, or were skipped. Formatting does not verify that
+  harnesses load instructions; do not claim deployment or reload without testing it.
 
-Use `rtk pnpm exec lint-staged --diff="HEAD"` only with explicit staging approval: it can change the
-index. Restrict its config to exact task paths when unrelated changes exist. Without approval,
-report that the chain was skipped and run known read-only checks on exact paths; for Markdown, use
-`rtk pnpm exec oxfmt --check --disable-nested-config <paths>`. Check untracked task files
-separately. Check that validation leaves the index unchanged unless staging was authorized. See
-`features/agent-guidelines.md` for the staging incident and validation limitations.
+## Tooling-update exception
 
-## Common Chezmoi Commands
-
-Read-only inspection and previews are allowed. The apply, add, re-add, and edit commands below
-change state and require explicit authorization for their effects. Prefer source-file edits for this
-work.
-
-```sh
-# Apply dotfiles to home directory
-chezmoi apply
-
-# Preview what would change before applying
-chezmoi diff
-
-# Add/update a file from home directory into this repo
-chezmoi add ~/.someconfig
-chezmoi re-add ~/.someconfig   # update after editing the target file
-
-# Edit a managed file (opens source, applies on save)
-chezmoi edit ~/.someconfig
-
-# Check managed file status
-chezmoi status
-
-# Run chezmoi with verbose output
-chezmoi apply --verbose
-```
-
-## File Naming Conventions
-
-Chezmoi uses filename prefixes to encode metadata:
-
-| Prefix         | Meaning                                                |
-| -------------- | ------------------------------------------------------ |
-| `dot_`         | Maps to a dotfile (e.g., `dot_zshrc` → `~/.zshrc`)     |
-| `private_`     | Restricts target permissions; does not encrypt content |
-| `executable_`  | File should be executable (chmod +x)                   |
-| `.tmpl` suffix | Chezmoi template — processed before applying           |
-
-Directories follow the same pattern (e.g., `dot_config/` → `~/.config/`).
-
-## Templating
-
-Files ending in `.tmpl` use Go template syntax. The main conditional is OS detection:
-
-```
-{{ if eq .chezmoi.os "darwin" }}
-# macOS-specific content
-{{ else if eq .chezmoi.os "linux" }}
-# Linux-specific content
-{{ end }}
-```
-
-Key template files:
-
-- `dot_zshrc.tmpl` — main shell config (Homebrew init on macOS)
-- `dot_zsh/aliases.sh.tmpl` — shell aliases with OS-specific variants
-- `private_dot_ssh/private_config.tmpl` — SSH config with OS-specific 1Password socket paths
-
-## Architecture
-
-### Shell Setup
-
-- **Framework**: Prezto + Antidote plugin manager
-- **Prompt**: geometry-zsh/geometry
-- **Load order**: `dot_zshenv` → `dot_zprofile` → `dot_zshrc.tmpl` → `dot_zlogin`
-- Custom aliases live in `dot_zsh/aliases.sh.tmpl`
-- Startup hooks in `dot_scripts/startup/` are sourced per-OS at the end of `.zshrc`
-
-### Custom Scripts
-
-Scripts in `dot_scripts/` are installed to `~/.scripts/` and added to PATH:
-
-- `~/.scripts/bin/` — general utilities (`t`, `y`, `untilfail`, `cow-echo`, `oc`, `cc`)
-- `~/.scripts/git/` — git subcommands (`git-wip`, `git-nuke`, `git-squash-feature`, `git-fetch-all`,
-  `git-reset-remote`, `git-diff-origin`)
-
-The `y` script auto-detects and delegates to yarn/npm/pnpm based on lockfile presence.
-
-### Version/Package Managers
-
-- **mise** — runtime version manager. Shims (`~/.local/share/mise/shims`) are on PATH via
-  `dot_zshenv`/`dot_zprofile` so runtimes resolve in non-interactive shells (Claude Code, IDEs);
-  interactive zsh additionally runs `mise activate` and generates completions in `dot_zshrc.tmpl`.
-  Global versions are pinned in `dot_config/mise/config.toml`.
-- **pnpm** — `PNPM_HOME=~/.local/share/pnpm`
-- PATH order matters: mise shims, pnpm, `~/.local/bin`, custom scripts, `/usr/local/bin`
-
-### Platform Differences
-
-| Feature              | macOS                                               | Linux                     |
-| -------------------- | --------------------------------------------------- | ------------------------- |
-| Homebrew             | `/opt/homebrew`                                     | not used                  |
-| 1Password SSH socket | `~/Library/Group Containers/.../agent.sock`         | `~/.1password/agent.sock` |
-| PostgreSQL           | `/opt/homebrew/opt/postgresql@16/bin` added to PATH | not added                 |
-| Karabiner            | configured                                          | not applicable            |
+Explicit invocation of `francisco-tooling-update` (including `tooling-update`) authorizes its
+package upgrades, chezmoi synchronization, global mise config changes, scoped apply, and commit/push
+of workflow-owned changes. Run without further confirmation unless blocked. Preserve unrelated work;
+authentication and destructive-action restrictions still apply.
