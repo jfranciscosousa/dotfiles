@@ -8,9 +8,6 @@ export type CommandResult = {
 
 export type AiResult = { success: true; text: string } | { success: false; details: string };
 
-const SELECTION_MIN_FILES = 2;
-const SELECTION_MIN_BYTES = 4_000;
-
 export function runCommand(
   command: string,
   args: string[],
@@ -71,82 +68,8 @@ export async function repoRoot(): Promise<string | undefined> {
   return root || undefined;
 }
 
-export async function relevantDiff(
-  diffArgs: string[],
-  options: { log?: string } = {},
-): Promise<string> {
-  const full = await gitOutput(["diff", ...diffArgs]);
-  const stat = (await gitOutput(["diff", "--stat", ...diffArgs])).trim();
-  const nameStatus = (await gitOutput(["diff", "--name-status", ...diffArgs])).trim();
-  const changed = nameStatus
-    .split(/\r?\n/)
-    .map((line) => line.split("\t").at(-1)?.trim())
-    .filter((file): file is string => Boolean(file));
-
-  if (changed.length < SELECTION_MIN_FILES || Buffer.byteLength(full) < SELECTION_MIN_BYTES) {
-    return full;
-  }
-
-  const selected = await selectFiles(nameStatus, stat, changed, options.log ?? "");
-  const omitted = changed.filter((file) => !selected.includes(file));
-  const sections = [`Changed files:\n${stat}`];
-
-  if (selected.length > 0) {
-    const selectedDiff = (await gitOutput(["diff", ...diffArgs, "--", ...selected])).trim();
-    sections.push(`Full diff of the files that need review:\n${selectedDiff}`);
-  }
-
-  if (omitted.length > 0) {
-    sections.push(`Other changed files (path/status only):\n${omitted.join("\n")}`);
-  }
-
-  return sections.join("\n\n");
-}
-
-async function selectFiles(
-  nameStatus: string,
-  stat: string,
-  changed: string[],
-  log: string,
-): Promise<string[]> {
-  const commits = log.trim() ? `\n\nCommits:\n${log.trim()}` : "";
-  const prompt = `You are gathering context to summarize a set of code changes.
-Below are the changed files (git status + line counts).
-List the files whose FULL DIFF you must read to summarize the changes accurately.
-Skip files where the path and change type already tell the story: lock files,
-generated or minified files, vendored dependencies, and pure renames or deletions.
-Output one file path per line, exactly as written below, and nothing else.
-Output NONE if the file list alone is enough.
-
-Files:
-${nameStatus}
-
-Stat:
-${stat}${commits}`;
-  const result = await aiGenerate(prompt, { fast: true });
-
-  if (!result.success) {
-    return changed;
-  }
-
-  const output = stripCodeFences(result.text);
-  if (/^\s*NONE\s*$/i.test(output)) {
-    return [];
-  }
-
-  const picks = output
-    .split(/\r?\n/)
-    .map((line) =>
-      line
-        .trim()
-        .replace(/^[-*]\s+/, "")
-        .replaceAll(/[`'"]/g, "")
-        .trim(),
-    )
-    .filter(Boolean);
-  const selected = picks.filter((file) => changed.includes(file));
-
-  return selected.length > 0 ? selected : changed;
+export async function relevantDiff(diffArgs: string[]): Promise<string> {
+  return gitOutput(["diff", ...diffArgs]);
 }
 
 export async function aiGenerate(
@@ -164,15 +87,15 @@ export async function aiGenerate(
     : (process.env.DOTFILES_MODEL ?? options.model);
 
   if (provider === "claude") {
-    return aiGenerateClaude(prompt, model ?? "haiku");
+    return aiGenerateClaude(prompt, model ?? "sonnet");
   }
 
   if (provider === "opencode") {
-    return aiGenerateOpencode(prompt, model ?? "openai/gpt-5.4-mini");
+    return aiGenerateOpencode(prompt, model ?? "openai/gpt-5.6-terra");
   }
 
   if (provider === "pi") {
-    return aiGeneratePi(prompt, model ?? "openai/gpt-5.4-mini");
+    return aiGeneratePi(prompt, model ?? "openai-codex/gpt-5.6-terra");
   }
 
   throw new Error(`Unknown provider: ${provider}`);
@@ -230,16 +153,27 @@ async function aiGenerateOpencode(prompt: string, model: string): Promise<AiResu
 }
 
 async function aiGeneratePi(prompt: string, model: string): Promise<AiResult> {
-  const command = ["pi", "--print", "--no-session", "--no-tools"];
+  const command = [
+    "pi",
+    "--mode",
+    "json",
+    "--no-session",
+    "--no-tools",
+    "--no-extensions",
+    "--no-skills",
+    "--no-prompt-templates",
+    "--no-context-files",
+    "--offline",
+  ];
   if (model) {
     command.push("--model", model);
   }
-  command.push(prompt);
+  command.push("--", prompt);
 
   debug(`model=${model}`);
   debug(`command=${commandForLog(command)}`);
   const result = await runCommand(command[0]!, command.slice(1));
-  const text = result.output.trim();
+  const text = extractPiText(result.output);
 
   if (result.code === 0 && text) {
     return { success: true, text };
@@ -252,6 +186,30 @@ async function aiGeneratePi(prompt: string, model: string): Promise<AiResult> {
         ? "pi returned no final text"
         : "pi returned no output";
   return { success: false, details: aiFailureDetails("pi", model, command, result, reason) };
+}
+
+function extractPiText(raw: string): string {
+  let text = "";
+
+  for (const line of raw.split(/\r?\n/)) {
+    const event = parseJsonObject(line);
+    if (event?.type !== "message_end") {
+      continue;
+    }
+
+    const message = objectValue(event.message);
+    if (message?.role !== "assistant" || !Array.isArray(message.content)) {
+      continue;
+    }
+
+    text = message.content
+      .map(objectValue)
+      .map((part) => (part ? stringField(part, "text") : undefined))
+      .filter((part): part is string => Boolean(part))
+      .join("");
+  }
+
+  return text.trim();
 }
 
 function extractOpencodeText(raw: string): string {

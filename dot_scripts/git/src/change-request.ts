@@ -70,7 +70,7 @@ export async function createChangeRequest(config: ChangeRequestConfig): Promise<
     process.exit(1);
   }
 
-  const diff = await relevantDiff([diffRange], { log });
+  const diff = await relevantDiff([diffRange]);
   const template = await findTemplate({
     candidates: config.templateCandidates ?? [],
     dirs: config.templateDirs ?? [],
