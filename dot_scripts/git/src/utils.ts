@@ -74,82 +74,13 @@ export async function relevantDiff(diffArgs: string[]): Promise<string> {
 
 export async function aiGenerate(
   prompt: string,
-  options: { model?: string; provider?: string; fast?: boolean } = {},
+  options: { model?: string; fast?: boolean } = {},
 ): Promise<AiResult> {
-  const provider = options.fast
-    ? (process.env.DOTFILES_FAST_PROVIDER ??
-      process.env.DOTFILES_PROVIDER ??
-      options.provider ??
-      "opencode")
-    : (process.env.DOTFILES_PROVIDER ?? options.provider ?? "opencode");
   const model = options.fast
     ? (process.env.DOTFILES_FAST_MODEL ?? process.env.DOTFILES_MODEL ?? options.model)
     : (process.env.DOTFILES_MODEL ?? options.model);
 
-  if (provider === "claude") {
-    return aiGenerateClaude(prompt, model ?? "sonnet");
-  }
-
-  if (provider === "opencode") {
-    return aiGenerateOpencode(prompt, model ?? "openai/gpt-5.6-terra");
-  }
-
-  if (provider === "pi") {
-    return aiGeneratePi(prompt, model ?? "openai-codex/gpt-5.6-terra");
-  }
-
-  throw new Error(`Unknown provider: ${provider}`);
-}
-
-async function aiGenerateClaude(prompt: string, model: string): Promise<AiResult> {
-  const command = [
-    "claude",
-    "--print",
-    "--model",
-    model,
-    "--no-session-persistence",
-    "--tools",
-    "",
-    "--disable-slash-commands",
-    "--strict-mcp-config",
-    "-",
-  ];
-  debug(`model=${model}`);
-  debug(`command=${commandForLog(command)}`);
-  const result = await runCommand(command[0]!, command.slice(1), prompt);
-  const text = result.output.trim();
-
-  if (result.code === 0 && text) {
-    return { success: true, text };
-  }
-
-  const reason = result.code === 0 ? "claude returned no text" : "claude exited unsuccessfully";
-  return { success: false, details: aiFailureDetails("claude", model, command, result, reason) };
-}
-
-async function aiGenerateOpencode(prompt: string, model: string): Promise<AiResult> {
-  const command = ["opencode", "run", "--format", "json", "--dir", "/tmp"];
-  if (model) {
-    command.push("--model", model);
-  }
-  command.push(prompt);
-
-  debug(`model=${model}`);
-  debug(`command=${commandForLog(command)}`);
-  const result = await runCommand(command[0]!, command.slice(1));
-  const text = extractOpencodeText(result.output);
-
-  if (result.code === 0 && text) {
-    return { success: true, text };
-  }
-
-  const reason =
-    result.code !== 0
-      ? "opencode exited unsuccessfully"
-      : result.output.trim()
-        ? "opencode returned no final text"
-        : "opencode returned no output";
-  return { success: false, details: aiFailureDetails("opencode", model, command, result, reason) };
+  return aiGeneratePi(prompt, model ?? "openai-codex/gpt-5.6-terra");
 }
 
 async function aiGeneratePi(prompt: string, model: string): Promise<AiResult> {
@@ -210,38 +141,6 @@ function extractPiText(raw: string): string {
   }
 
   return text.trim();
-}
-
-function extractOpencodeText(raw: string): string {
-  const final: string[] = [];
-  let last: string | undefined;
-
-  for (const line of raw.split(/\r?\n/)) {
-    const event = parseJsonObject(line);
-    if (!event || event.type !== "text") {
-      continue;
-    }
-
-    const part = objectValue(event.part);
-    const text = part ? stringField(part, "text") : undefined;
-    if (!text?.trim()) {
-      continue;
-    }
-
-    last = text;
-    const metadata = part ? objectValue(part.metadata) : undefined;
-    const phases = metadata
-      ? Object.values(metadata)
-          .map((value) => objectValue(value)?.phase)
-          .filter((phase): phase is string => typeof phase === "string")
-      : [];
-
-    if (phases.includes("final_answer")) {
-      final.push(text);
-    }
-  }
-
-  return (final.length > 0 ? final : last ? [last] : []).join("").trim();
 }
 
 function aiFailureDetails(

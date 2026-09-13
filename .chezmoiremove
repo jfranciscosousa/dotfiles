@@ -1,4 +1,3 @@
-.pi/agent/npm
 .pi/agent/missions
 .pi/agent/extensions/critical.ts
 .config/opencode/prompts
