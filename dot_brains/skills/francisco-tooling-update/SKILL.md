@@ -173,6 +173,15 @@ or another conflicted target. Report that the global mise conflict was overwritt
 After applying, inspect `chezmoi status`. Confirm which targets applied, which were skipped, and
 whether the global mise exception was used.
 
+Then install the deployed global tools from the home directory. This prevents a project config from
+changing the install scope:
+
+```bash
+(cd "$HOME" && mise install --yes </dev/null)
+```
+
+If the install fails, report it. Do not retry blindly.
+
 ## 6. Always summarize
 
 Report:

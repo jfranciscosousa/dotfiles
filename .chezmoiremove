@@ -6,6 +6,7 @@
 .claude/hooks/critical-instructions.sh
 .cursor/rules/critical.mdc
 .cursor/plugins/local/critical-instructions
+.brains/skills/ast-grep
 .brains/skills/orchestrate-create
 .brains/skills/orchestrate-implement
 .brains/skills/orchestrate-review

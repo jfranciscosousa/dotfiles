@@ -21,7 +21,7 @@ the current prompt.
 ## Tools
 
 - Use ast-grep for structural source-code searches. Use text search for plain text, configuration,
-  logs, and filenames. If ast-grep is unavailable, use scoped text search.
+  logs, and filenames.
 - Use the `ntn` CLI instead of the Notion MCP. Use the `glab` CLI instead of a GitLab MCP.
 - Read-only connected-service access is allowed when needed. Include the resource's HTTP URL in
   responses when available.

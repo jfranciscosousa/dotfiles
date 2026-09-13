@@ -200,8 +200,8 @@ cat <<'EOF'
 
   # If it already is (cloned at ~/.local/share/chezmoi):
   chezmoi diff      # review what will change
-  chezmoi apply     # deploy configs
-  mise install      # install the globally pinned tools, including Claude Code
+  chezmoi apply              # deploy configs
+  (cd ~ && mise install)     # install the globally pinned tools, including Claude Code
 
   # Then open a fresh shell:
   exec zsh
