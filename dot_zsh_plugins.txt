@@ -12,6 +12,9 @@ sorin-ionescu/prezto path:modules/spectrum
 sorin-ionescu/prezto path:modules/utility
 sorin-ionescu/prezto path:modules/completion
 sorin-ionescu/prezto path:modules/prompt
+sorin-ionescu/prezto path:modules/autosuggestions
+sorin-ionescu/prezto path:modules/history-substring-search
+sorin-ionescu/prezto path:modules/syntax-highlighting
 
 # Prompt theme
 geometry-zsh/geometry
