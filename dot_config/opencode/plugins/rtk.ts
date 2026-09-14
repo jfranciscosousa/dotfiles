@@ -1,3 +1,6 @@
+// Based on upstream rtk-ai/rtk hooks/opencode/rtk.ts. Local additions:
+// package-manager lint guard (repo lint is oxfmt/lint-staged, not ESLint),
+// RTK_DISABLED passthrough.
 import { execFile } from "node:child_process";
 
 const RTK_COMMAND_PREFIX = /^(?:env\s+\S+\s+)*rtk(?:\s|$)/;
@@ -15,6 +18,12 @@ type ToolExecuteBeforeOutput = {
   };
 };
 
+function hasRtk(): Promise<boolean> {
+  return new Promise((resolve) => {
+    execFile("which", ["rtk"], (error) => resolve(!error));
+  });
+}
+
 function rewriteCommand(command: string): Promise<{ code: number; stdout: string }> {
   return new Promise((resolve) => {
     execFile("rtk", ["rewrite", command], { timeout: 3000 }, (error, stdout) => {
@@ -29,25 +38,35 @@ function rewriteCommand(command: string): Promise<{ code: number; stdout: string
   });
 }
 
-export const Rtk = async () => ({
-  "tool.execute.before": async (input: ToolExecuteBeforeInput, output: ToolExecuteBeforeOutput) => {
-    if (input.tool !== "bash") return;
+export const Rtk = async () => {
+  if (!(await hasRtk())) {
+    console.warn("[rtk] rtk binary not found in PATH — plugin disabled");
+    return {};
+  }
 
-    const command = output.args.command;
-    if (
-      !command ||
-      RTK_COMMAND_PREFIX.test(command.trim()) ||
-      PACKAGE_MANAGER_LINT_COMMAND.test(command.trim())
-    ) {
-      return;
-    }
+  return {
+    "tool.execute.before": async (
+      input: ToolExecuteBeforeInput,
+      output: ToolExecuteBeforeOutput,
+    ) => {
+      const tool = String(input.tool ?? "").toLowerCase();
+      if (tool !== "bash" && tool !== "shell") return;
 
-    const result = await rewriteCommand(command);
-    if (!RTK_REWRITE_CODES.has(result.code)) return;
+      const command = output.args.command;
+      if (!command) return;
+      const trimmed = command.trim();
+      if (RTK_COMMAND_PREFIX.test(trimmed) || PACKAGE_MANAGER_LINT_COMMAND.test(trimmed)) {
+        return;
+      }
+      if (process.env.RTK_DISABLED === "1") return;
 
-    const rewritten = result.stdout.trim();
-    if (rewritten && rewritten !== command) {
-      output.args = { ...output.args, command: rewritten };
-    }
-  },
-});
+      const result = await rewriteCommand(command);
+      if (!RTK_REWRITE_CODES.has(result.code)) return;
+
+      const rewritten = result.stdout.trim();
+      if (rewritten && rewritten !== command) {
+        output.args = { ...output.args, command: rewritten };
+      }
+    },
+  };
+};

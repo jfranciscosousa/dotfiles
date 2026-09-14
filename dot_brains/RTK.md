@@ -24,6 +24,8 @@ Use `rtk proxy <command>` when filtering hides diagnostics or exact output is re
 truncated files and diffs completely before making claims that depend on the omitted content. Do not
 rerun a mutating command just to recover its output; inspect existing results or logs instead.
 
+`RTK_DISABLED=1 <command>` skips rewriting for one command.
+
 If RTK is unavailable, report it and use the underlying command with the same permission limits. Do
 not install or reconfigure RTK implicitly.
 
@@ -35,6 +37,9 @@ This repository configures RTK integrations for:
 - OpenCode: `tool.execute.before` plugin at `~/.config/opencode/plugins/rtk.ts`.
 - Cursor: `preToolUse` Shell hook in `~/.cursor/hooks.json`.
 - Pi: `tool_call` extension at `~/.pi/agent/extensions/rtk.ts`.
+
+Codex CLI has no command hook in the installed rtk, so it uses prompt-level guidance:
+`~/.codex/AGENTS.md` references `~/.codex/RTK.md` and the agent prefixes `rtk` itself.
 
 Rewriting depends on the installed version, active hook, and command shape. Do not assume compound
 commands or pipelines are rewritten. Prefer separate tool calls for independent commands and
