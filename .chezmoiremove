@@ -2,6 +2,7 @@
 .pi/agent/extensions/critical.ts
 .config/opencode/prompts
 .config/opencode/plugins/critical.ts
+.config/opencode/plugins/zed-bell.js
 .brains/CRITICAL.md
 .claude/hooks/critical-instructions.sh
 .cursor/rules/critical.mdc
