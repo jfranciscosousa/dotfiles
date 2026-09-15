@@ -25,11 +25,11 @@ path=(
   "$HOME/.opencode/bin"
   "$PNPM_HOME/bin"
   "${MISE_DATA_DIR:-$HOME/.local/share/mise}/shims"
+  "$HOME/.local/bin"
   /usr/local/bin
   $path
   "$HOME/.scripts/git"
   "$HOME/.scripts/bin"
-  "$HOME/.local/bin"
 )
 
 # Source private env file if it exists

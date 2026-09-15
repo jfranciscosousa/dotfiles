@@ -2,9 +2,14 @@
 # Pinned runtime versions used by the shell + scripts.
 # Project mise.toml / .tool-versions files override these per-repo.
 
-# Use pnpm for mise's npm backend. pnpm blocks dependency build scripts unless allowed.
+# Use npm for mise's npm backend. The pnpm backend fails with pnpm 12
+# (ERR_PNPM_GLOBAL_BIN_DIR_NOT_IN_PATH on mise 2026.9.9). Revert when fixed upstream.
+[settings]
+auto_update = true
+auto_update_check_duration = "7d"
+
 [settings.npm]
-package_manager = "pnpm"
+package_manager = "npm"
 
 [tools]
 {{ if hasPrefix "Remote-" .chezmoi.hostname -}}
@@ -31,3 +36,4 @@ chezmoi = "latest"
 "github:basecamp/hey-cli" = "latest"
 rg = "latest"
 ast-grep = "latest"
+bat = "latest"
