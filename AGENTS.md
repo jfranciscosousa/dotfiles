@@ -19,6 +19,8 @@ files here; `chezmoi apply` deploys them to the home directory.
   explicitly permits the specific paths and actions. Source edits do not authorize deployment.
 - `chezmoi diff` and `chezmoi status` are read-only. `apply`, `add`, `re-add`, and `edit` require
   explicit approval for their effects; prefer editing source files directly.
+- On `chezmoi apply` conflicts (target changed since chezmoi last wrote it), skip the conflicting
+  file and report it. Never use `apply --force`.
 - When removing a managed file or feature, update `.chezmoiremove` so a later apply removes the
   deployed targets too.
 - Do not edit externally installed skills or vendor documentation as part of local rule cleanup.

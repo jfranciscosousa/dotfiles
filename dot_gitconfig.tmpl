@@ -40,11 +40,3 @@
   # Histogram tends to produce cleaner hunks than the default myers algorithm, often faster
   # on large files too.
   algorithm = histogram
-# Route GitHub HTTPS auth through the mise-managed gh (shim path stays stable
-# across gh upgrades; `gh auth setup-git` writes a version-pinned path instead).
-[credential "https://github.com"]
-	helper =
-	helper = !{{ .chezmoi.homeDir }}/.local/share/mise/shims/gh auth git-credential
-[credential "https://gist.github.com"]
-	helper =
-	helper = !{{ .chezmoi.homeDir }}/.local/share/mise/shims/gh auth git-credential
