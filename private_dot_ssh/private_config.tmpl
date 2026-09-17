@@ -1,6 +1,10 @@
 {{- if and (eq .chezmoi.os "darwin") (hasPrefix "Remote-" .chezmoi.hostname) -}}
 Include {{ .chezmoi.homeDir }}/.colima/ssh_config
 
+Host gitlab.com
+  IdentityAgent none
+  IdentityFile ~/.ssh/id_ed25519_gitlab
+  IdentitiesOnly yes
 
 Host *
   IdentityAgent "~/Library/Group Containers/2BUA8C4S2C.com.1password/t/agent.sock"

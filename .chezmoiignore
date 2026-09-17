@@ -31,6 +31,7 @@
 {{- if not (hasPrefix "Remote-" .chezmoi.hostname) }}
 .zsh/remote.sh
 {{- else }}
+.pi/**
 .zsh/personal.sh
 {{- end }}
 

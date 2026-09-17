@@ -1,0 +1,32 @@
+{{- if hasPrefix "Remote-" .chezmoi.hostname -}}
+#!/usr/bin/env bash
+set -euo pipefail
+
+if command -v mise >/dev/null 2>&1; then
+  if mise ls --installed pi 2>/dev/null | grep -q '[^[:space:]]'; then
+    mise uninstall --all --yes pi
+  fi
+  if mise ls --installed "npm:@earendil-works/pi-coding-agent" 2>/dev/null | grep -q '[^[:space:]]'; then
+    mise uninstall --all --yes "npm:@earendil-works/pi-coding-agent"
+  fi
+  mise reshim
+fi
+
+mise_data_dir="${MISE_DATA_DIR:-${XDG_DATA_HOME:-$HOME/.local/share}/mise}"
+if [[ "$(uname -s)" == Darwin ]]; then
+  mise_cache_dir="${MISE_CACHE_DIR:-$HOME/Library/Caches/mise}"
+else
+  mise_cache_dir="${MISE_CACHE_DIR:-${XDG_CACHE_HOME:-$HOME/.cache}/mise}"
+fi
+
+rm -f "$mise_data_dir/shims/pi"
+rm -rf \
+  "$mise_data_dir/installs/pi" \
+  "$mise_data_dir/installs/npm-earendil-works-pi-coding-agent" \
+  "$mise_cache_dir/pi"
+for npm_meta in "$mise_cache_dir"/npm-meta/*/@earendil-works__pi-coding-agent.json; do
+  [[ -e $npm_meta ]] || continue
+  rm -f "$npm_meta"
+done
+rm -rf "$HOME/.pi"
+{{- end }}

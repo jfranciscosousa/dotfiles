@@ -30,7 +30,9 @@ gh = "latest"
 glab = "latest"
 codex = "latest"
 opencode = "latest"
+{{ if not (hasPrefix "Remote-" .chezmoi.hostname) -}}
 pi = "latest"
+{{ end -}}
 chezmoi = "latest"
 "aqua:modem-dev/hunk" = "latest"
 "github:basecamp/hey-cli" = "latest"
