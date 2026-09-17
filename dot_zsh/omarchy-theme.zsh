@@ -135,7 +135,7 @@ _omarchy_zsh_theme_apply() {
   # Geometry reads these values while it loads each prompt plugin.
   typeset -g GEOMETRY_COLOR_PROMPT="$accent"
   typeset -g GEOMETRY_COLOR_ROOT="$red"
-  typeset -g GEOMETRY_COLOR_DIR="$blue"
+  typeset -g GEOMETRY_COLOR_DIR="$accent"
   typeset -g GEOMETRY_COLOR_EXIT_VALUE="$bright_red"
   typeset -g GEOMETRY_COLOR_GIT_DIRTY="$yellow"
   typeset -g GEOMETRY_COLOR_GIT_CLEAN="$green"
