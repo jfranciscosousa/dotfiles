@@ -1,0 +1,100 @@
+{{- /* chezmoi:modify-template */ -}}
+{{- $existing := dict -}}
+{{- if .chezmoi.stdin -}}
+{{- /* Zed uses full-line JSONC comments in generated settings files. */ -}}
+{{- $json := regexReplaceAll "(?m)^[ \t]*//[^\n]*(\n|$)" .chezmoi.stdin "" -}}
+{{- $existing = $json | fromJson -}}
+{{- end -}}
+{{- $_ := unset $existing "agent_servers" -}}
+
+{{- $managed := dict
+  "cli_default_open_behavior" "existing_window"
+  "auto_install_extensions" (dict
+    "catppuccin-icons" true
+    "elixir" true
+    "mdx" false
+  )
+  "icon_theme" "Catppuccin Mocha"
+  "project_panel" (dict "dock" "left")
+  "agent" (dict
+    "sidebar_side" "right"
+    "dock" "right"
+  )
+  "git" (dict "worktree_directory" "/home/jfranciscosousa/.git-worktrees")
+  "collaboration_panel" (dict "button" false)
+  "search" (dict "button" false)
+  "telemetry" (dict
+    "diagnostics" false
+    "metrics" false
+  )
+  "terminal" (dict
+    "alternate_scroll" "on"
+    "max_scroll_history_lines" 10000
+    "font_size" 14
+  )
+  "multi_cursor_modifier" "alt"
+  "minimap" (dict "show" "never")
+  "buffer_font_family" "Fira Mono"
+  "file_types" (dict
+    "markdown" (list "*.mdx")
+    "scss" (list "*.css")
+    "javascript" (list "*.jsx")
+    "html" (list "*.liquid" "*.njk")
+  )
+  "linked_edits" true
+  "tab_size" 2
+  "base_keymap" "VSCode"
+  "ui_font_size" 16
+  "buffer_font_size" 16.0
+  "languages" (dict
+    "Elixir" (dict "language_servers" (list "dexter" "!expert" "!elixir-ls" "!next-ls" "!lexical"))
+    "EEx" (dict "language_servers" (list "dexter" "!expert" "!elixir-ls" "!next-ls" "!lexical"))
+    "HEEx" (dict "language_servers" (list "dexter" "!expert" "!elixir-ls" "!next-ls" "!lexical"))
+    "TypeScript" (dict "language_servers" (list "typescript-ls" "oxlint" "!vtsls" "!typescript-language-server" "!eslint"))
+    "TSX" (dict "language_servers" (list "typescript-ls" "oxlint" "!vtsls" "!typescript-language-server" "!eslint"))
+    "JavaScript" (dict "language_servers" (list "typescript-ls" "oxlint" "!vtsls" "!typescript-language-server" "!eslint"))
+    "JSX" (dict "language_servers" (list "typescript-ls" "oxlint" "!vtsls" "!typescript-language-server" "!eslint"))
+    "MDX" (dict "language_servers" (list "!mdx-analyzer"))
+  )
+  "lsp" (dict
+    "dexter" (dict
+      "binary" (dict "arguments" (list "lsp"))
+      "initialization_options" (dict "followDelegates" true)
+    )
+    "solargraph" (dict "settings" (dict "use_bundler" false))
+  )
+-}}
+
+{{- if hasPrefix "Remote-" .chezmoi.hostname -}}
+{{- $_ = set $managed "edit_predictions" (dict
+  "provider" "open_ai_compatible_api"
+  "open_ai_compatible_api" (dict
+    "model" "gpt-5.4-nano"
+    "api_url" "https://api.openai.com/v1"
+  )
+) -}}
+{{- $_ = set $managed "language_models" (dict
+  "openai" (dict
+    "api_url" "https://api.openai.com/v1"
+    "available_models" (list
+      (dict
+        "name" "gpt-5.5"
+        "display_name" "GPT-5.5 High"
+        "reasoning_effort" "high"
+        "max_tokens" 272000
+        "max_completion_tokens" 20000
+      )
+    )
+  )
+) -}}
+{{- $_ = set (index $managed "agent") "default_model" (dict
+  "provider" "openai"
+  "model" "gpt-5.5"
+) -}}
+{{- end -}}
+
+{{- if and (eq .chezmoi.os "linux") (lookPath "omarchy") -}}
+{{- $_ = set $managed "theme" "Omazed" -}}
+{{- end -}}
+
+{{ mergeOverwrite $existing $managed | toPrettyJson }}
