@@ -108,11 +108,11 @@ Ensure this updates the global configuration, not a project config discovered fr
 directory. Inspect effective configuration paths first. Plugin metadata failure need not block
 unaffected tools when their backends remain usable. Inspect partial results before retrying.
 
-After a successful update, inspect `mise ls --prunable` and `mise prune --tools --dry-run`. Run
-`mise prune --tools --yes` only after confirming that the preview contains no version required by
-retained worktree configuration. Do not run the default prune command: it can also remove stale
-tracked configuration links. Report each pruned tool and version. A prune failure does not
-invalidate an otherwise successful update.
+After a successful update, inspect `mise ls --prunable` and `mise prune --dry-run`. Run
+`mise prune --yes` only after confirming that the preview contains no version required by retained
+worktree configuration. The default prune removes unused tool versions and stale tracked
+configuration links that point to nonexistent configurations. Report each pruned tool, version, and
+configuration link. A prune failure does not invalidate an otherwise successful update.
 
 Compare the global target against the reconciled baseline. Transfer only update-owned version
 changes into the source template; preserve directives, unrelated edits, and settings. Do not invent
