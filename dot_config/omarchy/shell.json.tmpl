@@ -10,11 +10,12 @@ plugins are installed out-of-band and must be restored manually on a new machine
 setup installs build deps, builds librepods into ~/.local, and enables
 librepods.service (user unit). Only the enable state below is managed here.
 */ -}}
-{{- output "bash" "-c" `
+{{- $isAsahi := includeTemplate "is-asahi.tmpl" . -}}
+{{- output "bash" "-c" (printf `
 set -euo pipefail
 
 # Apply the customizations below to the current Omarchy package default.
-jq '
+jq --arg is_asahi "%s" '
 # Remove an entry before re-inserting it. This makes the patch idempotent.
 def remove_id($id):
   map(select(.id != $id));
@@ -49,6 +50,13 @@ def insert_after($anchor; $item):
 )
 # Replace the stock workspace widget with the per-monitor clone.
 | .bar.layout.left |= map(if .id == "omarchy.workspaces" then .id = "jfranciscosousa.workspaces" else . end)
+# On the MacBook, place status indicators left of the notch, then weather and clock on its right.
+| if $is_asahi == "true" then
+    .bar.layout.center = ((.bar.layout.right | map(select(.id == "omarchy.indicators"))) + [{"id": "omarchy.spacer", "size": 220}] + (.bar.layout.right | map(select(.id == "omarchy.weather"))) + [{"id": "omarchy.clock", "format": "HH:mm", "formatAlt": "d MMMM 'W'ww yyyy", "verticalFormat": "HH\n—\nmm"}])
+    | .bar.layout.right |= map(select(.id != "omarchy.indicators" and .id != "omarchy.weather" and .id != "omarchy.clock"))
+    | .bar.centerAnchor = "omarchy.spacer"
+  else .
+  end
 # Enable cloned services and disable the built-in plugins they replace.
 | .plugins = ((.plugins // [] | map(select(.id != "jfranciscosousa.lock"))) + [{"id": "jfranciscosousa.lock"}])
 | .plugins = ((.plugins // [] | map(select(.id != "jfranciscosousa.notifications"))) + [{"id": "jfranciscosousa.notifications"}])
@@ -64,4 +72,4 @@ def insert_after($anchor; $item):
 # Restore each built-in plugin if its clone is removed later.
 | .cloneSourceRestores = ((.cloneSourceRestores // [] | map(select(. != "jfranciscosousa.lock" and . != "jfranciscosousa.notifications"))) + ["jfranciscosousa.lock", "jfranciscosousa.notifications"])
 ' /usr/share/omarchy/config/omarchy/shell.json
-` -}}
+` $isAsahi) -}}

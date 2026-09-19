@@ -1,0 +1,15 @@
+{{- $isAsahi := eq (includeTemplate "is-asahi.tmpl" .) "true" }}
+{{- if $isAsahi }}
+hl.config({
+  input = {
+    touchpad = {
+      natural_scroll = false,
+    },
+  },
+})
+
+hl.device({
+  name = "apple-spi-keyboard",
+  kb_options = "compose:caps,shift:both_capslock_cancel,altwin:swap_alt_win,lv3:win_switch",
+})
+{{- end }}

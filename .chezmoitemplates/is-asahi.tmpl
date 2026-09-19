@@ -1,0 +1,1 @@
+{{- output "bash" "-c" "test -r /proc/device-tree/compatible && grep -zq 'apple,' /proc/device-tree/compatible && . /etc/os-release && test \"$ID\" = archarm && printf true || printf false" -}}

@@ -1,8 +1,14 @@
 -- See https://wiki.hypr.land/Configuring/Basics/Monitors/
 -- List current monitors and supported resolutions with: hyprctl monitors all
 
+{{- $isAsahi := eq (includeTemplate "is-asahi.tmpl" .) "true" }}
+{{ if $isAsahi }}
+local omarchy_gdk_scale = 2
+local omarchy_monitor_scale = "auto"
+{{ else }}
 local omarchy_gdk_scale = 1
 local omarchy_monitor_scale = 1.25
+{{ end }}
 local omarchy_4k_monitor_scale = 2
 
 hl.env("GDK_SCALE", tostring(omarchy_gdk_scale))
