@@ -11,6 +11,10 @@ auto_update_check_duration = "7d"
 [settings.npm]
 package_manager = "npm"
 
+# Reuse GitHub CLI authentication for GitHub-backed mise tools and API requests.
+[settings.github]
+credential_command = 'gh auth token --hostname "$MISE_CREDENTIAL_HOST"'
+
 [tools]
 {{ if hasPrefix "Remote-" .chezmoi.hostname -}}
 remotectl = "latest"
