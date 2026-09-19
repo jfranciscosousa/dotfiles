@@ -2,7 +2,7 @@
   "schemaVersion": 1,
   "id": "jfranciscosousa.spotify-player",
   "name": "Spotify",
-  "version": "1.3.0",
+  "version": "1.4.0",
   "author": "jfranciscosousa",
   "license": "MIT",
   "description": "Spotify launcher with integrated MPRIS playback and per-app volume controls for the Omarchy bar.",

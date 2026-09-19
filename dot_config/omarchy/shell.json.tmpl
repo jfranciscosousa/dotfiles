@@ -54,9 +54,13 @@ def insert_after($anchor; $item):
 | .plugins = ((.plugins // [] | map(select(.id != "jfranciscosousa.notifications"))) + [{"id": "jfranciscosousa.notifications"}])
 # Enable the vendored OmaSwitch overlay.
 | .plugins = ((.plugins // [] | map(select(.id != "piyush.omaswitch" and .id != "francisco.omaswitch"))) + [{"id": "francisco.omaswitch"}])
+# Enable the first-party media service. The Spotify tray reads MPRIS players
+# through it. The stock media bar widget stays hidden because the layout
+# above does not reference omarchy.media.
+| .plugins = ((.plugins // [] | map(select(.id != "omarchy.media"))) + [{"id": "omarchy.media"}])
 # Enable the external AirPods plugin (source installed out-of-band, see above).
 | .plugins = ((.plugins // [] | map(select(.id != "io.github.thisisgm.omapods"))) + [{"id": "io.github.thisisgm.omapods"}])
-| .disabledPlugins = ((.disabledPlugins // [] | map(select(. != "omarchy.lock" and . != "omarchy.notifications"))) + ["omarchy.lock", "omarchy.notifications"])
+| .disabledPlugins = ((.disabledPlugins // [] | map(select(. != "omarchy.lock" and . != "omarchy.notifications" and . != "omarchy.media"))) + ["omarchy.lock", "omarchy.notifications"])
 # Restore each built-in plugin if its clone is removed later.
 | .cloneSourceRestores = ((.cloneSourceRestores // [] | map(select(. != "jfranciscosousa.lock" and . != "jfranciscosousa.notifications"))) + ["jfranciscosousa.lock", "jfranciscosousa.notifications"])
 ' /usr/share/omarchy/config/omarchy/shell.json
