@@ -57,8 +57,13 @@ def insert_after($anchor; $item):
     | .bar.centerAnchor = "omarchy.spacer"
   else .
   end
-# Enable cloned services and disable the built-in plugins they replace.
-| .plugins = ((.plugins // [] | map(select(.id != "jfranciscosousa.lock"))) + [{"id": "jfranciscosousa.lock"}])
+# The custom lock service keeps the display lit after locking. Use the stock
+# lock service on the Asahi MacBook so its display can power down normally.
+| if $is_asahi == "true" then
+    .plugins = (.plugins // [] | map(select(.id != "jfranciscosousa.lock")))
+  else
+    .plugins = ((.plugins // [] | map(select(.id != "jfranciscosousa.lock"))) + [{"id": "jfranciscosousa.lock"}])
+  end
 | .plugins = ((.plugins // [] | map(select(.id != "jfranciscosousa.notifications"))) + [{"id": "jfranciscosousa.notifications"}])
 # Enable the vendored OmaSwitch overlay.
 | .plugins = ((.plugins // [] | map(select(.id != "piyush.omaswitch" and .id != "francisco.omaswitch"))) + [{"id": "francisco.omaswitch"}])
@@ -68,8 +73,8 @@ def insert_after($anchor; $item):
 | .plugins = ((.plugins // [] | map(select(.id != "omarchy.media"))) + [{"id": "omarchy.media"}])
 # Enable the external AirPods plugin (source installed out-of-band, see above).
 | .plugins = ((.plugins // [] | map(select(.id != "io.github.thisisgm.omapods"))) + [{"id": "io.github.thisisgm.omapods"}])
-| .disabledPlugins = ((.disabledPlugins // [] | map(select(. != "omarchy.lock" and . != "omarchy.notifications" and . != "omarchy.media"))) + ["omarchy.lock", "omarchy.notifications"])
+| .disabledPlugins = ((.disabledPlugins // [] | map(select(. != "omarchy.lock" and . != "omarchy.notifications" and . != "omarchy.media"))) + ["omarchy.notifications"] + (if $is_asahi == "true" then [] else ["omarchy.lock"] end))
 # Restore each built-in plugin if its clone is removed later.
-| .cloneSourceRestores = ((.cloneSourceRestores // [] | map(select(. != "jfranciscosousa.lock" and . != "jfranciscosousa.notifications"))) + ["jfranciscosousa.lock", "jfranciscosousa.notifications"])
+| .cloneSourceRestores = ((.cloneSourceRestores // [] | map(select(. != "jfranciscosousa.lock" and . != "jfranciscosousa.notifications"))) + ["jfranciscosousa.notifications"] + (if $is_asahi == "true" then [] else ["jfranciscosousa.lock"] end))
 ' /usr/share/omarchy/config/omarchy/shell.json
 ` $isAsahi) -}}
