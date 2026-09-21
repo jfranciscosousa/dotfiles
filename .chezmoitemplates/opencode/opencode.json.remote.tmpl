@@ -3,8 +3,14 @@
   "$schema": "https://opencode.ai/config.json",
   "model": "openai/gpt-5.6-terra",
   "shell": "/bin/zsh",
-  "providers": {
+  "provider": {
     "openai": {
+      "whitelist": [
+        "gpt-5.6-luna",
+        "gpt-5.6-sol",
+        "gpt-5.6-terra",
+        "gpt-6-astra"
+      ],
       "models": {
         "gpt-5.6-sol": {
           "options": {
@@ -23,6 +29,13 @@
         "gpt-5.6-luna": {
           "options": {
             "reasoningEffort": "low",
+            "textVerbosity": "low",
+            "reasoningSummary": "auto"
+          }
+        },
+        "gpt-6-astra": {
+          "options": {
+            "reasoningEffort": "high",
             "textVerbosity": "low",
             "reasoningSummary": "auto"
           }
@@ -99,14 +112,6 @@
       "mixpanel": {
         "type": "remote",
         "url": "https://mcp-eu.mixpanel.com/mcp"
-      },
-      "pganalyze": {
-        "type": "remote",
-        "url": "https://app.pganalyze.com/mcp"
-      },
-      "notion": {
-        "type": "remote",
-        "url": "https://mcp.notion.com/mcp"
       },
       "slack": {
         "type": "remote",

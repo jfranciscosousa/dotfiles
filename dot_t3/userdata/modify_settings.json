@@ -1,0 +1,40 @@
+{{- /* chezmoi:modify-template */ -}}
+{{- $existing := dict -}}
+{{- if .chezmoi.stdin -}}
+{{- $existing = .chezmoi.stdin | fromJson -}}
+{{- end -}}
+
+{{- $instancePatch := dict -}}
+{{- $instances := index $existing "providerInstances" | default dict -}}
+{{- range $id, $enabled := dict "cursor" true "codex" true "claudeAgent" true "grok" false "opencode" true -}}
+{{- if hasKey $instances $id -}}
+{{- $patch := dict "enabled" $enabled -}}
+{{- $config := index $instances $id "config" -}}
+{{- if and (kindIs "map" $config) (hasKey $config "enabled") -}}
+{{- $_ := set $patch "config" (dict "enabled" $enabled) -}}
+{{- end -}}
+{{- $_ := set $instancePatch $id $patch -}}
+{{- end -}}
+{{- end -}}
+
+{{- $managed := dict
+  "textGenerationModelSelection" (dict "instanceId" "cursor" "model" "auto-smart")
+  "sourceControlWriterModelSelection" (dict "instanceId" "cursor" "model" "auto-smart")
+  "providers" (dict
+    "cursor" (dict "enabled" true)
+    "codex" (dict "enabled" true)
+    "claudeAgent" (dict "enabled" true)
+    "grok" (dict "enabled" false)
+    "opencode" (dict "enabled" true)
+  )
+-}}
+{{- if $instancePatch -}}
+{{- $_ := set $managed "providerInstances" $instancePatch -}}
+{{- end -}}
+
+{{- $out := mergeOverwrite (deepCopy $existing) $managed -}}
+{{- if eq ($existing | toJson) ($out | toJson) -}}
+{{- .chezmoi.stdin -}}
+{{- else -}}
+{{ $out | toPrettyJson }}
+{{- end -}}

@@ -1,0 +1,30 @@
+{{- /* chezmoi:modify-template */ -}}
+{{- $existing := dict -}}
+{{- if .chezmoi.stdin -}}
+{{- $existing = .chezmoi.stdin | fromJson -}}
+{{- end -}}
+
+{{- $codex := list
+  (dict "provider" "codex" "model" "gpt-5.6-luna")
+  (dict "provider" "codex" "model" "gpt-5.6-terra")
+  (dict "provider" "codex" "model" "gpt-5.6-sol")
+  (dict "provider" "codex" "model" "gpt-6-astra")
+-}}
+{{- $kept := list -}}
+{{- range (index $existing "favorites" | default list) -}}
+{{- $provider := index . "provider" -}}
+{{- $model := index . "model" | default "" -}}
+{{- if and (ne $provider "opencode") (ne $provider "grok") (ne $provider "codex") -}}
+{{- if not (and (eq $provider "cursor") (hasPrefix "grok" $model)) -}}
+{{- $kept = append $kept . -}}
+{{- end -}}
+{{- end -}}
+{{- end -}}
+
+{{- $managed := dict "favorites" (concat $codex $kept) -}}
+{{- $out := mergeOverwrite (deepCopy $existing) $managed -}}
+{{- if eq ($existing | toJson) ($out | toJson) -}}
+{{- .chezmoi.stdin -}}
+{{- else -}}
+{{ $out | toPrettyJson }}
+{{- end -}}
