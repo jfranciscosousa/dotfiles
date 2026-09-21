@@ -76,11 +76,53 @@ export async function aiGenerate(
   prompt: string,
   options: { model?: string; fast?: boolean } = {},
 ): Promise<AiResult> {
+  const provider = options.fast
+    ? (process.env.DOTFILES_FAST_PROVIDER ?? process.env.DOTFILES_PROVIDER ?? "pi")
+    : (process.env.DOTFILES_PROVIDER ?? "pi");
   const model = options.fast
     ? (process.env.DOTFILES_FAST_MODEL ?? process.env.DOTFILES_MODEL ?? options.model)
     : (process.env.DOTFILES_MODEL ?? options.model);
 
-  return aiGeneratePi(prompt, model ?? "openai-codex/gpt-5.6-terra");
+  if (provider === "opencode") {
+    return aiGenerateOpencode(prompt, model ?? "openai/gpt-5.6-terra");
+  }
+
+  if (provider === "pi") {
+    return aiGeneratePi(prompt, model ?? "openai-codex/gpt-5.6-terra");
+  }
+
+  throw new Error(`Unknown provider: ${provider}`);
+}
+
+async function aiGenerateOpencode(prompt: string, model: string): Promise<AiResult> {
+  const command = [
+    "opencode",
+    "run",
+    "--format",
+    "json",
+    "--dir",
+    "/tmp",
+    "--model",
+    model,
+    prompt,
+  ];
+
+  debug(`model=${model}`);
+  debug(`command=${commandForLog(command)}`);
+  const result = await runCommand(command[0]!, command.slice(1));
+  const text = extractOpencodeText(result.output);
+
+  if (result.code === 0 && text) {
+    return { success: true, text };
+  }
+
+  const reason =
+    result.code !== 0
+      ? "opencode exited unsuccessfully"
+      : result.output.trim()
+        ? "opencode returned no final text"
+        : "opencode returned no output";
+  return { success: false, details: aiFailureDetails("opencode", model, command, result, reason) };
 }
 
 async function aiGeneratePi(prompt: string, model: string): Promise<AiResult> {
@@ -141,6 +183,38 @@ function extractPiText(raw: string): string {
   }
 
   return text.trim();
+}
+
+function extractOpencodeText(raw: string): string {
+  const final: string[] = [];
+  let last: string | undefined;
+
+  for (const line of raw.split(/\r?\n/)) {
+    const event = parseJsonObject(line);
+    if (event?.type !== "text") {
+      continue;
+    }
+
+    const part = objectValue(event.part);
+    const text = part ? stringField(part, "text") : undefined;
+    if (!text?.trim()) {
+      continue;
+    }
+
+    last = text;
+    const metadata = part ? objectValue(part.metadata) : undefined;
+    const phases = metadata
+      ? Object.values(metadata)
+          .map((value) => objectValue(value)?.phase)
+          .filter((phase): phase is string => typeof phase === "string")
+      : [];
+
+    if (phases.includes("final_answer")) {
+      final.push(text);
+    }
+  }
+
+  return (final.length > 0 ? final : last ? [last] : []).join("").trim();
 }
 
 function aiFailureDetails(

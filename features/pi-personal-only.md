@@ -8,6 +8,7 @@ On personal machines, the global mise configuration installs Pi and chezmoi mana
 
 On work laptops, chezmoi:
 
+- configures AI-enabled Git scripts to use OpenCode instead of Pi;
 - omits Pi from the global mise configuration;
 - ignores all Pi configuration;
 - does not install the cmux Pi hook;

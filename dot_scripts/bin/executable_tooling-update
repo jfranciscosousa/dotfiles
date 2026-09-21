@@ -4,4 +4,5 @@ set -euo pipefail
 source_dir=$(chezmoi source-path)
 cd "$source_dir"
 
-exec pi --name "tooling update" "/skill:francisco-tooling-update"
+exec opencode run --auto --title "tooling update" \
+  "Use the francisco-tooling-update skill and execute its complete workflow."
