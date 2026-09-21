@@ -17,7 +17,6 @@ typeset -gU cdpath fpath mailpath path
 # macOS path_helper (in /etc/zprofile) runs before this file and reorders PATH,
 # pushing system dirs ahead of what we set in .zshenv.
 path=(
-  "$HOME/.opencode/bin"
   "$PNPM_HOME/bin"
   "${MISE_DATA_DIR:-$HOME/.local/share/mise}/shims"
   $path

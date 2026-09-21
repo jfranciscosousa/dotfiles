@@ -22,7 +22,6 @@ typeset -gU path
 
 export PNPM_HOME="$HOME/.local/share/pnpm"
 path=(
-  "$HOME/.opencode/bin"
   "$PNPM_HOME/bin"
   "${MISE_DATA_DIR:-$HOME/.local/share/mise}/shims"
   "$HOME/.local/bin"

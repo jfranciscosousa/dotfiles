@@ -147,21 +147,10 @@ else
 fi
 
 # ----------------------------------------------------------------------------
-# 5. AI CLI bootstrap
+# 5. mise runtimes (node, erlang, elixir, postgres, yarn)
 # ----------------------------------------------------------------------------
-# Claude Code is installed by mise after its chezmoi-managed config is applied.
-# opencode -> ~/.opencode/bin (already first on PATH via dot_zshenv)
-
-log "opencode CLI"
-if have opencode; then
-  ok "already installed ($(command -v opencode))"
-else
-  curl -fsSL https://opencode.ai/install | bash
-fi
-
-# ----------------------------------------------------------------------------
-# 6. mise runtimes (node, erlang, elixir, postgres, yarn)
-# ----------------------------------------------------------------------------
+# AI CLIs (Claude Code, codex, opencode) are mise tools: they install from
+# dot_config/mise/config.toml once `chezmoi apply` deploys it.
 
 log "mise runtimes"
 if ! have mise; then
@@ -174,7 +163,7 @@ else
 fi
 
 # ----------------------------------------------------------------------------
-# 7. pnpm (standalone installer -> ~/.local/share/pnpm, matches PNPM_HOME)
+# 6. pnpm (standalone installer -> ~/.local/share/pnpm, matches PNPM_HOME)
 # ----------------------------------------------------------------------------
 
 log "pnpm"
