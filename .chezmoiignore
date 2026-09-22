@@ -21,7 +21,6 @@
 
 {{- if ne .chezmoi.os "linux" }}
 .scripts/bin/arch-update
-.zsh/linux.sh
 {{- end }}
 
 {{- if ne .chezmoi.os "darwin" }}

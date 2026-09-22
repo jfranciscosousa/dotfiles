@@ -31,9 +31,8 @@ awk -F '[: ]+' '
   $2 != "lo" && $2 != "face" && NF >= 11 {
     rx += $3
     tx += $11
-    interfaces++
   }
-  END { printf "network\t%.0f\t%.0f\t%d\n", rx, tx, interfaces }
+  END { printf "network\t%.0f\t%.0f\n", rx, tx }
 ' /proc/net/dev
 
 if command -v nvidia-smi >/dev/null 2>&1; then

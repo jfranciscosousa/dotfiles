@@ -10,7 +10,6 @@ function parseSnapshot(raw) {
     diskPercent: 0,
     rxBytes: 0,
     txBytes: 0,
-    interfaceCount: 0,
     gpuAvailable: false,
     gpuPercent: 0,
     gpuMemoryUsedMiB: 0,
@@ -36,7 +35,6 @@ function parseSnapshot(raw) {
     } else if (fields[0] === "network") {
       snapshot.rxBytes = number(fields[1]);
       snapshot.txBytes = number(fields[2]);
-      snapshot.interfaceCount = number(fields[3]);
     } else if (fields[0] === "gpu") {
       snapshot.gpuAvailable = true;
       snapshot.gpuPercent = number(fields[1]);

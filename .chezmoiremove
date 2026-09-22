@@ -20,3 +20,5 @@
 .scripts/git/utils.rb
 .scripts/startup
 .zgen
+.zlogin
+.zsh/linux.sh

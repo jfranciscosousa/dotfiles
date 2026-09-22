@@ -32,7 +32,6 @@ Panel {
   property string gpuName: ""
   property real downloadRate: 0
   property real uploadRate: 0
-  property int interfaceCount: 0
 
   property real previousCpuIdle: 0
   property real previousCpuTotal: 0
@@ -83,7 +82,6 @@ Panel {
     gpuMemoryTotalMiB = snapshot.gpuMemoryTotalMiB
     gpuTemperature = snapshot.gpuTemperature
     gpuName = snapshot.gpuName
-    interfaceCount = snapshot.interfaceCount
     loaded = true
   }
 

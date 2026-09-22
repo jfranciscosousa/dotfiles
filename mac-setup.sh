@@ -55,13 +55,6 @@ CASKS=(
   font-fira-code
 )
 
-# Optional GUI apps: configs exist (VISUAL=code, dot_cursor/) but they were not
-# installed on the reference machine. Move into CASKS if you want them.
-OPTIONAL_CASKS=(
-  visual-studio-code
-  cursor
-)
-
 INSTALL_CASKS=1
 [[ "${1:-}" == "--no-casks" ]] && INSTALL_CASKS=0
 
@@ -141,7 +134,6 @@ if [[ "$INSTALL_CASKS" -eq 1 ]]; then
       brew install --cask "$cask" || warn "failed to install cask: $cask (skipping)"
     fi
   done
-  bold "  optional casks (not installed automatically): ${OPTIONAL_CASKS[*]}"
 else
   log "Skipping casks (--no-casks)"
 fi
