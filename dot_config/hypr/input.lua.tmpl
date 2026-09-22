@@ -1,3 +1,4 @@
+-- Personal input overrides. Keep this module present on every host.
 {{- $isAsahi := eq (includeTemplate "is-asahi.tmpl" .) "true" }}
 {{- if $isAsahi }}
 hl.config({
