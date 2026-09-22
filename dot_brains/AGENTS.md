@@ -26,19 +26,12 @@ the current prompt.
   responses when available.
 - In user-facing responses, link Linear issues, Notion documents, PRs, and MRs using their titles,
   shortened when needed—not IDs or slugs. IDs are fine in tool calls.
-- Do not install tools, skills, browsers, or dependencies, run downloaded code, or change global
-  configuration without explicit approval. This includes implicit downloads and lifecycle scripts.
 
 ## Scripting
 
 For standalone cross-platform shell scripts, use Bash with `#!/usr/bin/env bash` and
 `set -euo pipefail`. Keep scripts compatible with macOS Bash 3.2 unless another runtime is required.
 Use zsh only for files sourced by zsh. Do not use POSIX sh.
-
-## Terminal file links
-
-Use short repo-relative `path:line` references so terminal users can open files with cmd-click. Put
-important references on separate lines without decorations that interfere with detection.
 
 ## Code comments
 
