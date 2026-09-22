@@ -15,8 +15,6 @@ the current prompt.
   Do not upload, publish, deploy, or mutate connected-service data without an explicit request.
 - Do not bypass permission checks, sandbox boundaries, or authentication controls to complete a
   task. Tool availability is not authorization.
-- On very large projects, do not run full-project tests, type checks, lints, or builds. Use scoped
-  checks, or report that none are available.
 
 ## Tools
 
