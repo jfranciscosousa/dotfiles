@@ -3,22 +3,6 @@ set -euo pipefail
 
 # git-squash-feature - Soft reset all commits since branching from a base branch into one.
 
-not_merged() {
-  local merge_destination_branch="$1"
-  local merge_source_branch="$2"
-  local merge_base
-  local merge_source_current_commit
-
-  merge_base=$(git merge-base "$merge_destination_branch" "$merge_source_branch")
-  merge_source_current_commit=$(git rev-parse "$merge_source_branch")
-
-  if [[ "$merge_base" = "$merge_source_current_commit" ]]; then
-    return 1
-  fi
-
-  return 0
-}
-
 if [ "$#" -ne 1 ]; then
   echo "usage: git squash-feature <base-branch>" >&2
   exit 2
@@ -28,7 +12,7 @@ base_branch="$1"
 base=$(git merge-base HEAD "$base_branch")
 current_branch=$(git branch --show-current)
 
-if not_merged "$current_branch" "$base_branch"; then
+if [[ "$(git merge-base "$current_branch" "$base_branch")" != "$(git rev-parse "$base_branch")" ]]; then
   echo "$base_branch is not merged with this branch, fix that please"
   exit 1
 fi
