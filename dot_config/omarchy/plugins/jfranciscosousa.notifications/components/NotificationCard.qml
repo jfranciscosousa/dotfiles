@@ -43,17 +43,13 @@ BorderSurface {
   readonly property bool summaryStartsWithGlyph: NotificationLogic.summaryStartsWithGlyph(summary)
   readonly property bool singleLineToast: sanitizedBody.length === 0
   readonly property bool collapseRedundantIcon: singleLineToast && !hasGlyph && summaryStartsWithGlyph
-  readonly property string sanitizedBody: sanitizeBody(body)
+  readonly property string sanitizedBody: NotificationLogic.sanitizeBody(body, app, appIcon)
   readonly property string styledBody: NotificationLogic.styledBody(body, app, appIcon)
 
   readonly property color dimColor: Qt.darker(Color.notifications.text, 1.4)
   readonly property color bodyColor: Qt.darker(Color.notifications.text, 1.15)
   readonly property color accentColor: urgency === 2 ? Color.urgent : (urgency === 0 ? dimColor : Color.notifications.countdown)
   readonly property var cardBorderSpec: Border.surfaceSpec("notifications", "border", Color.notifications.border, Math.max(1, Style.space(2)))
-
-  function sanitizeBody(s) {
-    return NotificationLogic.sanitizeBody(s, app, appIcon)
-  }
 
   function iconSource(icon) {
     var value = String(icon || "")
