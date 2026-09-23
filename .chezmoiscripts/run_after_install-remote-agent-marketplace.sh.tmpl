@@ -1,0 +1,54 @@
+{{- if hasPrefix "Remote-" .chezmoi.hostname -}}
+#!/usr/bin/env bash
+set -euo pipefail
+
+repository='git@gitlab.com:remote-com/tools/agent-plugin-marketplace.git'
+
+marketplace_listed() {
+  python3 -c '
+import json, sys
+entries = json.load(sys.stdin)
+if isinstance(entries, dict):
+    entries = entries["marketplaces"]
+sys.exit(not any(entry["name"] == sys.argv[1] for entry in entries))
+' "$1"
+}
+
+if command -v python3 >/dev/null 2>&1; then
+  if command -v claude >/dev/null 2>&1; then
+    if marketplaces="$(claude plugin marketplace list --json)"; then
+      if ! marketplace_listed remote-claude-plugins <<<"$marketplaces"; then
+        claude plugin marketplace add --scope user "$repository"
+      fi
+    else
+      printf 'warning: could not inspect Claude Code marketplaces\n' >&2
+    fi
+  fi
+
+  if command -v codex >/dev/null 2>&1; then
+    if marketplaces="$(codex plugin marketplace list --json)"; then
+      if ! marketplace_listed remote-codex-plugins <<<"$marketplaces"; then
+        codex plugin marketplace add "$repository" --ref main
+      fi
+    else
+      printf 'warning: could not inspect Codex marketplaces\n' >&2
+    fi
+  fi
+
+  if command -v opencode >/dev/null 2>&1; then
+    config_home="${XDG_CONFIG_HOME:-$HOME/.config}/opencode"
+    if [[ ! -f "$config_home/remote-marketplace.json" || ! -f "$config_home/plugins/remote-marketplace.ts" ]]; then
+      ref=main
+      if [[ -f "$config_home/remote-marketplace.json" ]]; then
+        ref="$(python3 -c 'import json, sys; print(json.load(open(sys.argv[1]))["ref"])' "$config_home/remote-marketplace.json")"
+      fi
+      checkout="$(mktemp -d "${TMPDIR:-/tmp}/remote-marketplace.XXXXXX")"
+      trap 'rm -rf -- "$checkout"' EXIT
+      git clone --depth 1 --branch main "$repository" "$checkout/source"
+      REMOTE_MARKETPLACE_REF="$ref" "$checkout/source/scripts/install-opencode.sh"
+    fi
+  fi
+else
+  printf 'warning: python3 is required to register the Remote agent marketplace\n' >&2
+fi
+{{- end -}}
