@@ -8,10 +8,6 @@ if [ "$#" -eq 0 ]; then
   exit 1
 fi
 
-dir=$(dirname "$1")
-
-if [ ! -d "$dir" ]; then
-  mkdir -p "$dir"
-fi
+mkdir -p "$(dirname -- "$1")"
 
 touch "$1"
