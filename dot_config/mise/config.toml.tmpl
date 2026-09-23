@@ -13,7 +13,7 @@ package_manager = "npm"
 
 # Reuse GitHub CLI authentication for GitHub-backed mise tools and API requests.
 [settings.github]
-credential_command = 'gh auth token --hostname "$MISE_CREDENTIAL_HOST"'
+credential_command = 'gh auth token --hostname github.com'
 
 [tools]
 {{ if hasPrefix "Remote-" .chezmoi.hostname -}}
