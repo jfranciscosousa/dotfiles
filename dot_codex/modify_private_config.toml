@@ -3,6 +3,7 @@
 {{- if hasKey .chezmoi "stdin" -}}
 {{- $existing = index .chezmoi "stdin" | fromToml -}}
 {{- end -}}
+{{- $_ := set $existing "model" "gpt-6-sol" -}}
 
 {{- if hasPrefix "Remote-" .chezmoi.hostname -}}
 {{- $mcpServers := dict

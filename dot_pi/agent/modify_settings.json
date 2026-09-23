@@ -14,9 +14,9 @@
 {{- end -}}
 
 {{- $enabledModels := list
-  (printf "%s/gpt-5.6-luna" $provider)
-  (printf "%s/gpt-5.6-sol" $provider)
   (printf "%s/gpt-5.6-terra" $provider)
+  (printf "%s/gpt-6-sol" $provider)
+  (printf "%s/gpt-6-luna" $provider)
   (printf "%s/gpt-6-astra" $provider)
   "openrouter/deepseek/deepseek-v4.1-flash"
 -}}

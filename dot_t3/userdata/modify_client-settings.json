@@ -5,9 +5,9 @@
 {{- end -}}
 
 {{- $codex := list
-  (dict "provider" "codex" "model" "gpt-5.6-luna")
+  (dict "provider" "codex" "model" "gpt-6-luna")
   (dict "provider" "codex" "model" "gpt-5.6-terra")
-  (dict "provider" "codex" "model" "gpt-5.6-sol")
+  (dict "provider" "codex" "model" "gpt-6-sol")
   (dict "provider" "codex" "model" "gpt-6-astra")
 -}}
 {{- $kept := list -}}

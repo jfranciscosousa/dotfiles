@@ -1,7 +1,7 @@
 export DOTFILES_PROVIDER=opencode
 export DOTFILES_MODEL=openai/gpt-5.6-terra
 export DOTFILES_FAST_PROVIDER=opencode
-export DOTFILES_FAST_MODEL=openai/gpt-5.6-luna
+export DOTFILES_FAST_MODEL=openai/gpt-6-luna
 
 alias prod="remotectl k8s shell tiger-api -lc -e production -r production-basic -m 4Gi -- tiger/bin/tiger start_iex"
 alias staging="remotectl k8s shell tiger-api -lc -e staging -r engineer -m 4Gi -- tiger/bin/tiger start_iex"
