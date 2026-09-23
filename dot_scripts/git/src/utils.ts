@@ -19,6 +19,7 @@ export function runCommand(
 
     child.stdout.on("data", (chunk: Buffer) => chunks.push(chunk));
     child.stderr.on("data", (chunk: Buffer) => chunks.push(chunk));
+    child.stdin.on("error", () => {});
     child.on("error", (error) => {
       resolve({ code: null, signal: null, output: error.message });
     });
@@ -34,8 +35,8 @@ export function runCommand(
   });
 }
 
-export async function gitOutput(args: string[]): Promise<string> {
-  const result = await runCommand("git", args);
+export async function gitOutput(args: string[], input?: string): Promise<string> {
+  const result = await runCommand("git", args, input);
   if (result.code === 0) {
     return result.output;
   }

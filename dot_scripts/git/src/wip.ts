@@ -1,6 +1,3 @@
-import { mkdtemp, rm, writeFile } from "node:fs/promises";
-import { tmpdir } from "node:os";
-import { join } from "node:path";
 import {
   aiGenerate,
   gitOutput,
@@ -61,22 +58,12 @@ ${diff}`;
 }
 
 const commitArgs = ["commit", ...options.commitFlags];
-let messageDirectory: string | undefined;
 
 if (!options.noEdit) {
-  messageDirectory = await mkdtemp(join(tmpdir(), "git-commit-msg-"));
-  const messagePath = join(messageDirectory, "message");
-  await writeFile(messagePath, message);
-  commitArgs.push("-F", messagePath);
+  commitArgs.push("-F", "-");
 }
 
-try {
-  printOutput(await gitOutput(commitArgs));
-} finally {
-  if (messageDirectory) {
-    await rm(messageDirectory, { recursive: true, force: true });
-  }
-}
+printOutput(await gitOutput(commitArgs, options.noEdit ? undefined : message));
 
 if (options.push) {
   const pushArgs = ["push", "-u", "origin", branch];
