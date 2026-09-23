@@ -5,7 +5,6 @@ import {
   detectDefaultBranch,
   gitOutput,
   maybeGitOutput,
-  relevantDiff,
   repoRoot,
   runCommand,
   splitTitleBody,
@@ -70,7 +69,7 @@ export async function createChangeRequest(config: ChangeRequestConfig): Promise<
     process.exit(1);
   }
 
-  const diff = await relevantDiff([diffRange]);
+  const diff = await gitOutput(["diff", diffRange]);
   const template = await findTemplate({
     candidates: config.templateCandidates ?? [],
     dirs: config.templateDirs ?? [],

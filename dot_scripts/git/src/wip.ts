@@ -2,7 +2,6 @@ import {
   aiGenerate,
   gitOutput,
   printOutput,
-  relevantDiff,
   splitTitleBody,
   stringArg,
   titleStyle,
@@ -29,7 +28,7 @@ printOutput(await gitOutput(["add", "--all"]));
 let message = options.message;
 
 if (options.aiMessage) {
-  const diff = await relevantDiff(["--cached"]);
+  const diff = await gitOutput(["diff", "--cached"]);
   const prompt = `Summarize this staged diff as a git commit message: one subject line, then a blank line, then the body.
 ${titleStyle("subject line", 50)}
 In the body, use bullet points grouped by topic.

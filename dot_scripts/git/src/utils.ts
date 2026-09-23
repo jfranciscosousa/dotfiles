@@ -69,10 +69,6 @@ export async function repoRoot(): Promise<string | undefined> {
   return root || undefined;
 }
 
-export async function relevantDiff(diffArgs: string[]): Promise<string> {
-  return gitOutput(["diff", ...diffArgs]);
-}
-
 export async function aiGenerate(
   prompt: string,
   options: { model?: string; fast?: boolean } = {},
