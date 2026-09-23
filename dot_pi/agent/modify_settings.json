@@ -4,7 +4,7 @@
 {{- $defaultThinkingLevel := "high" -}}
 {{- if not (hasPrefix "Remote-" .chezmoi.hostname) -}}
 {{- $provider = "openai-codex" -}}
-{{- $defaultModel = "gpt-5.6-terra" -}}
+{{- $defaultModel = "gpt-6-sol" -}}
 {{- $defaultThinkingLevel = "medium" -}}
 {{- end -}}
 
@@ -14,7 +14,6 @@
 {{- end -}}
 
 {{- $enabledModels := list
-  (printf "%s/gpt-5.6-terra" $provider)
   (printf "%s/gpt-6-sol" $provider)
   (printf "%s/gpt-6-luna" $provider)
   (printf "%s/gpt-6-astra" $provider)
