@@ -1,0 +1,202 @@
+# User-global RTK filters. Project-local .rtk/filters.toml takes precedence.
+# Docs: https://github.com/rtk-ai/rtk#custom-filters
+# On macOS rtk reads ~/Library/Application Support/rtk/filters.toml, which
+# chezmoi links to this file. rtk ignores the file until `rtk trust` records
+# its hash, so run `rtk trust` again after each change.
+schema_version = 1
+
+# The hook never routes plain `pnpm ...` to a TOML filter because `pnpm` is a
+# native rtk subcommand. The `mise exec --` wrapper makes the hook route it.
+# Strip known noise only, so unknown errors (module resolution, TypeScript,
+# real console.error output) survive.
+[filters.dragon-jest]
+description = "Compact Jest output from pnpm --filter @remote-com/* test scripts"
+match_command = "^mise exec --\\s+pnpm\\s+(--filter[ =]|-F\\s*)@remote-com/\\S+\\s+(run\\s+)?test(:file)?(\\s|$)"
+strip_ansi = true
+filter_stderr = true
+replace = [{ pattern = " \\(\\d+ MB heap size\\)", replacement = "" }]
+strip_lines_matching = [
+  "^\\s*$",
+  # pnpm script echo, norma cn-table build, Dragon test setup
+  "^\\$ ",
+  "^cn tables are current$",
+  "^Finished in \\d+m?s on \\d+ files? using \\d+ threads\\.$",
+  "^generated src/utils/cn-tables\\.generated\\.ts$",
+  "^Skipping setup\\.\\.\\.$",
+  "^Running one project: ",
+  # jest-haste-map duplicate manual mock warning
+  "^jest-haste-map: duplicate manual mock found: ",
+  "^\\s+The following files share their name; please delete one of them:$",
+  "^\\s+\\* <rootDir>/.*/__mocks__/",
+  # jsdom "Could not parse CSS stylesheet" dump of the whole Tailwind CSS
+  "^\\s+Error: Could not parse CSS stylesheet$",
+  "^\\s+detail: '/\\*! tailwindcss ",
+  "^\\s+'.*\\\\n' \\+$",
+  "^\\s+' '\\.\\.\\. \\d+ more characters,$",
+  "^\\s+type: 'css parsing'$",
+  "^\\s+\\d+ \\|   style\\.(id = STYLE_ELEMENT_ID|textContent = css);$",
+  "^\\s+> \\d+ \\|   doc\\.head\\.appendChild\\(style\\);$",
+  "^\\s+at appendChild \\(.*/norma/src/test-utils/jsdom\\.ts:",
+  "^\\s+at Object\\.<anonymous> \\(setupTests\\.js:",
+  "^\\s+at .*/node_modules/",
+  # passing tests and reporters
+  "^\\s+✓ ",
+  "^FlakyTestsReporter ",
+  "^No flaky tests found$",
+  "^Ran all test suites",
+  # pnpm failure box; the exit code is preserved
+  "^\\[ELIFECYCLE\\] Test failed\\. See above for more details\\.$",
+  "^Error: ERR_PNPM_RECURSIVE_RUN_FIRST_FAIL$",
+  "^\\s+× \"pnpm recursive run\" failed in ",
+  "^\\s+│ ",
+]
+
+[[tests.dragon-jest]]
+name = "failing run keeps the full failure block, diff, and summary"
+input = '''
+$ pnpm test --runTestsByPath src/helpers/zzRtkProbe.test.ts
+$ pnpm --filter @remote-com/norma run build:cn
+cn tables are current
+Skipping setup...
+Running one project: test
+jest-haste-map: duplicate manual mock found: salaryBandConfigHandlers
+  The following files share their name; please delete one of them:
+    * <rootDir>/src/domains/salaryBands/__mocks__/salaryBandConfigHandlers.ts
+
+  console.error
+    Error: Could not parse CSS stylesheet
+        at appendChild (../../packages/norma/src/test-utils/jsdom.ts:42:12)
+        at Object.<anonymous> (setupTests.js:43:18) {
+      detail: '/*! tailwindcss v4.3.0 | MIT License | https://tailwindcss.com */\n' +
+        '@layer properties;\n' +
+        '    width: var(--norma-spacing-4);\n' +
+        ' '... 195621 more characters,
+      type: 'css parsing'
+    }
+
+      40 |   style.id = STYLE_ELEMENT_ID;
+      41 |   style.textContent = css;
+    > 42 |   doc.head.appendChild(style);
+      at VirtualConsole.<anonymous> (../../node_modules/.pnpm/jest-environment-jsdom@29.6.4/node_modules/jest-environment-jsdom/build/index.js:55:29)
+      at appendChild (../../packages/norma/src/test-utils/jsdom.ts:42:12)
+      at Object.<anonymous> (setupTests.js:43:18)
+
+ FAIL   test  src/helpers/zzRtkProbe.test.ts (113 MB heap size)
+  probe
+    ✕ fails (3 ms)
+    ✓ passes
+
+  ● probe › fails
+
+    expect(received).toEqual(expected) // deep equality
+
+    - Expected  - 2
+    + Received  + 2
+
+      Object {
+    -   "a": 2,
+    +   "a": 1,
+        "b": Array [
+          1,
+    -     3,
+    +     2,
+        ],
+      }
+
+    > 1 | describe('probe', () => { it('fails', () => { expect({ a: 1, b: [1, 2] }).toEqual({ a: 2, b: [1, 3] }); }); it('passes', () => { expect(1).toBe(1); }); });
+        |                                                                           ^
+      2 |
+
+      at Object.toEqual (src/helpers/zzRtkProbe.test.ts:1:75)
+
+FlakyTestsReporter CI_JOB_URL: undefined
+No flaky tests found
+Test Suites: 1 failed, 1 total
+Tests:       1 failed, 1 passed, 2 total
+Snapshots:   0 total
+Time:        0.981 s
+Ran all test suites within paths "src/helpers/zzRtkProbe.test.ts".
+[ELIFECYCLE] Test failed. See above for more details.
+[ELIFECYCLE] Command failed with exit code 1.
+Error: ERR_PNPM_RECURSIVE_RUN_FIRST_FAIL
+
+  × "pnpm recursive run" failed in /Users/francisco/Projects/employ_workspace/
+  │ dragon/apps/employ
+'''
+expected = '''
+  console.error
+    }
+ FAIL   test  src/helpers/zzRtkProbe.test.ts
+  probe
+    ✕ fails (3 ms)
+  ● probe › fails
+    expect(received).toEqual(expected) // deep equality
+    - Expected  - 2
+    + Received  + 2
+      Object {
+    -   "a": 2,
+    +   "a": 1,
+        "b": Array [
+          1,
+    -     3,
+    +     2,
+        ],
+      }
+    > 1 | describe('probe', () => { it('fails', () => { expect({ a: 1, b: [1, 2] }).toEqual({ a: 2, b: [1, 3] }); }); it('passes', () => { expect(1).toBe(1); }); });
+        |                                                                           ^
+      2 |
+      at Object.toEqual (src/helpers/zzRtkProbe.test.ts:1:75)
+Test Suites: 1 failed, 1 total
+Tests:       1 failed, 1 passed, 2 total
+Snapshots:   0 total
+Time:        0.981 s
+[ELIFECYCLE] Command failed with exit code 1.
+'''
+
+[[tests.dragon-jest]]
+name = "passing run keeps only file result and summary"
+input = '''
+$ pnpm test --runTestsByPath src/helpers/url.test.ts
+Finished in 15ms on 1 files using 15 threads.
+generated src/utils/cn-tables.generated.ts
+Skipping setup...
+ PASS   test  src/helpers/url.test.ts (113 MB heap size)
+  getSearchParamsFromURL()
+    ✓ should return an object with search params (3 ms)
+    ✓ should return an empty object (1 ms)
+
+FlakyTestsReporter CI_JOB_URL: undefined
+No flaky tests found
+Test Suites: 1 passed, 1 total
+Tests:       2 passed, 2 total
+Snapshots:   0 total
+Time:        5.417 s
+Ran all test suites within paths "src/helpers/url.test.ts".
+'''
+expected = '''
+ PASS   test  src/helpers/url.test.ts
+  getSearchParamsFromURL()
+Test Suites: 1 passed, 1 total
+Tests:       2 passed, 2 total
+Snapshots:   0 total
+Time:        5.417 s
+'''
+
+[[tests.dragon-jest]]
+name = "unknown errors survive"
+input = '''
+ FAIL   test  src/domains/foo/Foo.test.tsx
+  ● Test suite failed to run
+
+    Cannot find module '@/src/missing' from 'src/domains/foo/Foo.test.tsx'
+
+  console.error
+    Warning: Each child in a list should have a unique "key" prop.
+'''
+expected = '''
+ FAIL   test  src/domains/foo/Foo.test.tsx
+  ● Test suite failed to run
+    Cannot find module '@/src/missing' from 'src/domains/foo/Foo.test.tsx'
+  console.error
+    Warning: Each child in a list should have a unique "key" prop.
+'''

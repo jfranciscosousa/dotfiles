@@ -20,6 +20,13 @@ For package scripts named exactly `lint`, use `rtk pnpm run lint`, never bare `p
 can rewrite the bare command to `rtk lint` and attempt to run ESLint. Repository-specific check
 scope still applies; this example does not authorize a full-project lint.
 
+For Jest runs through `pnpm --filter @remote-com/<package> run test` or `run test:file`, add the
+`mise exec --` prefix. Example:
+`SKIP_SETUP=true mise exec -- pnpm --filter @remote-com/employ run test:file <path>`. The hook does
+not send plain `pnpm` commands to TOML filters. The prefix routes the command to the `dragon-jest`
+filter, which keeps failure blocks, file results, and the summary. Do not redirect the output to a
+file: the hook does not rewrite commands that contain redirects.
+
 Use `rtk proxy <command>` when filtering hides diagnostics or exact output is required. Inspect
 truncated files and diffs completely before making claims that depend on the omitted content. Do not
 rerun a mutating command just to recover its output; inspect existing results or logs instead.

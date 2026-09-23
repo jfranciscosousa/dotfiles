@@ -25,6 +25,7 @@
 
 {{- if ne .chezmoi.os "darwin" }}
 .zsh/macos.sh
+Library
 {{- end }}
 
 {{- if not (hasPrefix "Remote-" .chezmoi.hostname) }}
