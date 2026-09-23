@@ -1,10 +1,6 @@
 // Based on upstream rtk-ai/rtk hooks/pi/rtk.ts. Local additions: RTK.md
 // system-prompt injection, rtk-gain command, package-manager lint guard.
-import type {
-  BashToolCallEvent,
-  ExtensionAPI,
-  ToolCallEvent,
-} from "@earendil-works/pi-coding-agent";
+import type { ExtensionAPI } from "@earendil-works/pi-coding-agent";
 import { readFile } from "node:fs/promises";
 import { homedir } from "node:os";
 import { join } from "node:path";
@@ -15,14 +11,6 @@ const PACKAGE_MANAGER_LINT_COMMAND = /^(?:env\s+\S+\s+)*(?:pnpm|npm|yarn|bun)\s+
 const RTK_REWRITE_CODES = new Set([0, 3]);
 const REWRITE_TIMEOUT_MS = 3000;
 const MIN_SUPPORTED_RTK_MINOR = 23;
-
-// Local reimplementation of the package's `isToolCallEventType("bash", event)`
-// type guard. That helper is a value export, so importing it pulls in the whole
-// package barrel at extension load; these type-only imports are erased at
-// compile time. Mirrors upstream.
-function isBashToolCallEvent(event: ToolCallEvent): event is BashToolCallEvent {
-  return event.toolName === "bash";
-}
 
 // Parse "X.Y.Z" semver, return [major, minor, patch] or null.
 function parseSemver(raw: string): [number, number, number] | null {
@@ -64,7 +52,7 @@ export default async function (pi: ExtensionAPI) {
   }
 
   pi.on("tool_call", async (event, ctx) => {
-    if (!isBashToolCallEvent(event)) return;
+    if (event.toolName !== "bash" || typeof event.input.command !== "string") return;
 
     const command = event.input.command;
     if (!command) return;
