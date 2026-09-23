@@ -12,8 +12,6 @@
   # Built-in filesystem monitor daemon — skips scanning unchanged files on `git status`.
   # Biggest single speedup for large worktrees on macOS/Windows (requires Git >= 2.37).
   fsmonitor = true
-  # Cache the list of untracked files between runs so `git status` doesn't re-stat everything.
-  untrackedCache = true
 [feature]
   # Umbrella switch that enables index v4, commit-graph, and other tuned defaults for big repos.
   manyFiles = true
