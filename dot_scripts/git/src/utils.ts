@@ -374,16 +374,6 @@ export function stringArg(value: unknown): string | undefined {
   return undefined;
 }
 
-export function chunks<T>(items: T[], size: number): T[][] {
-  const result: T[][] = [];
-
-  for (let index = 0; index < items.length; index += size) {
-    result.push(items.slice(index, index + size));
-  }
-
-  return result;
-}
-
 export function commandForLog(command: string[]): string {
   return command
     .map((arg) => {

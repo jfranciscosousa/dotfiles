@@ -1,5 +1,4 @@
 import {
-  chunks,
   detectDefaultBranch,
   firstJsonArrayObject,
   hasCommand,
@@ -144,8 +143,10 @@ async function fetchBranchReviewUrls(
     return urls;
   }
 
-  for (const chunk of chunks(branches, REMOTE_CHUNK_SIZE)) {
-    const entries = await Promise.all(chunk.map(fetchReview));
+  for (let index = 0; index < branches.length; index += REMOTE_CHUNK_SIZE) {
+    const entries = await Promise.all(
+      branches.slice(index, index + REMOTE_CHUNK_SIZE).map(fetchReview),
+    );
 
     for (const entry of entries) {
       if (entry) {
