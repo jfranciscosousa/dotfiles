@@ -122,11 +122,11 @@ async function fetchReviewUrls(
   branches: string[],
 ): Promise<Map<string, ReviewInfo>> {
   if (remoteUrl.includes("github")) {
-    return fetchGithubUrls(branches);
+    return fetchBranchReviewUrls(branches, "gh", fetchGithubUrl);
   }
 
   if (remoteUrl.includes("gitlab")) {
-    return fetchGitlabUrls(branches);
+    return fetchBranchReviewUrls(branches, "glab", fetchGitlabUrl);
   }
 
   return new Map();
@@ -158,10 +158,6 @@ async function fetchBranchReviewUrls(
   return urls;
 }
 
-async function fetchGithubUrls(branches: string[]): Promise<Map<string, ReviewInfo>> {
-  return fetchBranchReviewUrls(branches, "gh", fetchGithubUrl);
-}
-
 async function fetchGithubUrl(
   branch: string,
 ): Promise<{ branch: string; info: ReviewInfo } | undefined> {
@@ -191,10 +187,6 @@ async function fetchGithubUrl(
   } catch {
     return undefined;
   }
-}
-
-async function fetchGitlabUrls(branches: string[]): Promise<Map<string, ReviewInfo>> {
-  return fetchBranchReviewUrls(branches, "glab", fetchGitlabUrl);
 }
 
 async function fetchGitlabUrl(
