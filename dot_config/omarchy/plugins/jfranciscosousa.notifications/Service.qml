@@ -119,23 +119,6 @@ Item {
     return Math.round(ms)
   }
 
-  // DND bypass: only let through notifications we trust to be intentional
-  // and rare.
-  //   - omarchy-action: a user-action confirmation toast ("Theme changed",
-  //     "Screenshot saved"). The user JUST did something — their feedback
-  //     should show.
-  //   - urgency=critical AND app_name=notify-send: bare-CLI emergency alerts.
-  //     Trusted because it's almost always omarchy or system shell scripts —
-  //     chat apps set app_name to their brand (Discord/Slack/Vesktop), which
-  //     falls outside this rule.
-  function shouldBypassDnd(notification) {
-    return NotificationLogic.shouldBypassDnd(notification, NotificationUrgency.Critical)
-  }
-
-  function snapshotOf(notification) {
-    return NotificationLogic.snapshotOf(notification, Date.now())
-  }
-
   // A notification nobody looks back at:
   //   - the freedesktop `transient` hint is set ("popup only, don't store")
   //   - app_name is "notify-send" (the CLI default — means the sender
@@ -159,7 +142,7 @@ Item {
     // as this signal handler returns, which would null out the `ref` we just
     // captured for the popup card.
     notification.tracked = true
-    var snapshot = snapshotOf(notification)
+    var snapshot = NotificationLogic.snapshotOf(notification, Date.now())
     liveRefs[snapshot.originalId] = notification
     // Guard the delete: a newer notification may have reused this originalId
     // (freedesktop replaces_id) and taken over the map slot.
@@ -168,10 +151,10 @@ Item {
         delete service.liveRefs[snapshot.originalId]
     })
 
-    // DND bypass rules: chat apps abuse urgency=critical to force
-    // visibility, so critical alone isn't enough — we also require the
-    // sender to be CLI-style. See shouldBypassDnd().
-    if (service.doNotDisturb && !shouldBypassDnd(notification)) {
+    // DND lets through omarchy-action confirmations for actions the user just took,
+    // plus critical notify-send CLI alerts. Branded chat apps can mark messages
+    // critical too, so urgency alone is not trusted.
+    if (service.doNotDisturb && !NotificationLogic.shouldBypassDnd(notification, NotificationUrgency.Critical)) {
       // The toast never shows, so the only record a silenced notification
       // can leave is a history entry. Write it straight into history —
       // "what did I miss while silenced" is exactly what history is for.
