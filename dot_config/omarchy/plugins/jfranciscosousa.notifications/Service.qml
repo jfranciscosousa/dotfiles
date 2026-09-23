@@ -250,7 +250,7 @@ Item {
       return
     }
 
-    var roles = NotificationLogic.popupRoles()
+    var roles = NotificationLogic.POPUP_ROLES
     for (var i = 0; i < popupModel.count; i++) {
       var row = popupModel.get(i)
       if (!row || row.originalId !== originalId || row.timestamp !== timestamp) continue

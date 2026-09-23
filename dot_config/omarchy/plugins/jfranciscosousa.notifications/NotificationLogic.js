@@ -223,10 +223,6 @@ var POPUP_ROLES = [
   "expireTimeout",
 ];
 
-function popupRoles() {
-  return POPUP_ROLES;
-}
-
 // Whether a refresh has anything to write. Each property a client updates
 // emits its own signal, and the catch-up refresh after a row is inserted
 // usually finds the object exactly as it was snapshotted — without this,
@@ -484,7 +480,7 @@ if (typeof module !== "undefined") {
     parseExecArgv: parseExecArgv,
     shouldRenderCompactGlyph: shouldRenderCompactGlyph,
     snapshotOf: snapshotOf,
-    popupRoles: popupRoles,
+    POPUP_ROLES: POPUP_ROLES,
     popupRowChanged: popupRowChanged,
     replacementSnapshot: replacementSnapshot,
     historyEntry: historyEntry,
