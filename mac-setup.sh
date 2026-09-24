@@ -32,7 +32,7 @@ NODE_VERSION="${NODE_VERSION:-26.3.0}"
 # Homebrew formulae (mirror of `brew leaves` on the reference machine).
 FORMULAE=(
   # core CLI used directly by the shell + scripts
-  chezmoi git gh mise direnv tmux neovim jq rtk sox
+  chezmoi git gh mise direnv tmux neovim jq sox
   coreutils gawk curl pkgconf
   # build deps for mise-built runtimes (erlang/node native extensions)
   autoconf openssl@3 readline libxslt zlib ossp-uuid wxwidgets gcc
@@ -141,7 +141,7 @@ fi
 # ----------------------------------------------------------------------------
 # 5. mise runtimes (node, erlang, elixir, postgres, yarn)
 # ----------------------------------------------------------------------------
-# AI CLIs (Claude Code, codex, opencode) are mise tools: they install from
+# AI CLIs (Claude Code, codex, opencode) and RTK are mise tools: they install from
 # dot_config/mise/config.toml once `chezmoi apply` deploys it.
 
 log "mise runtimes"
@@ -191,7 +191,7 @@ Notes:
   • Docker: start the colima engine once -> `colima start`
     (or `brew services start colima` to auto-start it on login).
   • 1Password SSH agent: enable it in 1Password ▸ Settings ▸ Developer.
-  • rtk: verify the token-killer is the right binary -> `rtk gain`
+  • rtk: mise builds master HEAD with Cargo; verify -> `rtk gain`
     (name collision with reachingforthejack/rtk; see ~/.brains/RTK.md).
   • opencode/Claude auth: run `opencode auth login` / `claude` once to sign in.
 EOF

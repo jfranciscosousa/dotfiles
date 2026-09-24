@@ -3,6 +3,11 @@
 RTK reduces CLI output sent to the model. It is an output filter, not a permission boundary or a
 substitute for verification.
 
+The global mise config installs Rust and builds RTK from the master branch of
+https://github.com/rtk-ai/rtk via the Cargo backend. After `chezmoi apply`, run `mise install rust`
+and `mise install 'cargo:https://github.com/rtk-ai/rtk'`. To rebuild from the newest commit, run
+`mise install --force 'cargo:https://github.com/rtk-ai/rtk@branch:master'`.
+
 ## Usage
 
 Prefer explicit wrappers for supported commands:
