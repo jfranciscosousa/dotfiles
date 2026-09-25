@@ -30,6 +30,8 @@ Panel {
   property bool applyingFocusState: false
   property var groupedHistory: []
   property var expandedGroups: ({})
+  property var dismissedFiles: ({})
+  property var dismissQueue: []
 
   readonly property bool timedFocus: focusMode === "1h" || focusMode === "4h"
   readonly property string focusStatus: focusMode === "off"
@@ -52,6 +54,8 @@ Panel {
 
       try {
         var entry = JSON.parse(line)
+        var fileName = String(entry.timestamp || 0) + "-" + String(entry.originalId || 0) + ".json"
+        if (dismissedFiles[fileName]) continue
         var sourceApp = String(entry.app || "Notification")
         var sourceBody = String(entry.body || "")
         var app = webAppName(sourceApp, sourceBody)
@@ -68,7 +72,7 @@ Panel {
           summary: summary,
           body: body,
           focusPattern: notificationFocusPattern(sourceApp, sourceBody),
-          fileName: String(entry.timestamp || 0) + "-" + String(entry.originalId || 0) + ".json",
+          fileName: fileName,
           timestamp: Number(entry.timestamp || 0)
         })
       } catch (error) {
@@ -146,7 +150,30 @@ Panel {
   }
 
   function dismissGroup(notifications) {
-    if (dismissGroupProcess.running || !notifications || notifications.length === 0) return
+    if (!notifications || notifications.length === 0) return
+
+    var dismissed = {}
+    for (var i = 0; i < notifications.length; i++)
+      dismissed[notifications[i].fileName] = true
+    var next = {}
+    for (var name in dismissedFiles) next[name] = true
+    for (var fileName in dismissed) next[fileName] = true
+    dismissedFiles = next
+
+    groupedHistory = groupedHistory.filter(function(group) {
+      return !dismissed[group.notifications[0].fileName]
+    })
+    for (var row = historyModel.count - 1; row >= 0; row--)
+      if (dismissed[historyModel.get(row).fileName]) historyModel.remove(row)
+
+    dismissQueue = dismissQueue.concat([notifications])
+    runNextDismissGroup()
+  }
+
+  function runNextDismissGroup() {
+    if (dismissGroupProcess.running || dismissQueue.length === 0) return
+    var notifications = dismissQueue[0]
+    dismissQueue = dismissQueue.slice(1)
 
     var command = [
       "bash", "-c",
@@ -293,9 +320,14 @@ Panel {
   implicitWidth: button.implicitWidth
   implicitHeight: button.implicitHeight
 
-  onOpenedChanged: if (opened) {
-    expireTimedFocusIfNeeded()
-    refreshHistory()
+  onOpenedChanged: {
+    if (opened) {
+      if (!dismissGroupProcess.running && dismissQueue.length === 0) dismissedFiles = ({})
+      expireTimedFocusIfNeeded()
+      refreshHistory()
+    } else if (!dismissGroupProcess.running && dismissQueue.length === 0) {
+      dismissedFiles = ({})
+    }
   }
   onNotificationServiceChanged: applyLoadedFocusState()
   onFocusEnabledChanged: syncExternalFocusState()
@@ -321,7 +353,13 @@ Panel {
 
   Process {
     id: dismissGroupProcess
-    onExited: root.refreshHistory()
+    onExited: {
+      root.runNextDismissGroup()
+      if (!running && root.dismissQueue.length === 0) {
+        if (!root.opened) root.dismissedFiles = ({})
+        root.refreshHistory()
+      }
+    }
   }
 
   Process {
