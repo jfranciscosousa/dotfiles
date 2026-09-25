@@ -4,7 +4,9 @@ Pi is available only on personal machines. A work laptop is any machine whose ho
 `Remote-`.
 
 On personal machines, the global mise configuration installs Pi and chezmoi manages its files under
-`~/.pi/`.
+`~/.pi/`. The `tooling-update` command opens an interactive Pi session when `pi` is available and
+starts the update prompt. Otherwise, it runs OpenCode. It disables the mise versions host for that
+run to avoid rate limits from the shared version cache.
 
 On work laptops, chezmoi:
 
