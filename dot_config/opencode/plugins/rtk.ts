@@ -65,7 +65,7 @@ export const Rtk = async () => {
 
       const rewritten = result.stdout.trim();
       if (rewritten && rewritten !== command) {
-        output.args = { ...output.args, command: rewritten };
+        output.args.command = rewritten;
       }
     },
   };
