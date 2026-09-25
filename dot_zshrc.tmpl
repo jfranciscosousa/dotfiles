@@ -118,6 +118,22 @@ if (( ! ${+_comps} )); then
   compinit -u
 fi
 
+# Prezto refreshes its completion dump roughly once a day. Compile a new dump
+# after compinit, so subsequent shells load bytecode rather than parse the text.
+# Publish it atomically: another shell may start while compilation is in progress.
+if [[ "$TERM" != dumb ]]; then
+  completion_dump="${XDG_CACHE_HOME:-$HOME/.cache}/prezto/zcompdump"
+  if [[ -s "$completion_dump" && ( ! -s "$completion_dump.zwc" || "$completion_dump" -nt "$completion_dump.zwc" ) ]]; then
+    completion_bytecode="$completion_dump.$$.${RANDOM}.zwc"
+    if zcompile "$completion_bytecode" "$completion_dump"; then
+      command mv -f -- "$completion_bytecode" "$completion_dump.zwc"
+    else
+      command rm -f -- "$completion_bytecode"
+    fi
+  fi
+  unset completion_dump completion_bytecode
+fi
+
 # Register the repository-local completion immediately even when Prezto reuses
 # a dump created before this fpath entry existed.
 autoload -Uz _mise _octmux
