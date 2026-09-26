@@ -5,7 +5,8 @@ substitute for verification.
 
 The global mise config installs Rust and builds RTK from the master branch of
 https://github.com/rtk-ai/rtk via the Cargo backend. After `chezmoi apply`, run `mise install rust`
-and `mise install 'cargo:https://github.com/rtk-ai/rtk'`. To rebuild from the newest commit, run
+and `mise install 'cargo:https://github.com/rtk-ai/rtk'`, then `rtk trust` to enable the managed
+Jest filter. Run `rtk trust` again after filter changes. To rebuild from the newest commit, run
 `mise install --force 'cargo:https://github.com/rtk-ai/rtk@branch:master'`.
 
 ## Usage
@@ -50,8 +51,7 @@ This repository configures RTK integrations for:
 - Cursor: `preToolUse` Shell hook in `~/.cursor/hooks.json`.
 - Pi: `tool_call` extension at `~/.pi/agent/extensions/rtk.ts`.
 
-Codex CLI has no command hook in the installed rtk, so it uses prompt-level guidance:
-`~/.codex/AGENTS.md` references `~/.codex/RTK.md` and the agent prefixes `rtk` itself.
+Codex uses prompt-level guidance in `~/.codex/AGENTS.md` and prefixes `rtk` itself.
 
 Rewriting depends on the installed version, active hook, and command shape. Do not assume compound
 commands or pipelines are rewritten. Prefer separate tool calls for independent commands and

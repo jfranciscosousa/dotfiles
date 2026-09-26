@@ -10,7 +10,7 @@ import { dirname, extname, isAbsolute, resolve } from "node:path";
 import { Type } from "typebox";
 
 const CHATGPT_CODEX_URL = "https://chatgpt.com/backend-api/codex/responses";
-const IMAGE_MODEL = "gpt-6-sol";
+const HOST_MODEL = "gpt-6-astra";
 const IMAGE_TIMEOUT_MS = 5 * 60_000;
 const MAX_RESPONSE_BYTES = 100 * 1024 * 1024;
 const MAX_VERSION_SUFFIX = 999;
@@ -25,12 +25,12 @@ const parameters = Type.Object({
       "Output PNG path, relative to the project directory unless absolute. Existing files are never overwritten.",
   }),
   quality: StringEnum(["low", "medium", "high", "auto"] as const, {
-    description: "Generation quality passed to OpenAI's hosted image_generation tool.",
+    description: "Requested generation quality; the Codex backend may override it.",
   }),
   size: Type.Optional(
     Type.String({
       description:
-        "Optional size: `auto` or WIDTHxHEIGHT. Dimensions must be multiples of 16, each edge at most 3840, ratio at most 3:1, and total pixels from 655,360 through 8,294,400.",
+        "Requested size: `auto` or WIDTHxHEIGHT; the Codex backend may override it. Dimensions must be multiples of 16, each edge at most 3840, ratio at most 3:1, and total pixels from 655,360 through 8,294,400.",
     }),
   ),
   images: Type.Optional(
@@ -43,7 +43,7 @@ const parameters = Type.Object({
 
 type ImageDetails = {
   billing: "subscription";
-  model: string;
+  hostModel: string;
   out: string;
   versioned: boolean;
 };
@@ -84,7 +84,7 @@ export default function (pi: ExtensionAPI) {
 
       onUpdate?.({
         content: [{ type: "text", text: "Reading reference images..." }],
-        details: { model: IMAGE_MODEL },
+        details: { hostModel: HOST_MODEL },
       });
       const inputImages = await Promise.all(
         (params.images ?? []).map((path) => readImageAsDataUrl(path, ctx.cwd)),
@@ -93,7 +93,7 @@ export default function (pi: ExtensionAPI) {
 
       onUpdate?.({
         content: [{ type: "text", text: "Generating image..." }],
-        details: { model: IMAGE_MODEL },
+        details: { hostModel: HOST_MODEL },
       });
       const base64 = await generateImage(
         auth,
@@ -112,7 +112,7 @@ export default function (pi: ExtensionAPI) {
       );
       const details: ImageDetails = {
         billing: "subscription",
-        model: IMAGE_MODEL,
+        hostModel: HOST_MODEL,
         out: saved.path,
         versioned: saved.path !== outputPath,
       };
@@ -142,7 +142,7 @@ export default function (pi: ExtensionAPI) {
 
       const suffix = details.versioned ? " · versioned" : "";
       return new Text(
-        `${theme.fg("success", details.out)}${theme.fg("dim", ` · ${details.model}${suffix}`)}`,
+        `${theme.fg("success", details.out)}${theme.fg("dim", ` · via ${details.hostModel}${suffix}`)}`,
         0,
         0,
       );
@@ -210,7 +210,7 @@ async function generateImage(
         "user-agent": "pi-gpt-imagegen",
       },
       body: JSON.stringify({
-        model: IMAGE_MODEL,
+        model: HOST_MODEL,
         instructions:
           "You are an image generation assistant running inside the Codex backend. Always satisfy the request by invoking the image_generation tool exactly once. Do not respond with text only.",
         input: [{ role: "user", content }],
