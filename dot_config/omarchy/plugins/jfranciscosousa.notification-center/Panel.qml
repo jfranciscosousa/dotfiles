@@ -14,20 +14,18 @@ Panel {
   readonly property string imagesDir: Quickshell.env("HOME") + "/.local/state/omarchy/notifications/images"
   readonly property string focusStatePath: Quickshell.env("HOME") + "/.local/state/omarchy/notification-center.json"
   readonly property string focusAppCommand: Quickshell.env("OMARCHY_PATH") + "/bin/omarchy-hyprland-focus-app"
-  readonly property var notificationService: bar && bar.shell
-    ? bar.shell.firstPartyServiceFor("omarchy.notifications")
-    : null
-  readonly property bool focusEnabled: notificationService
-    ? notificationService.doNotDisturb
-    : false
   readonly property color foreground: Color.menu.text
   readonly property color dim: Util.alpha(foreground, 0.6)
   readonly property string fontFamily: bar ? bar.fontFamily : Style.font.family
 
   property string focusMode: "off"
   property double focusUntil: 0
+  property bool focusEnabled: false
   property bool focusStateLoaded: false
   property bool applyingFocusState: false
+  property string pendingDnd: ""
+  property int dndRevision: 0
+  property int queriedDndRevision: 0
   property var groupedHistory: []
   property var expandedGroups: ({})
   property var dismissedFiles: ({})
@@ -235,13 +233,35 @@ Panel {
     focusUntil = next === "1h" ? Date.now() + 60 * 60 * 1000
       : next === "4h" ? Date.now() + 4 * 60 * 60 * 1000
       : 0
-    if (notificationService) notificationService.setDoNotDisturb(next !== "off")
+    focusEnabled = next !== "off"
     applyingFocusState = false
     saveFocusState()
+    requestDnd(focusEnabled)
   }
 
   function toggleFocus() {
     setFocusMode(focusEnabled ? "off" : "on")
+  }
+
+  function requestDnd(enabled) {
+    dndRevision++
+    pendingDnd = enabled ? "on" : "off"
+    runPendingDnd()
+  }
+
+  function runPendingDnd() {
+    if (setDndProcess.running || !pendingDnd) return
+    var value = pendingDnd
+    pendingDnd = ""
+    setDndProcess.command = ["omarchy-shell", "notifications", "setDnd", value]
+    setDndProcess.running = true
+  }
+
+  function refreshDnd() {
+    if (focusStateLoaded && !setDndProcess.running && !pendingDnd && !dndStateProcess.running) {
+      queriedDndRevision = dndRevision
+      dndStateProcess.running = true
+    }
   }
 
   function expireTimedFocusIfNeeded() {
@@ -268,22 +288,19 @@ Panel {
   }
 
   function applyLoadedFocusState() {
-    if (!focusStateLoaded || !notificationService) return
+    if (!focusStateLoaded) return
 
     if (timedFocus && focusUntil <= Date.now()) {
       setFocusMode("off")
       return
     }
 
-    applyingFocusState = true
     if (focusMode === "on" || timedFocus) {
-      notificationService.setDoNotDisturb(true)
-    } else if (focusEnabled) {
-      focusMode = "on"
-      focusUntil = 0
-      saveFocusState()
+      focusEnabled = true
+      requestDnd(true)
+    } else {
+      refreshDnd()
     }
-    applyingFocusState = false
   }
 
   function syncExternalFocusState() {
@@ -310,7 +327,7 @@ Panel {
   }
 
   function clearHistory() {
-    if (notificationService) notificationService.clearHistory()
+    if (!clearHistoryProcess.running) clearHistoryProcess.running = true
     groupedHistory = []
     expandedGroups = ({})
     historyModel.clear()
@@ -329,7 +346,6 @@ Panel {
       dismissedFiles = ({})
     }
   }
-  onNotificationServiceChanged: applyLoadedFocusState()
   onFocusEnabledChanged: syncExternalFocusState()
   Component.onCompleted: focusStateFile.reload()
 
@@ -345,6 +361,33 @@ Panel {
     printErrors: false
     onLoaded: root.loadFocusState(text())
     onLoadFailed: root.loadFocusState("")
+  }
+
+  Process {
+    id: setDndProcess
+    onExited: Qt.callLater(function() {
+      root.runPendingDnd()
+      if (!setDndProcess.running && !root.pendingDnd) root.refreshDnd()
+    })
+  }
+
+  Process {
+    id: dndStateProcess
+    command: ["omarchy-shell", "notifications", "dndState"]
+    stdout: StdioCollector {
+      waitForEnd: true
+      onStreamFinished: {
+        if (!setDndProcess.running && !root.pendingDnd && root.queriedDndRevision === root.dndRevision) {
+          var state = text.trim()
+          if (state === "on" || state === "off") root.focusEnabled = state === "on"
+        }
+      }
+    }
+  }
+
+  Process {
+    id: clearHistoryProcess
+    command: ["omarchy-shell", "notifications", "clear"]
   }
 
   Process {
@@ -393,6 +436,13 @@ Panel {
     running: root.focusStateLoaded && root.timedFocus
     repeat: true
     onTriggered: root.expireTimedFocusIfNeeded()
+  }
+
+  Timer {
+    interval: 3000
+    running: root.focusStateLoaded
+    repeat: true
+    onTriggered: root.refreshDnd()
   }
 
   BarIconButton {
@@ -507,6 +557,15 @@ Panel {
         color: Color.menu.selectedBackground
         border.width: root.focusEnabled ? 1 : 0
         border.color: Color.accent
+
+        MouseArea {
+          anchors.left: parent.left
+          anchors.right: parent.right
+          anchors.top: parent.top
+          anchors.bottom: focusOptions.top
+          cursorShape: Qt.PointingHandCursor
+          onClicked: root.toggleFocus()
+        }
 
         Text {
           id: focusIcon
