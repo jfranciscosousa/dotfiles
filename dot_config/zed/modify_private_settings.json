@@ -16,10 +16,7 @@
   )
   "icon_theme" "Catppuccin Mocha"
   "project_panel" (dict "dock" "left")
-  "agent" (dict
-    "sidebar_side" "right"
-    "dock" "right"
-  )
+  "disable_ai" true
   "git" (dict "worktree_directory" "/home/jfranciscosousa/.git-worktrees")
   "collaboration_panel" (dict "button" false)
   "search" (dict "button" false)
@@ -64,34 +61,6 @@
     "solargraph" (dict "settings" (dict "use_bundler" false))
   )
 -}}
-
-{{- if hasPrefix "Remote-" .chezmoi.hostname -}}
-{{- $_ = set $managed "edit_predictions" (dict
-  "provider" "open_ai_compatible_api"
-  "open_ai_compatible_api" (dict
-    "model" "gpt-5.4-nano"
-    "api_url" "https://api.openai.com/v1"
-  )
-) -}}
-{{- $_ = set $managed "language_models" (dict
-  "openai" (dict
-    "api_url" "https://api.openai.com/v1"
-    "available_models" (list
-      (dict
-        "name" "gpt-5.5"
-        "display_name" "GPT-5.5 High"
-        "reasoning_effort" "high"
-        "max_tokens" 272000
-        "max_completion_tokens" 20000
-      )
-    )
-  )
-) -}}
-{{- $_ = set (index $managed "agent") "default_model" (dict
-  "provider" "openai"
-  "model" "gpt-5.5"
-) -}}
-{{- end -}}
 
 {{- if and (eq .chezmoi.os "linux") (lookPath "omarchy") -}}
 {{- $_ = set $managed "theme" "Omazed" -}}
