@@ -1,0 +1,17 @@
+{{- if hasPrefix "Remote-" .chezmoi.hostname -}}
+#!/usr/bin/env bash
+set -euo pipefail
+
+if ! command -v glab >/dev/null 2>&1; then
+  printf 'warning: glab is required to install the LiteLLM models plugin\n' >&2
+  exit 0
+fi
+
+plugin_dir="${XDG_CONFIG_HOME:-$HOME/.config}/opencode/plugins"
+mkdir -p "$plugin_dir"
+temporary_file="$(mktemp "$plugin_dir/.litellm-models.ts.XXXXXX")"
+trap 'rm -f "$temporary_file"' EXIT
+
+glab api 'projects/remote-com%2Ftools%2Fagent-plugin-marketplace/repository/files/plugins%2Fai-gateway%2Flitellm-models.ts/raw?ref=dt%2Fai-gateway-opencode-plugin' >"$temporary_file"
+mv -f "$temporary_file" "$plugin_dir/litellm-models.ts"
+{{- end }}

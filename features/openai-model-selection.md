@@ -3,6 +3,11 @@
 OpenCode lists only `gpt-6-sol`, `gpt-6-luna`, and `gpt-6-astra` from OpenAI on personal and work
 machines. Its agents use these models.
 
+On `Remote-` machines, `chezmoi apply` downloads the LiteLLM plugin from the Remote agent plugin
+marketplace branch and replaces the local copy, even if it changed. The plugin adds Remote's AI
+Gateway and loads the models available to the connected key when OpenCode starts. Use `/connect` →
+Other → `litellm` to add the key, then restart OpenCode to refresh the model list.
+
 Pi runs only on personal machines. Its model picker and cycling list the same three OpenAI models.
 Pi uses `gpt-6-sol` by default, and its image-generation tool uses the same model. Pi's
 `enabledModels` setting controls selection in the UI, not explicit CLI model arguments.
