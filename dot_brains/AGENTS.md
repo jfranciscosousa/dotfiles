@@ -8,17 +8,13 @@ the current prompt.
 
 - If SSH authentication fails, stop and ask me to approve the 1Password prompt. Retry only when I
   ask. Do not investigate SSH failures unless I explicitly ask.
-- Never perform any non-read Git, GitLab, or GitHub action unless the current prompt explicitly asks
-  you to.
-- Prefix new branches with `fs/` when branch creation is explicitly requested.
-- Never reply to or communicate with anyone on any connected system unless I explicitly tell you to.
-  Do not upload, publish, deploy, or mutate connected-service data without an explicit request.
+- Prefix new branches and worktrees with `fs/`. Create them only when I ask.
 - Do not bypass permission checks, sandbox boundaries, or authentication controls to complete a
   task. Tool availability is not authorization.
 
 ## Tools
 
-- Use ast-grep for structural source-code searches. Use rg for text search
+- Use ast-grep for structural source-code searches. Use rg for text search.
 - Use the `ntn` CLI instead of the Notion MCP. Use the `glab` CLI instead of a GitLab MCP.
 - Read-only connected-service access is allowed when needed. Include the resource's HTTP URL in
   responses when available.
@@ -42,4 +38,6 @@ When writing technical documentation or instructions, apply ASD-STE100 principle
 sentences, active voice, consistent terms, and concrete instructions. Avoid idioms, vague words, and
 unnecessary words. Use "must" for requirements and "should" for recommendations.
 
-I also have ADHD, be concise and to the point.
+## Communication
+
+I have ADHD. Keep reports short and direct. Lead with the result. Omit filler.
