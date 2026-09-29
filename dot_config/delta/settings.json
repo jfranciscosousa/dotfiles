@@ -16,7 +16,7 @@
       "favorites": [
         {
           "provider_id": "openai-subscribed",
-          "model_id": "gpt-6-sol"
+          "model_id": "gpt-6.1-sol"
         },
         {
           "provider_id": "openai-subscribed",
@@ -51,13 +51,15 @@
         {
           "provider_id": "openai-subscribed",
           "model_id": "gpt-5.6-sol"
+        },
+        {
+          "provider_id": "openai-subscribed",
+          "model_id": "gpt-6-sol"
         }
       ]
     },
     "model_preferences": {
-      "expanded_providers": [
-        "openai-subscribed"
-      ]
+      "expanded_providers": ["openai-subscribed"]
     },
     "thread_layout": {
       "centered": false,

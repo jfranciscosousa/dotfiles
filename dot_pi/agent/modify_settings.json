@@ -4,7 +4,7 @@
 {{- $defaultThinkingLevel := "high" -}}
 {{- if not (hasPrefix "Remote-" .chezmoi.hostname) -}}
 {{- $provider = "openai-codex" -}}
-{{- $defaultModel = "gpt-6-sol" -}}
+{{- $defaultModel = "gpt-6.1-sol" -}}
 {{- $defaultThinkingLevel = "medium" -}}
 {{- end -}}
 
@@ -14,7 +14,7 @@
 {{- end -}}
 
 {{- $enabledModels := list
-  (printf "%s/gpt-6-sol" $provider)
+  (printf "%s/gpt-6.1-sol" $provider)
   (printf "%s/gpt-6-luna" $provider)
   (printf "%s/gpt-6-astra" $provider)
   "openrouter/deepseek/deepseek-v4.1-flash"

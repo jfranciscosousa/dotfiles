@@ -81,11 +81,11 @@ export async function aiGenerate(
     : (process.env.DOTFILES_MODEL ?? options.model);
 
   if (provider === "opencode") {
-    return aiGenerateOpencode(prompt, model ?? "openai/gpt-6-sol");
+    return aiGenerateOpencode(prompt, model ?? "openai/gpt-6.1-sol");
   }
 
   if (provider === "pi") {
-    return aiGeneratePi(prompt, model ?? "openai-codex/gpt-6-sol");
+    return aiGeneratePi(prompt, model ?? "openai-codex/gpt-6.1-sol");
   }
 
   throw new Error(`Unknown provider: ${provider}`);

@@ -1,12 +1,12 @@
 {{/* Personal machines use OpenCode with GPT models. */}}
 {
   "$schema": "https://opencode.ai/config.json",
-  "model": "openai/gpt-6-sol",
+  "model": "openai/gpt-6.1-sol",
   "provider": {
     "openai": {
-      "whitelist": ["gpt-6-sol", "gpt-6-luna", "gpt-6-astra"],
+      "whitelist": ["gpt-6.1-sol", "gpt-6-luna", "gpt-6-astra"],
       "models": {
-        "gpt-6-sol": { "options": { "reasoningEffort": "high", "textVerbosity": "low", "reasoningSummary": "auto" } },
+        "gpt-6.1-sol": { "options": { "reasoningEffort": "high", "textVerbosity": "low", "reasoningSummary": "auto" } },
         "gpt-6-luna": { "options": { "reasoningEffort": "low", "textVerbosity": "low", "reasoningSummary": "auto" } },
         "gpt-6-astra": { "options": { "reasoningEffort": "high", "textVerbosity": "low", "reasoningSummary": "auto" } }
       }
@@ -18,7 +18,7 @@
     "build": {
       "mode": "primary",
       "description": "Default primary agent for full development work.",
-      "model": "openai/gpt-6-sol",
+      "model": "openai/gpt-6.1-sol",
       "options": {
         "reasoningEffort": "medium"
       }
@@ -31,7 +31,7 @@
     "general": {
       "mode": "subagent",
       "description": "General-purpose agent for researching complex questions and executing multi-step tasks.",
-      "model": "openai/gpt-6-sol"
+      "model": "openai/gpt-6.1-sol"
     },
     "explore": {
       "model": "openai/gpt-6-luna"
