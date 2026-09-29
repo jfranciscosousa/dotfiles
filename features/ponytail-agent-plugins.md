@@ -1,10 +1,11 @@
 # Ponytail agent plugins
 
-Ponytail is enabled globally for Claude Code, Codex, and OpenCode.
+Ponytail is enabled globally for Claude Code and OpenCode. It is also enabled for Codex on personal
+machines.
 
 - OpenCode loads `@dietrichgebert/ponytail` from its managed global configuration.
 - After each `chezmoi apply`, chezmoi adds the Ponytail marketplace and installs the user-scoped
-  plugin for Claude Code and Codex when it is missing.
+  plugin for each available Claude Code or Codex CLI when it is missing.
 - If a harness CLI is not available during apply, the script skips that harness. A later apply
   installs the plugin after the CLI becomes available.
 - A network or marketplace failure reports a warning but does not block unrelated dotfile changes.

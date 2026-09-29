@@ -2,8 +2,8 @@
 
 On machines whose hostname starts with `Remote-`, `chezmoi apply` registers the
 [Remote agent plugin marketplace](https://gitlab.com/remote-com/tools/agent-plugin-marketplace) for
-Claude Code and Codex. It also installs the OpenCode marketplace manager from the same repository.
-The installer keeps OpenCode's local mirror and plugin state outside chezmoi.
+Claude Code. It also installs the OpenCode marketplace manager from the same repository. The
+installer keeps OpenCode's local mirror and plugin state outside chezmoi.
 
 Registration does not install any catalogue plugins. Install only the plugins you need through each
 harness. OpenCode provides `/remote-plugin list` and `/remote-plugin install <name>` after a

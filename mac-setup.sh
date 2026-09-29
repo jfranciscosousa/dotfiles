@@ -141,8 +141,8 @@ fi
 # ----------------------------------------------------------------------------
 # 5. mise runtimes (node, erlang, elixir, postgres, yarn)
 # ----------------------------------------------------------------------------
-# AI CLIs (Claude Code, codex, opencode) and RTK are mise tools: they install from
-# dot_config/mise/config.toml once `chezmoi apply` deploys it.
+# AI CLIs and RTK are mise tools. Claude Code installs on remote machines, Codex
+# installs on personal machines, and OpenCode installs on both.
 
 log "mise runtimes"
 if ! have mise; then

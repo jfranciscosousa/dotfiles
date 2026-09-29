@@ -25,16 +25,6 @@ if command -v python3 >/dev/null 2>&1; then
     fi
   fi
 
-  if command -v codex >/dev/null 2>&1; then
-    if marketplaces="$(codex plugin marketplace list --json)"; then
-      if ! marketplace_listed remote-codex-plugins <<<"$marketplaces"; then
-        codex plugin marketplace add "$repository" --ref main
-      fi
-    else
-      printf 'warning: could not inspect Codex marketplaces\n' >&2
-    fi
-  fi
-
   if command -v opencode >/dev/null 2>&1; then
     config_home="${XDG_CONFIG_HOME:-$HOME/.config}/opencode"
     if [[ ! -f "$config_home/remote-marketplace.json" || ! -f "$config_home/plugins/remote-marketplace.ts" ]]; then

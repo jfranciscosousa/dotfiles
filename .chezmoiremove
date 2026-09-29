@@ -1,6 +1,7 @@
 .pi/agent/missions
 .pi/agent/extensions/critical.ts
 {{- if hasPrefix "Remote-" .chezmoi.hostname }}
+.codex
 .pi
 {{- end }}
 .config/opencode/prompts

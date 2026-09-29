@@ -12,7 +12,7 @@ if command -v claude >/dev/null 2>&1; then
   fi
 fi
 
-if command -v codex >/dev/null 2>&1; then
+if [[ $(hostname) != Remote-* ]] && command -v codex >/dev/null 2>&1; then
   if ! codex_plugins="$(codex plugin list --marketplace ponytail 2>/dev/null)"; then
     printf 'warning: could not inspect Codex plugins; skipping Ponytail installation\n' >&2
   elif ! grep -Eq '^ponytail@ponytail[[:space:]]+installed' <<<"$codex_plugins"; then

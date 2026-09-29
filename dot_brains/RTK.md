@@ -51,7 +51,8 @@ This repository configures RTK integrations for:
 - Cursor: `preToolUse` Shell hook in `~/.cursor/hooks.json`.
 - Pi: `tool_call` extension at `~/.pi/agent/extensions/rtk.ts`.
 
-Codex uses prompt-level guidance in `~/.codex/AGENTS.md` and prefixes `rtk` itself.
+On personal machines, Codex uses prompt-level guidance in `~/.codex/AGENTS.md` and prefixes `rtk`
+itself.
 
 Rewriting depends on the installed version, active hook, and command shape. Do not assume compound
 commands or pipelines are rewritten. Prefer separate tool calls for independent commands and

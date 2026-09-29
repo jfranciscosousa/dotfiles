@@ -32,6 +32,7 @@ Library
 .zsh/remote.sh
 .t3/**
 {{- else }}
+.codex/**
 .pi/**
 .zsh/personal.sh
 {{- end }}

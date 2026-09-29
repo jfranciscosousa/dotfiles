@@ -1,0 +1,13 @@
+{{- if hasPrefix "Remote-" .chezmoi.hostname -}}
+#!/usr/bin/env bash
+set -euo pipefail
+
+auth_file="${XDG_DATA_HOME:-$HOME/.local/share}/opencode/auth.json"
+if [[ -f "$auth_file" ]] && jq -e 'has("openai")' "$auth_file" >/dev/null; then
+  temporary_file="$(mktemp "${auth_file}.XXXXXX")"
+  trap 'rm -f "$temporary_file"' EXIT
+  jq 'del(.openai)' "$auth_file" >"$temporary_file"
+  chmod 600 "$temporary_file"
+  mv -f "$temporary_file" "$auth_file"
+fi
+{{- end }}

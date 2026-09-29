@@ -6,7 +6,7 @@
 
 {{- $instancePatch := dict -}}
 {{- $instances := index $existing "providerInstances" | default dict -}}
-{{- range $id, $enabled := dict "cursor" true "codex" true "claudeAgent" true "grok" false "opencode" true -}}
+{{- range $id, $enabled := dict "cursor" true "codex" false "claudeAgent" true "grok" false "opencode" true -}}
 {{- if hasKey $instances $id -}}
 {{- $patch := dict "enabled" $enabled -}}
 {{- $config := index $instances $id "config" -}}
@@ -22,7 +22,7 @@
   "sourceControlWriterModelSelection" (dict "instanceId" "cursor" "model" "auto-smart")
   "providers" (dict
     "cursor" (dict "enabled" true)
-    "codex" (dict "enabled" true)
+    "codex" (dict "enabled" false)
     "claudeAgent" (dict "enabled" true)
     "grok" (dict "enabled" false)
     "opencode" (dict "enabled" true)

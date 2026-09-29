@@ -1,24 +1,25 @@
 # OpenAI models in coding agents
 
-OpenCode lists only `gpt-6-sol`, `gpt-6-luna`, and `gpt-6-astra` from OpenAI on personal and work
-machines. Its agents use these models.
+On personal machines, OpenCode lists only `gpt-6-sol`, `gpt-6-luna`, and `gpt-6-astra` from OpenAI.
+Its agents use these models.
 
-On `Remote-` machines, `chezmoi apply` downloads the LiteLLM plugin from the Remote agent plugin
-marketplace branch and replaces the local copy, even if it changed. The plugin adds Remote's AI
-Gateway and loads the models available to the connected key when OpenCode starts. On a fresh
-install, search for `Other` in `/connect`, select it, then enter `litellm` as the provider ID and
-add the key. Searching for `litellm` before adding the key returns no results. Restart OpenCode to
-refresh the model list.
+On `Remote-` machines, OpenCode enables only the `litellm` provider and defaults to
+`litellm/gpt-6-sol`. `chezmoi apply` removes stored OpenAI credentials and downloads the LiteLLM
+plugin from the Remote agent plugin marketplace branch. It replaces the local copy, even if it
+changed. The plugin adds Remote's AI Gateway and loads the models available to the connected key
+when OpenCode starts. On a fresh install, search for `Other` in `/connect`, select it, then enter
+`litellm` as the provider ID and add the key. Searching for `litellm` before adding the key returns
+no results. Restart OpenCode to refresh the model list.
 
 Pi runs only on personal machines. Its model picker and cycling list the same three OpenAI models.
 Pi uses `gpt-6-sol` by default, and its image-generation tool uses the same model. Pi's
 `enabledModels` setting controls selection in the UI, not explicit CLI model arguments.
 
-Codex defaults to `gpt-6-sol`. Codex has no local model allowlist setting, so users can select other
-models with `--model` or project configuration.
+On personal machines, Codex defaults to `gpt-6-sol`. Codex has no local model allowlist setting, so
+users can select other models with `--model` or project configuration. Remote machines do not
+install or configure Codex.
 
-T3 favorites include these three models. AI-enabled Git scripts use `gpt-6-sol` by default and
-`gpt-6-luna` for fast requests.
+AI-enabled Git scripts use `gpt-6-sol` by default and `gpt-6-luna` for fast requests.
 
 ## Claude models on Remote machines
 

@@ -1,79 +1,48 @@
-{{/* Remote work machines intentionally use GPT/OpenAI, not OpenCode Go. */}}
+{{/* Remote work machines use GPT models through Remote's AI Gateway. */}}
 {
   "$schema": "https://opencode.ai/config.json",
-  "model": "openai/gpt-6-sol",
+  "model": "litellm/gpt-6-sol",
+  "enabled_providers": ["litellm"],
   "shell": "/bin/zsh",
-  "provider": {
-    "openai": {
-      "whitelist": [
-        "gpt-6-sol",
-        "gpt-6-luna",
-        "gpt-6-astra"
-      ],
-      "models": {
-        "gpt-6-sol": {
-          "options": {
-            "reasoningEffort": "high",
-            "textVerbosity": "low",
-            "reasoningSummary": "auto"
-          }
-        },
-        "gpt-6-luna": {
-          "options": {
-            "reasoningEffort": "low",
-            "textVerbosity": "low",
-            "reasoningSummary": "auto"
-          }
-        },
-        "gpt-6-astra": {
-          "options": {
-            "reasoningEffort": "high",
-            "textVerbosity": "low",
-            "reasoningSummary": "auto"
-          }
-        }
-      }
-    }
-  },
   "agent": {
     "plan": {
-      "model": "openai/gpt-6-sol",
+      "model": "litellm/gpt-6-sol",
       "options": {
         "reasoningEffort": "low"
       }
     },
     "build": {
-      "model": "openai/gpt-6-sol",
+      "model": "litellm/gpt-6-sol",
       "options": {
         "reasoningEffort": "medium"
       }
     },
     "general": {
-      "model": "openai/gpt-6-sol",
+      "model": "litellm/gpt-6-sol",
       "options": {
         "reasoningEffort": "high"
       }
     },
     "explore": {
-      "model": "openai/gpt-6-luna",
+      "model": "litellm/gpt-6-luna",
       "options": {
         "reasoningEffort": "high"
       }
     },
     "compaction": {
-      "model": "openai/gpt-6-sol",
+      "model": "litellm/gpt-6-sol",
       "options": {
         "reasoningEffort": "high"
       }
     },
     "summary": {
-      "model": "openai/gpt-6-sol",
+      "model": "litellm/gpt-6-sol",
       "options": {
         "reasoningEffort": "high"
       }
     },
     "title": {
-      "model": "openai/gpt-6-luna",
+      "model": "litellm/gpt-6-luna",
       "options": {
         "reasoningEffort": "high"
       }
