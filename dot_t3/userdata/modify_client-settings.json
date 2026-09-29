@@ -9,19 +9,30 @@
   (dict "provider" "codex" "model" "gpt-6-sol")
   (dict "provider" "codex" "model" "gpt-6-astra")
 -}}
+{{- $claude := list
+  (dict "provider" "claudeAgent" "model" "claude-sonnet-5-5")
+  (dict "provider" "claudeAgent" "model" "claude-opus-5-5")
+  (dict "provider" "claudeAgent" "model" "claude-fable-5-1")
+-}}
+{{- $claudeHidden := list "claude-fable-5" "claude-opus-5" "claude-opus-5-0" "claude-opus-4-5" "claude-opus-4-6" "claude-opus-4-7" "claude-opus-4-8" "claude-sonnet-5" "claude-sonnet-5-0" "claude-sonnet-4-6" "claude-haiku-4-5" -}}
 {{- $kept := list -}}
 {{- range (index $existing "favorites" | default list) -}}
 {{- $provider := index . "provider" -}}
 {{- $model := index . "model" | default "" -}}
-{{- if and (ne $provider "opencode") (ne $provider "grok") (ne $provider "codex") -}}
+{{- if and (ne $provider "opencode") (ne $provider "grok") (ne $provider "codex") (ne $provider "claudeAgent") -}}
 {{- if not (and (eq $provider "cursor") (hasPrefix "grok" $model)) -}}
 {{- $kept = append $kept . -}}
 {{- end -}}
 {{- end -}}
 {{- end -}}
 
-{{- $managed := dict "favorites" (concat $codex $kept) -}}
+{{- $managed := dict "favorites" (concat $claude $codex $kept) -}}
 {{- $out := mergeOverwrite (deepCopy $existing) $managed -}}
+{{- $prefs := index $out "providerModelPreferences" | default dict -}}
+{{- $claudePrefs := index $prefs "claudeAgent" | default dict -}}
+{{- $_ := set $claudePrefs "hiddenModels" (concat (index $claudePrefs "hiddenModels" | default list) $claudeHidden | uniq) -}}
+{{- $_ := set $prefs "claudeAgent" $claudePrefs -}}
+{{- $_ := set $out "providerModelPreferences" $prefs -}}
 {{- if eq ($existing | toJson) ($out | toJson) -}}
 {{- .chezmoi.stdin -}}
 {{- else -}}

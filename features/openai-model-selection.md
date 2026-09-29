@@ -19,3 +19,9 @@ models with `--model` or project configuration.
 
 T3 favorites include these three models. AI-enabled Git scripts use `gpt-6-sol` by default and
 `gpt-6-luna` for fast requests.
+
+## Claude models on Remote machines
+
+On `Remote-` machines, Claude Code defaults to `claude-sonnet-5-5`. Its `availableModels` setting
+lists only `claude-sonnet-5-5`, `claude-opus-5-5`, and `claude-fable-5-1`. T3 favorites these three
+models and hides the other Claude Agent models.
