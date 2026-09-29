@@ -27,7 +27,6 @@ usage = "6.12.0"
 pnpm = "12.6.0"
 deno = "2.9.7"
 "npm:zx" = "8.8.5"
-"npm:vercel" = "latest"
 "npm:ntn" = { version = "latest", allow_builds = ["ntn"] }
 "npm:playwright" = "latest"
 "npm:agent-browser" = "latest"
@@ -39,6 +38,7 @@ opencode = "1"
 {{ if not (hasPrefix "Remote-" .chezmoi.hostname) -}}
 codex = "latest"
 pi = "latest"
+"npm:vercel" = "latest"
 {{ end -}}
 chezmoi = "latest"
 "aqua:modem-dev/hunk" = "latest"
