@@ -26,3 +26,13 @@ AI-enabled Git scripts use `gpt-6-sol` by default and `gpt-6-luna` for fast requ
 On `Remote-` machines, Claude Code defaults to `claude-sonnet-5-5`. Its `availableModels` setting
 lists only `claude-sonnet-5-5`, `claude-opus-5-5`, and `claude-fable-5-1`. T3 favorites these three
 models and hides the other Claude Agent models.
+
+## Claude reasoning effort
+
+Claude Code sets the default effort per model with `modelSettings`: `claude-sonnet-5-5` uses `high`
+and `claude-opus-5-5` uses `xhigh`. Other models use the top-level `effortLevel` (`xhigh`).
+`CLAUDE_CODE_EFFORT_LEVEL` overrides these values, so do not set it.
+
+T3 has no per-model default. Its server `defaultModelSelection` sets one model and effort:
+`claude-opus-5-5` with `xhigh` and a 1M context window. T3 sends the effort with each session, so
+`modelSettings` does not apply there. To use Sonnet in T3, choose its effort in the model picker.

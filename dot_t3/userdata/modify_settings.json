@@ -18,6 +18,14 @@
 {{- end -}}
 
 {{- $managed := dict
+  "defaultModelSelection" (dict
+    "instanceId" "claudeAgent"
+    "model" "claude-opus-5-5"
+    "options" (list
+      (dict "id" "effort" "value" "xhigh")
+      (dict "id" "contextWindow" "value" "1m")
+    )
+  )
   "textGenerationModelSelection" (dict "instanceId" "cursor" "model" "auto-smart")
   "sourceControlWriterModelSelection" (dict "instanceId" "cursor" "model" "auto-smart")
   "providers" (dict

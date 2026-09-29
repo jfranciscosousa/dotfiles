@@ -21,6 +21,10 @@
     "command" "bash ~/.claude/statusline-command.sh"
   )
   "effortLevel" "xhigh"
+  "modelSettings" (dict
+    "claude-sonnet-5-5" (dict "effortLevel" "high")
+    "claude-opus-5-5" (dict "effortLevel" "xhigh")
+  )
   "tui" "fullscreen"
   "preferredNotifChannel" "terminal_bell"
   "skipAutoPermissionPrompt" true
