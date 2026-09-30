@@ -1,7 +1,8 @@
 ---
 name: francisco-tooling-update
 description:
-  Update the chezmoi source, Homebrew packages, and mise-managed tools. Should be manually invoked.
+  Update the chezmoi source, Homebrew packages, mise-managed tools, and installed harness plugins.
+  Should be manually invoked.
 ---
 
 # Francisco tooling update
@@ -122,7 +123,59 @@ include only coherent, successfully verified changes.
 Capture installed versions and outdated lists again, using the same commands and scope. Report
 actual before/after version changes, not just changes in outdated lists.
 
-## 4. Validate, commit, and push
+## 4. Update installed harness plugins
+
+Update user-scoped plugins for every installed harness: Pi, Codex, OpenCode, Cursor, and Claude
+Code. Harness binaries remain owned by Homebrew or mise; do not run separate self-updaters. Run
+plugin commands from `$HOME` to avoid repository-local configuration. Skip unavailable harnesses and
+report them. A plugin failure does not block other harnesses or the remaining workflow.
+
+Before each update, inspect the installed CLI's help and record installed plugin versions, sources,
+scopes, and pins. Keep recoverable copies of affected configuration and lockfiles. Update only
+already-installed plugins, including disabled plugins, without changing their enabled state. Do not
+install new plugins, approve hooks, change project trust, or update project-scoped plugins. Preserve
+exact versions, Git tags, commits, and local source edits. Report pinned or locally edited plugins
+as skipped. Do not edit vendor code, remove caches, or uninstall/reinstall plugins to force updates.
+
+Use the installed version's supported commands, not commands inferred from another release:
+
+- **Pi:** Record `pi list`, then run `pi update --extensions --no-approve </dev/null`. This updates
+  package resources, including extensions and skills, without updating the mise-owned Pi binary.
+  Preserve source pins in `dot_pi/agent/modify_settings.json`.
+- **Codex:** Record `codex plugin marketplace list` and `codex plugin list`, using JSON output when
+  supported. Run `codex plugin marketplace upgrade --json </dev/null` to refresh configured Git
+  marketplaces. Verify installed plugin versions separately: refreshing marketplace metadata does
+  not prove that installed plugins changed. If the CLI provides a separate installed-plugin update
+  command, use it. Otherwise report installed-plugin updates as unsupported; do not remove/add
+  plugins or change their enabled state.
+- **Claude Code:** Record `claude plugin list --json` and the marketplace inventory. Run
+  `claude plugin marketplace update </dev/null`, then
+  `claude plugin update <plugin@marketplace> --scope user </dev/null` for each installed, unpinned
+  user plugin. Do not update other scopes.
+- **OpenCode:** Inspect the global configuration's plugin entries and resolved package versions. Use
+  a native plugin update command if supported. For versions that only provide
+  `opencode plugin <module>`, refresh each already-configured, unpinned npm plugin with
+  `opencode plugin <module> --global --force </dev/null` only when help confirms that `--force`
+  replaces its installed version. Preserve the original configuration entry and all other entries.
+  Local chezmoi-managed plugins update during apply, not through npm. For external marketplace
+  managers, use their documented non-interactive update mechanism; otherwise report updates as
+  deferred until startup or requiring user action. Do not start an AI session to issue slash
+  commands.
+- **Cursor:** Use the editor's `cursor` CLI, not the separate agent CLI. Record
+  `cursor --list-extensions --show-versions`. Run `cursor --update-extensions </dev/null` only if
+  its help advertises that option and extension pins can be preserved. Treat Cursor agent plugins
+  separately from editor extensions: inspect their supported update mechanism and report them as
+  unsupported if no safe non-interactive updater exists. Never substitute forced extension
+  installation or GUI automation.
+
+Capture the same inventories after updating. Report actual version changes, metadata-only refreshes,
+failures, and skipped plugins per harness. If versions cannot be inspected, report them as
+unverified. Include any update-owned source configuration changes in the scoped validation and
+commit below; do not copy runtime caches, marketplace checkouts, or vendor packages into chezmoi.
+Tell the user to restart active harnesses to load changed plugins. Do not restart the harness
+running this workflow.
+
+## 5. Validate, commit, and push
 
 Run scoped, repository-approved checks on changed source paths and inspect the full diff. Run
 `chezmoi verify ~/.config/mise/config.toml`. Resolve discrepancies only when their ownership and
@@ -143,7 +196,7 @@ attempt limit, and preserve the local commit when pushing remains blocked.
 Verify the final branch/upstream relationship and confirm that unrelated working-tree and index
 changes remain intact.
 
-## 5. Apply chezmoi changes
+## 6. Apply chezmoi changes
 
 At the end of the workflow, apply the complete chezmoi source state without prompting:
 
@@ -182,13 +235,15 @@ changing the install scope:
 
 If the install fails, report it. Do not retry blindly.
 
-## 6. Always summarize
+## 7. Always summarize
 
 Report:
 
 - Completed, failed, and skipped steps, with reasons and affected dependencies.
 - Warnings and recovery actions; distinguish recovered errors from unresolved blockers.
-- Actual before/after version changes and anything still outdated.
+- Actual before/after tool and harness-plugin version changes and anything still outdated.
+- Per-harness plugin results, including metadata-only refreshes, pins, unsupported updates, and
+  required restarts.
 - Chezmoi verification and scoped check results.
 - Commit hash and URL when available, push result, and final Git state.
 - Any remaining conflicts, recovery stashes, or user action needed.

@@ -61,6 +61,7 @@ Preserve macOS/Linux branches in templates.
 ## Tooling-update exception
 
 Explicit invocation of `francisco-tooling-update` (including `tooling-update`) authorizes its
-package upgrades, chezmoi synchronization, global mise config changes, scoped apply, and commit/push
-of workflow-owned changes. Run without further confirmation unless blocked. Preserve unrelated work;
-authentication and destructive-action restrictions still apply.
+package upgrades, updates to already-installed user-scoped harness plugins and editor extensions,
+chezmoi synchronization, global mise config changes, scoped apply, and commit/push of workflow-owned
+changes. Run without further confirmation unless blocked. Preserve unrelated work; authentication
+and destructive-action restrictions still apply.
