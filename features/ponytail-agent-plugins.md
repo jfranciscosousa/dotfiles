@@ -14,7 +14,9 @@ machines.
 and Cursor editor extensions through supported non-interactive commands. It preserves pins, local
 edits, scopes, and enabled states. Missing harnesses and unsupported update mechanisms are reported
 as skipped. A Codex marketplace refresh is reported separately from installed-plugin updates. Cursor
-agent plugins are separate from editor extensions and require their own supported updater.
+agent plugins are separate from editor extensions and require their own supported updater. Invoking
+`tooling-update` also authorizes full conflict-safe chezmoi apply, including managed targets
+unrelated to upgrades and apply scripts, without separate approval.
 
 Restart an active harness after installation or an update. In Codex, open `/hooks` once after a new
 installation and approve Ponytail's lifecycle hooks.

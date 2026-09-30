@@ -8,8 +8,10 @@ description:
 # Francisco tooling update
 
 Execute the workflow without routine confirmation under the tooling-update authorization in the
-chezmoi repository's `AGENTS.md`. A skill does not grant its own permissions. Preserve the scope and
-restrictions of that authorization. Do not apply unrelated dotfiles.
+chezmoi repository's `AGENTS.md`. Explicit invocation authorizes the complete workflow, including
+full conflict-safe chezmoi apply of managed targets unrelated to upgrades and apply scripts. Do not
+ask for separate apply approval. A skill does not grant its own permissions; preserve the scope and
+restrictions of the repository authorization.
 
 Recover autonomously when the fix is clear and preserves user work. Never force-push, discard user
 changes, disable security checks, or blindly select an entire conflict side. Allow at most two
