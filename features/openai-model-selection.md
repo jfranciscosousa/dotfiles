@@ -31,9 +31,11 @@ models and hides the other Claude Agent models.
 ## Claude reasoning effort
 
 Claude Code sets the default effort per model with `modelSettings`: `claude-sonnet-5-5` uses `high`
-and `claude-opus-5-5` uses `xhigh`. Other models use the top-level `effortLevel` (`xhigh`).
-`CLAUDE_CODE_EFFORT_LEVEL` overrides these values, so do not set it.
+and `claude-opus-5-5` uses `xhigh`. Other models use the top-level `effortLevel` (`xhigh`). On
+`Remote-` machines, the top-level value and the `modelSettings` entries for the three available
+models are `medium`. `CLAUDE_CODE_EFFORT_LEVEL` overrides these values, so do not set it.
 
 T3 has no per-model default. Its server `defaultModelSelection` sets one model and effort:
-`claude-opus-5-5` with `xhigh` and a 1M context window. T3 sends the effort with each session, so
-`modelSettings` does not apply there. To use Sonnet in T3, choose its effort in the model picker.
+`claude-opus-5-5` with `xhigh` (`medium` on `Remote-` machines) and a 1M context window. T3 sends
+the effort with each session, so `modelSettings` does not apply there. To use another model in T3,
+choose its effort in the model picker.

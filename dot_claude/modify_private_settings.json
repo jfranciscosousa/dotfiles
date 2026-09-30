@@ -46,6 +46,12 @@
 {{- if hasPrefix "Remote-" .chezmoi.hostname -}}
 {{- $_ := set $managed "model" "claude-sonnet-5-5" -}}
 {{- $_ := set $managed "availableModels" (list "claude-sonnet-5-5" "claude-opus-5-5" "claude-fable-5-1") -}}
+{{- $_ := set $managed "effortLevel" "medium" -}}
+{{- $_ := set $managed "modelSettings" (dict
+  "claude-sonnet-5-5" (dict "effortLevel" "medium")
+  "claude-opus-5-5" (dict "effortLevel" "medium")
+  "claude-fable-5-1" (dict "effortLevel" "medium")
+) -}}
 {{- end }}
 
 {{ mergeOverwrite $existing $managed | toPrettyJson }}
