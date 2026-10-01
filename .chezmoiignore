@@ -28,6 +28,10 @@
 Library
 {{- end }}
 
+{{- if or (ne .chezmoi.os "darwin") (not (hasPrefix "Remote-" .chezmoi.hostname)) }}
+.agent-browser/config.json
+{{- end }}
+
 {{- if not (hasPrefix "Remote-" .chezmoi.hostname) }}
 .zsh/remote.sh
 .t3/**
