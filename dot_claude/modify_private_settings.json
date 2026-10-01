@@ -52,6 +52,13 @@
   "claude-opus-5-5" (dict "effortLevel" "medium")
   "claude-fable-5-1" (dict "effortLevel" "medium")
 ) -}}
+{{- $_ := set $managed "extraKnownMarketplaces" (dict
+  "remote-claude-plugins" (dict "source" (dict
+    "source" "git"
+    "url" "git@gitlab.com:remote-com/claude-code-plugin-marketplace.git"
+  ))
+) -}}
+{{- $_ := set $managed "enabledPlugins" (dict "adversarial-review@remote-claude-plugins" true) -}}
 {{- end }}
 
 {{ mergeOverwrite $existing $managed | toPrettyJson }}

@@ -13,3 +13,6 @@ The post-apply script skips a harness when its CLI is unavailable. A later apply
 marketplace when that CLI becomes available. It leaves existing marketplace registrations and
 OpenCode pins intact. If GitLab SSH authentication fails, approve the 1Password prompt before
 retrying the apply.
+
+On the same machines, the Claude Code settings also register the `remote-claude-plugins` marketplace
+and enable the `adversarial-review` plugin. Other enabled plugins stay untouched.
