@@ -1,5 +1,8 @@
 # OpenAI models in coding agents
 
+Mise manages OpenCode v2 through the official `@opencode/cli` npm package. The version constraint
+stays on major version `2`. Its postinstall script is allowed to install the platform binary.
+
 On personal machines, OpenCode lists only `gpt-6.1-sol`, `gpt-6-luna`, and `gpt-6-astra` from
 OpenAI. Its agents use these models.
 

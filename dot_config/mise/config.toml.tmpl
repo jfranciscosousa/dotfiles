@@ -34,7 +34,7 @@ postgres = "18.6"
 shellcheck = "0.11.0"
 gh = "latest"
 glab = "latest"
-opencode = "1"
+"npm:@opencode/cli" = { version = "2", allow_builds = ["@opencode/cli"] }
 {{ if not (hasPrefix "Remote-" .chezmoi.hostname) -}}
 codex = "latest"
 pi = "latest"
