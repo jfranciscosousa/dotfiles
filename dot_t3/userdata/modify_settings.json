@@ -31,7 +31,7 @@
       (dict "id" "contextWindow" "value" "1m")
     )
   )
-  "textGenerationModelSelection" (dict "instanceId" "cursor" "model" "auto-smart")
+  "textGenerationModelSelection" (dict "instanceId" "claudeAgent" "model" "claude-sonnet-5-5")
   "sourceControlWriterModelSelection" (dict "instanceId" "cursor" "model" "auto-smart")
   "providers" (dict
     "cursor" (dict "enabled" true)
