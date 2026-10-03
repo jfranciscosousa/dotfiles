@@ -44,6 +44,7 @@ pi = "latest"
 chezmoi = "latest"
 "aqua:modem-dev/hunk" = "latest"
 "github:basecamp/hey-cli" = "latest"
+"github:lightpanda-io/browser" = { version = "1.0.0", asset_pattern = "lightpanda-{{ if eq .chezmoi.arch "arm64" }}aarch64{{ else }}x86_64{{ end }}-{{ if eq .chezmoi.os "darwin" }}macos{{ else }}linux{{ end }}", bin = "lightpanda" }
 rg = "latest"
 ast-grep = "latest"
 bat = "latest"
