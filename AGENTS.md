@@ -50,14 +50,23 @@ Preserve macOS/Linux branches in templates.
   completed work. Remove obsolete documentation; add a feature doc only when it provides useful
   context beyond the code.
 - Do not stage, commit, push, or apply unless explicitly requested.
-- Validate only task paths. Never run full-project lint or the `lint:staged` package script.
-- For Markdown, run `rtk pnpm exec oxfmt --check --disable-nested-config <paths>`.
-- `lint-staged --diff="HEAD"` can change the index, even with check-only tasks. Use it only with
-  explicit staging approval and restrict it to task paths. Otherwise skip it and use known read-only
-  checks. Check untracked task files separately.
-- Inspect the final diff and verify that checks left the index unchanged unless staging was
-  authorized. Report checks that passed, failed, or were skipped. Formatting does not verify that
-  harnesses load instructions; do not claim deployment or reload without testing it.
+- Automatically lint and format task files with the repository tools. Restrict automatic fixes to
+  task paths and preserve unrelated changes. Include untracked task files in checks.
+- Repository-wide read-only checks, including typechecking, are allowed. Do not run repository-wide
+  formatting or automatic fixes unless explicitly requested.
+- For Markdown, run `rtk pnpm exec oxfmt --disable-nested-config <paths>`, then rerun with
+  `--check`.
+- When a commit is authorized, run all configured commit hooks, including `pnpm lint:staged` and its
+  repository-wide typecheck. Commit approval includes hook checks and updates to task files in the
+  index. Do not disable or bypass hooks unless explicitly requested for those commits.
+- Fix check failures in task files before committing. If a failure requires unrelated changes,
+  report the blocker and ask for approval. Do not skip a failed check to complete a commit.
+- Outside an authorized commit, do not run lint-staged without explicit staging approval. It can
+  change the index even with check-only tasks. Use direct checks on task paths instead.
+- Inspect automatic fixes and the final staged diff before committing. Verify the final diff and
+  index after checks and commits. Report checks that passed, failed, or were skipped. Formatting
+  does not verify that harnesses load instructions; do not claim deployment or reload without
+  testing it.
 
 ## Tooling-update exception
 
