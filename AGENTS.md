@@ -44,6 +44,7 @@ Preserve macOS/Linux branches in templates.
 ## Workflow and checks
 
 - Before editing, inspect `git status --short`. Preserve unrelated changes.
+- Use this existing checkout. Do not create a branch or worktree unless the user explicitly asks.
 - Read relevant `features/` docs before changing a feature. Update them in the same change when
   behavior, configuration, or usage changes. Document the current implementation, not audit logs or
   completed work. Remove obsolete documentation; add a feature doc only when it provides useful
