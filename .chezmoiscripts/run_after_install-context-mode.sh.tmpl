@@ -1,0 +1,28 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+cd "$HOME"
+
+if command -v claude >/dev/null 2>&1; then
+  if ! plugins="$(claude plugin list 2>/dev/null)"; then
+    printf 'warning: could not inspect Claude Code plugins; skipping Context Mode installation\n' >&2
+  elif [[ $plugins != *"context-mode@context-mode"* ]]; then
+    if ! claude plugin marketplace add mksglu/context-mode ||
+      ! claude plugin install context-mode@context-mode --scope user --json; then
+      printf 'warning: could not install Context Mode for Claude Code\n' >&2
+    fi
+  fi
+fi
+
+{{ if not (hasPrefix "Remote-" .chezmoi.hostname) -}}
+if command -v codex >/dev/null 2>&1; then
+  if ! plugins="$(codex plugin list --marketplace context-mode 2>/dev/null)"; then
+    printf 'warning: could not inspect Codex plugins; skipping Context Mode installation\n' >&2
+  elif ! grep -Eq '^context-mode@context-mode[[:space:]]+installed' <<<"$plugins"; then
+    if ! codex plugin marketplace add mksglu/context-mode --json ||
+      ! codex plugin add context-mode@context-mode --json; then
+      printf 'warning: could not install Context Mode for Codex\n' >&2
+    fi
+  fi
+fi
+{{ end -}}

@@ -46,7 +46,16 @@
       "model": "openai/gpt-6-luna"
     }
   },
-  "instructions": ["{{ .chezmoi.homeDir }}/.brains/RTK.md"],
+  "mcp": {
+    "servers": {
+      "context-mode": {
+        "type": "local",
+        "command": ["{{ .chezmoi.homeDir }}/.scripts/bin/context-mode-mcp"],
+        "environment": { "CONTEXT_MODE_PLATFORM": "opencode" }
+      }
+    }
+  },
+  "instructions": ["{{ .chezmoi.homeDir }}/.brains/RTK.md", "{{ .chezmoi.homeDir }}/.config/opencode/context-mode.md"],
   "plugin": [
     {{- if lookPath "cmux" }}
     ".\/plugins\/cmux-session.js",

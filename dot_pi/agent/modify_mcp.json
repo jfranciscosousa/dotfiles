@@ -1,0 +1,13 @@
+{{- /* chezmoi:modify-template */ -}}
+{{- $existing := dict -}}
+{{- if .chezmoi.stdin -}}
+{{- $existing = .chezmoi.stdin | fromJson -}}
+{{- end -}}
+{{- $servers := index $existing "mcpServers" | default dict -}}
+{{- $_ := set $servers "context-mode" (dict
+  "command" (printf "%s/.scripts/bin/context-mode-mcp" .chezmoi.homeDir)
+  "env" (dict "CONTEXT_MODE_PLATFORM" "pi")
+  "description" "Index large outputs and retrieve relevant sections. Execution tools require the same approvals as native tools."
+) -}}
+{{- $_ := set $existing "mcpServers" $servers -}}
+{{ $existing | toPrettyJson }}

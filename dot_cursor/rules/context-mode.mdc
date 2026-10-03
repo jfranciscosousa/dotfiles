@@ -1,0 +1,18 @@
+---
+description: Context Mode output indexing and retrieval
+alwaysApply: true
+---
+
+# Context Mode
+
+Use `ctx_batch_execute` for multi-command research, `ctx_execute_file` for file analysis,
+`ctx_index` for indexing supplied content, and `ctx_search` for retrieving relevant sections.
+Use `ctx_fetch_and_index` for large web pages. Return only the data needed for the task.
+Use native read and edit tools when making file changes.
+
+Context Mode tools do not grant additional permissions. Execution tools run arbitrary code with
+the server's OS privileges. Never use them to bypass a denied tool call, sandbox, authentication
+control, or approval requirement. Follow shared agent rules when they conflict with routing guidance.
+
+Use `ctx_stats` to inspect savings. Updates and purges require explicit approval; do not run
+`ctx_upgrade` or `ctx_purge` automatically.

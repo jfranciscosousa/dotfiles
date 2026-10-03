@@ -4,6 +4,10 @@
 {{- $existing = index .chezmoi "stdin" | fromToml -}}
 {{- end -}}
 {{- $_ := set $existing "model" "gpt-6.1-sol" -}}
+{{- $features := index $existing "features" | default dict -}}
+{{- $_ := set $features "hooks" true -}}
+{{- $_ := set $features "plugin_hooks" true -}}
+{{- $_ := set $existing "features" $features -}}
 
 {{- if hasPrefix "Remote-" .chezmoi.hostname -}}
 {{- $mcpServers := dict

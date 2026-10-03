@@ -1,0 +1,6 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+# start.mjs sets the project path used by Context Mode's Bash policy reader.
+install="$(mise where npm:context-mode@1.0.169)"
+exec node "$install/lib/node_modules/context-mode/start.mjs"
