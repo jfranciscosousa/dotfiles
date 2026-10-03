@@ -39,7 +39,7 @@
   "hideThinkingBlock" true
   "enabledModels" $enabledModels
   "packages" (list
-    "git:github.com/sting8k/pi-vcc@f7b80bbbe22315acf9f7925c0c3be2d4ae9feee5"
+    "git:github.com/sting8k/pi-vcc@f16600028524581faf9c3b2e0e99fa7931bbe2d2"
     "npm:@dietrichgebert/ponytail"
   )
   "shellPath" "/bin/zsh"
