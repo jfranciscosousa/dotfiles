@@ -34,13 +34,25 @@ type OpenAIResponse = {
 };
 
 const MAX_RESPONSE_BYTES = 5 * 1024 * 1024;
+const MAX_OUTPUT_TOKENS = 1_200;
+const MAX_SOURCES = 8;
 const SEARCH_TIMEOUT_MS = 60_000;
 const TOOL_NAME = "openai-web-search";
 const OPENAI_PROVIDERS = new Set(["openai", "openai-codex"]);
 const CHATGPT_CODEX_URL = "https://chatgpt.com/backend-api/codex";
 
 const parameters = Type.Object({
-  query: Type.String({ description: "Question or topic to research on the web" }),
+  query: Type.Union(
+    [
+      Type.String({ description: "Question or topic to research on the web" }),
+      Type.Array(Type.String(), {
+        description: "Up to four questions to research in one request",
+        maxItems: 4,
+        minItems: 1,
+      }),
+    ],
+    { description: "One question, or a small batch of independent questions" },
+  ),
   allowedDomains: Type.Optional(
     Type.Array(Type.String(), {
       description: "Optional domains to include, without http:// or https://",
@@ -76,8 +88,10 @@ export default function (pi: ExtensionAPI) {
         );
       }
 
-      const query = params.query.trim();
-      if (!query) {
+      const queries = (Array.isArray(params.query) ? params.query : [params.query])
+        .map((query) => query.trim())
+        .filter(Boolean);
+      if (queries.length === 0) {
         throw new Error("Search query cannot be empty");
       }
 
@@ -86,7 +100,7 @@ export default function (pi: ExtensionAPI) {
       const tool: Record<string, unknown> = {
         type: "web_search",
         external_web_access: true,
-        search_context_size: "medium",
+        search_context_size: "low",
       };
       if (params.allowedDomains || params.blockedDomains) {
         tool.filters = {
@@ -107,8 +121,11 @@ export default function (pi: ExtensionAPI) {
             provider === "openai"
               ? {
                   model: ctx.model.id,
-                  input: query,
+                  input: searchInput(queries),
                   tools: [tool],
+                  max_output_tokens: MAX_OUTPUT_TOKENS,
+                  parallel_tool_calls: true,
+                  store: false,
                   tool_choice: "required",
                   include: ["web_search_call.action.sources"],
                 }
@@ -119,7 +136,7 @@ export default function (pi: ExtensionAPI) {
                     {
                       content: [
                         {
-                          text: `Perform a web search for the query: ${query}`,
+                          text: searchInput(queries),
                           type: "input_text",
                         },
                       ],
@@ -127,6 +144,8 @@ export default function (pi: ExtensionAPI) {
                     },
                   ],
                   instructions: "You are an assistant for performing a web search tool use",
+                  max_output_tokens: MAX_OUTPUT_TOKENS,
+                  parallel_tool_calls: true,
                   store: false,
                   stream: true,
                   tool_choice: "auto",
@@ -157,8 +176,13 @@ export default function (pi: ExtensionAPI) {
       }
 
       const answer = extractAnswer(payload);
-      const sources = extractSources(payload);
-      const details: SearchDetails = { answer, model: ctx.model.id, query, sources };
+      const sources = extractSources(payload).slice(0, MAX_SOURCES);
+      const details: SearchDetails = {
+        answer,
+        model: ctx.model.id,
+        query: queries.join("\n"),
+        sources,
+      };
 
       return {
         content: [{ type: "text", text: formatResult(answer, sources) }],
@@ -168,7 +192,10 @@ export default function (pi: ExtensionAPI) {
 
     renderCall(args, theme) {
       return new Text(
-        `${theme.fg("toolTitle", theme.bold("openai-web-search "))}${theme.fg("accent", `"${args.query}"`)}`,
+        `${theme.fg("toolTitle", theme.bold("openai-web-search "))}${theme.fg(
+          "accent",
+          Array.isArray(args.query) ? `${args.query.length} queries` : `"${args.query}"`,
+        )}`,
         0,
         0,
       );
@@ -369,6 +396,15 @@ function formatResult(answer: string, sources: SearchSource[]): string {
     (source, index) => `${index + 1}. ${source.title ?? source.url}\n   ${source.url}`,
   );
   return `${output}\n\nSources:\n${formattedSources.join("\n")}`;
+}
+
+function searchInput(queries: string[]): string {
+  if (queries.length === 1) return queries[0] ?? "";
+
+  return [
+    "Research each question independently. Give a compact, source-backed answer for each in order.",
+    ...queries.map((query, index) => `${index + 1}. ${query}`),
+  ].join("\n");
 }
 
 function errorMessage(error: unknown): string {

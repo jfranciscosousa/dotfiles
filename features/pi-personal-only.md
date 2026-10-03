@@ -21,3 +21,9 @@ On work laptops, chezmoi:
 
 Run `chezmoi apply` after changing a machine hostname so the policy for the new machine class takes
 effect.
+
+## Web search
+
+The `openai-web-search` Pi extension accepts one query or a batch of up to four independent queries.
+It sends the batch in one Responses request, uses low search context, limits generated output to
+1,200 tokens, and returns no more than eight sources. Use a single query when research needs depth.
