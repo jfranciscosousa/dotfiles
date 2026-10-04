@@ -13,6 +13,8 @@ the current prompt.
   task. Tool availability is not authorization.
 - Do not stage or commit generated demo artifacts, screenshots, or screen recordings unless I
   explicitly request their inclusion in the repository. Save them outside the checkout by default.
+  When I request a demo, include its artifacts in the PR or MR description as essential code review
+  evidence. Attach or link them; do not commit them unless explicitly requested.
 
 ## Tools
 
