@@ -12,4 +12,9 @@ because it fails the macOS Gatekeeper check. Install the cask manually:
 `brew install --cask ungoogled-chromium`. If the install fails with `Permission denied`, enable App
 Management for the terminal in System Settings → Privacy & Security.
 
-Run `agent-browser doctor` to see the selected browser.
+The global mise configuration includes `conda:ffmpeg` for video recording. The FFmpeg package also
+provides `ffprobe` for video inspection. After deploying the configuration, run
+`mise install conda:ffmpeg`. Recording requires `ffmpeg` on PATH with the `libvpx` and `libx264`
+encoders. Screenshots do not require FFmpeg.
+
+Run `agent-browser doctor` to check the selected browser and recording dependencies.
