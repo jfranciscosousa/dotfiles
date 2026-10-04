@@ -11,6 +11,8 @@ the current prompt.
 - Prefix new branches and worktrees with `fs/`. Create them only when I ask.
 - Do not bypass permission checks, sandbox boundaries, or authentication controls to complete a
   task. Tool availability is not authorization.
+- Do not stage or commit generated demo artifacts, screenshots, or screen recordings unless I
+  explicitly request their inclusion in the repository. Save them outside the checkout by default.
 
 ## Tools
 
