@@ -45,7 +45,8 @@ pi = "latest"
 chezmoi = "latest"
 "aqua:modem-dev/hunk" = "latest"
 "github:basecamp/hey-cli" = "latest"
-"github:lightpanda-io/browser" = { version = "1.0.0", asset_pattern = "lightpanda-{{ if eq .chezmoi.arch "arm64" }}aarch64{{ else }}x86_64{{ end }}-{{ if eq .chezmoi.os "darwin" }}macos{{ else }}linux{{ end }}", bin = "lightpanda" }
+# Pin nightly assets by digest: upstream replaces the nightly downloads in place.
+"github:lightpanda-io/browser" = { version = "nightly", asset_pattern = "lightpanda-{{ if eq .chezmoi.arch "arm64" }}aarch64{{ else }}x86_64{{ end }}-{{ if eq .chezmoi.os "darwin" }}macos{{ else }}linux{{ end }}", bin = "lightpanda", checksum = "sha256:{{ if eq .chezmoi.os "darwin" }}{{ if eq .chezmoi.arch "arm64" }}0c07fde6a81338bfaf043397a4531effe55de93fe6e1b781ef1b91a84a30a203{{ else }}9d4394ee358cc3fa2e56b557b9c6ab1e81ba07b5dbcfa3b5bf9a649d15ce9e83{{ end }}{{ else }}{{ if eq .chezmoi.arch "arm64" }}97a61090a8f5bcf9954a45605912298d564b217040549997052cb31397691507{{ else }}e24d135bb5c4c0905cea9ee9a1cd87eff407755af24bd99b659fa64ec907f18d{{ end }}{{ end }}" }
 rg = "latest"
 ast-grep = "latest"
 bat = "latest"
