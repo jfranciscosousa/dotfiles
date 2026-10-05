@@ -38,9 +38,10 @@ constraints, or workarounds. Do not restate what the code does.
 
 ## Technical English
 
-When writing technical documentation or instructions, apply ASD-STE100 principles: use short
-sentences, active voice, consistent terms, and concrete instructions. Avoid idioms, vague words, and
-unnecessary words. Use "must" for requirements and "should" for recommendations.
+Apply ASD-STE100 principles to all text you write. This includes replies, commit messages, PR and MR
+descriptions, documents, artifacts, code comments, and instructions. Use short sentences, active
+voice, consistent terms, and concrete instructions. Avoid idioms, vague words, and unnecessary
+words. Use "must" for requirements and "should" for recommendations.
 
 ## Communication
 
