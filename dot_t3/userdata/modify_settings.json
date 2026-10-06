@@ -5,6 +5,7 @@
 {{- end -}}
 
 {{- $instancePatch := dict -}}
+{{- $legacyPatch := dict -}}
 {{- $instances := index $existing "providerInstances" | default dict -}}
 {{- range $id, $enabled := dict "cursor" true "codex" false "claudeAgent" true "grok" false "opencode" true -}}
 {{- if hasKey $instances $id -}}
@@ -14,12 +15,26 @@
 {{- $_ := set $patch "config" (dict "enabled" $enabled) -}}
 {{- end -}}
 {{- $_ := set $instancePatch $id $patch -}}
+{{- else -}}
+{{- $_ := set $legacyPatch $id (dict "enabled" $enabled) -}}
 {{- end -}}
 {{- end -}}
 
 {{- $effort := "xhigh" -}}
 {{- if hasPrefix "Remote-" .chezmoi.hostname -}}
 {{- $effort = "medium" -}}
+{{- /* T3 drops plugin models from its OpenCode 2 catalog: https://github.com/pingdotgg/t3code/issues/15155 */ -}}
+{{- $gatewayModel := "litellm/gpt-6.1-sol" -}}
+{{- if hasKey $instancePatch "opencode" -}}
+{{- $customModels := dig "opencode" "config" "customModels" list $instances -}}
+{{- if not (has $gatewayModel $customModels) -}}
+{{- $patchConfig := index $instancePatch "opencode" "config" | default dict -}}
+{{- $_ := set $patchConfig "customModels" (append $customModels $gatewayModel) -}}
+{{- $_ := set (index $instancePatch "opencode") "config" $patchConfig -}}
+{{- end -}}
+{{- else -}}
+{{- $_ := set (index $legacyPatch "opencode") "customModels" (list $gatewayModel) -}}
+{{- end -}}
 {{- end -}}
 
 {{- $managed := dict
@@ -31,21 +46,40 @@
       (dict "id" "contextWindow" "value" "1m")
     )
   )
-  "textGenerationModelSelection" (dict "instanceId" "claudeAgent" "model" "claude-sonnet-5-5")
-  "sourceControlWriterModelSelection" (dict "instanceId" "cursor" "model" "auto-smart")
-  "providers" (dict
-    "cursor" (dict "enabled" true)
-    "codex" (dict "enabled" false)
-    "claudeAgent" (dict "enabled" true)
-    "grok" (dict "enabled" false)
-    "opencode" (dict "enabled" true)
+  "textGenerationModelSelection" (dict
+    "instanceId" "claudeAgent"
+    "model" "claude-sonnet-5-5"
+    "options" (list
+      (dict "id" "effort" "value" "high")
+      (dict "id" "contextWindow" "value" "1m")
+    )
   )
+  "storageCleanup" (dict
+    "worktreeAfterDays" 6
+    "worktreeOnMerge" true
+    "worktreeUnchanged" true
+    "browserArtifactsAfterDays" 15
+    "logsAfterDays" 15
+  )
+  "enableAgentBrowserAccess" false
+  "defaultAutoPull" true
+  "defaultThreadEnvMode" "local"
+  "sidebarAutoSettleAfterDays" 10
+  "branchNamePrefix" "fs"
+  "removeAgentCreditsOnMerge" true
+  "pullRequestMergeMethod" "squash"
+  "cursorKeychainUsageEnabled" true
 -}}
 {{- if $instancePatch -}}
 {{- $_ := set $managed "providerInstances" $instancePatch -}}
 {{- end -}}
+{{- /* T3 reads legacy `providers.<id>` only when `providerInstances.<id>` is missing. */ -}}
+{{- if $legacyPatch -}}
+{{- $_ := set $managed "providers" $legacyPatch -}}
+{{- end -}}
 
 {{- $out := mergeOverwrite (deepCopy $existing) $managed -}}
+{{- $_ := unset $out "sourceControlWriterModelSelection" -}}
 {{- if eq ($existing | toJson) ($out | toJson) -}}
 {{- .chezmoi.stdin -}}
 {{- else -}}
