@@ -34,7 +34,6 @@ Library
 
 {{- if not (hasPrefix "Remote-" .chezmoi.hostname) }}
 .zsh/remote.sh
-.t3/**
 {{- else }}
 .codex/**
 .pi/**
@@ -44,6 +43,7 @@ Library
 AGENTS.md
 README.md
 features/
+t3.json
 .editorconfig
 .husky/
 .oxfmtrc.json

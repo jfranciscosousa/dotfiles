@@ -8,13 +8,25 @@ the current prompt.
 
 - If SSH authentication fails, stop and ask me to approve the 1Password prompt. Retry only when I
   ask. Do not investigate SSH failures unless I explicitly ask.
-- Prefix new branches and worktrees with `fs/`. Create them only when I ask.
+- Prefix new branches and worktrees with `fs/`. Create them only when I ask, except for the T3 Code
+  policy below.
 - Do not bypass permission checks, sandbox boundaries, or authentication controls to complete a
   task. Tool availability is not authorization.
 - Do not stage or commit generated demo artifacts, screenshots, or screen recordings unless I
   explicitly request their inclusion in the repository. Save them outside the checkout by default.
   When I request a demo, include its artifacts in the PR or MR description as essential code review
   evidence. Attach or link them; do not commit them unless explicitly requested.
+
+## T3 Code worktrees
+
+- On non-work devices, T3 Code must use a separate task worktree with an `fs/` branch before editing
+  repository files. This includes personal servers accessed remotely. Hostnames that start with
+  `Remote-` identify work devices and do not have this automatic authorization.
+- This policy authorizes task worktree creation without another request. Reuse the current thread's
+  task worktree if it already has one. Use T3 Code workspace tools to keep the thread binding
+  correct.
+- For the chezmoi source repository, use the existing checkout. Create a branch or worktree only
+  when explicitly requested. This exception applies on all devices.
 
 ## Tools
 

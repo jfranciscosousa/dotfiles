@@ -21,8 +21,10 @@
 {{- end -}}
 
 {{- $effort := "xhigh" -}}
+{{- $workspace := "worktree" -}}
 {{- if hasPrefix "Remote-" .chezmoi.hostname -}}
 {{- $effort = "medium" -}}
+{{- $workspace = "local" -}}
 {{- /* T3 drops plugin models from its OpenCode 2 catalog: https://github.com/pingdotgg/t3code/issues/15155 */ -}}
 {{- $gatewayModel := "litellm/gpt-6.1-sol" -}}
 {{- if hasKey $instancePatch "opencode" -}}
@@ -63,7 +65,7 @@
   )
   "enableAgentBrowserAccess" false
   "defaultAutoPull" true
-  "defaultThreadEnvMode" "local"
+  "defaultThreadEnvMode" $workspace
   "sidebarAutoSettleAfterDays" 10
   "branchNamePrefix" "fs"
   "removeAgentCreditsOnMerge" true
