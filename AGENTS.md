@@ -6,7 +6,7 @@ files here; `chezmoi apply` deploys them to the home directory.
 ## Instruction scope
 
 - This file contains repository-specific rules only.
-- Read `dot_brains/AGENTS.md` for shared coding and tool rules used across agent harnesses.
+- Read `dot_brains/AGENTS.md.tmpl` for shared coding and tool rules used across agent harnesses.
 - `dot_brains/RTK.md` contains output-filter guidance; `dot_brains/skills/` contains shared
   workflows.
 - Edit shared guidelines in `dot_brains/` and harness routing in its source configuration, not

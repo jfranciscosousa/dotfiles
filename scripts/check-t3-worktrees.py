@@ -21,6 +21,14 @@ def render(path, hostname, system, stdin=""):
 
 for system in ("darwin", "linux"):
     for hostname in ("personal-test", "t3code", "REMOTE", "Remote-work"):
+        for path in (
+            "dot_brains/AGENTS.md.tmpl",
+            "dot_cursor/rules/global.mdc.tmpl",
+            "dot_codex/AGENTS.md.tmpl",
+        ):
+            instructions = render(path, hostname, system)
+            assert ("## T3 Code service administration" in instructions) == (hostname == "t3code")
+            assert "{{" not in instructions
         existing = {"unmanaged": {"keep": True}, "projectSettingsFolded": True}
         settings = json.loads(render(
             "dot_t3/userdata/modify_settings.json", hostname, system, json.dumps(existing),

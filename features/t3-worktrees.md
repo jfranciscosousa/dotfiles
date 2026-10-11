@@ -14,9 +14,14 @@ repository configuration file and must not be deployed to the home directory. T3
 can supersede it. Set the chezmoi project's workspace to local on each environment, especially when
 `projectSettingsFolded` disables repository settings.
 
-`dot_brains/AGENTS.md` authorizes automatic task worktree creation only for T3 Code on non-work
+`dot_brains/AGENTS.md.tmpl` authorizes automatic task worktree creation only for T3 Code on non-work
 devices. Agents must reuse an existing task worktree and must use T3 workspace tools to preserve
 thread bindings. Chezmoi always requires an explicit request to create a branch or worktree.
+
+The shared instructions are a chezmoi template. Only hostname `t3code` receives the service
+administration rules: identify the running executable and data directory, use an explicit
+`--base-dir`, and verify auth changes against that instance. Cursor and Codex render the same
+template.
 
 Defaults do not prevent explicit workspace overrides. Existing threads do not move automatically.
 Deploy the source settings and instructions with an approved `chezmoi apply` on each device. The

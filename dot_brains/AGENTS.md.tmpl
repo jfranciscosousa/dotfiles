@@ -28,6 +28,19 @@ the current prompt.
 - For the chezmoi source repository, use the existing checkout. Create a branch or worktree only
   when explicitly requested. This exception applies on all devices.
 
+{{ if eq .chezmoi.hostname "t3code" -}}
+## T3 Code service administration
+
+- Before listing sessions, revoking access, or creating pairing codes, identify the running server's
+  executable and data directory from its process and service configuration. Do not assume the `t3`
+  command on `PATH` manages that server. The service launcher can start a different runtime version.
+- Use the running server's executable and pass its explicit `--base-dir` for auth and pairing
+  commands. On this server, the service data directory is `/home/t3code/.t3`; resolve the running
+  executable each time instead of saving a version-specific path.
+- Verify revocations and new pairing credentials against that same instance before reporting
+  success. When a remote pairing URL is requested, use `--tailscale` and report the expiry time.
+
+{{ end -}}
 ## Tools
 
 - Use ast-grep for structural source-code searches. Use rg for text search.
