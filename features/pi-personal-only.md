@@ -52,9 +52,3 @@ with any Pi model. Search first, then read relevant sources when exact wording o
 The executable must support `--json`, `--strip-mode`, `--dump-max-bytes`, and
 `--block-private-networks`. Unsupported versions fail without a less-restricted fallback.
 `LIGHTPANDA_BIN` can select an executable for temporary testing.
-
-Run `node scripts/check-read-url.mjs` for deterministic checks. Add `--live` and set
-`LIGHTPANDA_BIN` to test public documentation and authenticated OpenAI search. This uses read-only
-Pi credentials and the active `PI_PROVIDER` and `PI_MODEL` values. Add `--read-only` to skip search.
-Latency, output bytes, and simple factual checks are written to a temporary directory. These checks
-are a small diagnostic sample, not a general search-quality benchmark.

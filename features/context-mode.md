@@ -40,8 +40,7 @@ plan-mode restrictions, sandbox boundaries, authentication controls, or required
 Context Mode's server reads Claude-style `permissions.deny` rules. Version 1.0.169's Bash policy
 reader requires `CLAUDE_PROJECT_DIR`. The default CLI and Pi bridge do not initialize it for a
 normal non-Claude session. The managed MCP launcher runs `start.mjs`, which initializes this path
-from the workspace. Codex's native plugin also uses `start.mjs`. The runtime check verifies Bash and
-Read deny rules plus the project boundary for `ctx_execute_file`. These checks do not prove complete
+from the workspace. Codex's native plugin also uses `start.mjs`. This does not prove complete
 host-sandbox equivalence.
 
 Keep RTK for supported CLI output filtering. OpenCode and Pi use MCP without Context Mode lifecycle
@@ -53,20 +52,11 @@ existing session-memory workflow. Cursor project hook files can override global 
 Run these checks from the chezmoi source directory:
 
 ```bash
-python3 scripts/check-context-mode.py
-node scripts/check-context-mode.mjs
-node scripts/check-context-mode.mjs pi
-node scripts/check-context-mode.mjs codex
 pi mcp list
 opencode mcp list
 codex plugin list --marketplace context-mode --json
 codex mcp get context-mode --json
 ```
-
-The Python check requires Python 3.11+. It renders personal/work macOS/Linux templates, verifies
-configuration merges, and checks installer idempotency with a mock CLI. The Node check requires the
-pinned mise package. It uses temporary fixtures to verify MCP tools, large-content retrieval,
-execution, deny rules, file containment, and statistics. It removes only its temporary fixtures.
 
 Restart Pi, Codex, Claude Code, or Cursor after configuration changes. Reload OpenCode configuration
 with `opencode reload`. MCP startup is asynchronous; retry its status check after initialization. In
@@ -79,8 +69,8 @@ approval as part of verification.
 
 ## Updates and removal
 
-The npm package is pinned. To update it, change the mise version, launcher version, and check-script
-version together, install the new version, and rerun the checks. Native marketplace plugins use the
+The npm package is pinned. To update it, change the mise and launcher versions together, install the
+new version, and verify connectivity in each configured agent. Native marketplace plugins use the
 harness-managed update mechanisms from `tooling-update`; their versions can differ from the pinned
 MCP package. Do not use Context Mode's self-upgrader to rewrite managed configuration.
 

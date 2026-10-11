@@ -50,6 +50,9 @@ Preserve macOS/Linux branches in templates.
   completed work. Remove obsolete documentation; add a feature doc only when it provides useful
   context beyond the code.
 - Do not stage, commit, push, or apply unless explicitly requested.
+- Do not add regression tests or test scripts to this source repository unless explicitly requested.
+  General commit approval does not authorize their inclusion. Use temporary tests outside the
+  checkout and delete them after verification.
 - Automatically lint and format task files with the repository tools. Restrict automatic fixes to
   task paths and preserve unrelated changes. Include untracked task files in checks.
 - Repository-wide read-only checks, including typechecking, are allowed. Do not run repository-wide

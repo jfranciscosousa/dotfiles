@@ -26,6 +26,3 @@ template.
 Defaults do not prevent explicit workspace overrides. Existing threads do not move automatically.
 Deploy the source settings and instructions with an approved `chezmoi apply` on each device. The
 settings are environment-local; one server cannot update other devices through its settings API.
-
-Run `python3 scripts/check-t3-worktrees.py` to check macOS/Linux host classification, settings merge
-preservation, prefix, and the chezmoi exception without deployment.
