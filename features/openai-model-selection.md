@@ -28,14 +28,14 @@ machines, they use `litellm/gpt-6-sol` and `litellm/gpt-6-luna`.
 ## Claude models on Remote machines
 
 On `Remote-` machines, Claude Code defaults to `claude-sonnet-5-5`. Its `availableModels` setting
-lists only `claude-sonnet-5-5`, `claude-opus-5-5`, and `claude-fable-5-1`. T3 favorites these three
-models and hides the other Claude Agent models.
+lists only `claude-sonnet-5-5`, `claude-opus-5-5`, `claude-fable-5-1`, and `claude-haiku-5-5`. T3
+favorites these four models and hides the other Claude Agent models.
 
 ## Claude reasoning effort
 
 Claude Code sets the default effort per model with `modelSettings`: `claude-sonnet-5-5` uses `high`
 and `claude-opus-5-5` uses `xhigh`. Other models use the top-level `effortLevel` (`xhigh`). On
-`Remote-` machines, the top-level value and the `modelSettings` entries for the three available
+`Remote-` machines, the top-level value and the `modelSettings` entries for the four available
 models are `medium`. `CLAUDE_CODE_EFFORT_LEVEL` overrides these values, so do not set it.
 
 T3 has no per-model default. Its server `defaultModelSelection` sets one model and effort:
