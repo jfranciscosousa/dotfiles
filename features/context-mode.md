@@ -9,6 +9,8 @@ macOS and Linux. Pi and Codex remain excluded on work machines. Zed AI remains d
 The global mise configuration installs `npm:context-mode@1.0.169`. After applying the configuration,
 run `mise install npm:context-mode@1.0.169`. The managed `~/.scripts/bin/context-mode-mcp` launcher
 resolves that installation through mise and runs its `start.mjs` entry point. Node must be on PATH.
+The global mise configuration also installs Bun. Context Mode detects Bun on PATH and uses it to run
+JavaScript and TypeScript in `ctx_execute`. The server itself still runs on Node.
 
 | Agent       | Integration                                                               | Lifecycle hooks     |
 | ----------- | ------------------------------------------------------------------------- | ------------------- |
