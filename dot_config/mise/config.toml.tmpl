@@ -46,8 +46,8 @@ pi = "latest"
 chezmoi = "latest"
 "aqua:modem-dev/hunk" = "latest"
 "github:basecamp/hey-cli" = "latest"
-# Pin nightly assets by digest: upstream replaces the nightly downloads in place.
-"github:lightpanda-io/browser" = { version = "nightly", asset_pattern = "lightpanda-{{ if eq .chezmoi.arch "arm64" }}aarch64{{ else }}x86_64{{ end }}-{{ if eq .chezmoi.os "darwin" }}macos{{ else }}linux{{ end }}", bin = "lightpanda", checksum = "sha256:{{ if eq .chezmoi.os "darwin" }}{{ if eq .chezmoi.arch "arm64" }}0c07fde6a81338bfaf043397a4531effe55de93fe6e1b781ef1b91a84a30a203{{ else }}9d4394ee358cc3fa2e56b557b9c6ab1e81ba07b5dbcfa3b5bf9a649d15ce9e83{{ end }}{{ else }}{{ if eq .chezmoi.arch "arm64" }}97a61090a8f5bcf9954a45605912298d564b217040549997052cb31397691507{{ else }}e24d135bb5c4c0905cea9ee9a1cd87eff407755af24bd99b659fa64ec907f18d{{ end }}{{ end }}" }
+# Pin release assets by their published SHA-256 checksums.
+"github:lightpanda-io/browser" = { version = "1.0.1", asset_pattern = "lightpanda-{{ if eq .chezmoi.arch "arm64" }}aarch64{{ else }}x86_64{{ end }}-{{ if eq .chezmoi.os "darwin" }}macos{{ else }}linux{{ end }}", bin = "lightpanda", checksum = "sha256:{{ if eq .chezmoi.os "darwin" }}{{ if eq .chezmoi.arch "arm64" }}d4b66ac8484f49d7a49e05b6f9342716c747129527fcbe8ffe36679ffa18dd60{{ else }}1fcca0ae7684f470780de611a56e9a8ea612d5ff21e37dbb48905ebac5b918a7{{ end }}{{ else }}{{ if eq .chezmoi.arch "arm64" }}392ba370c12d9f045c36c1477db8b3e2985942c89532732ef8d1610057db7d5c{{ else }}551747e35c51ba107b5d5277eca4b48e077b2a3b40f09a047bf6670448bc35fd{{ end }}{{ end }}" }
 rg = "latest"
 ast-grep = "latest"
 bat = "latest"
