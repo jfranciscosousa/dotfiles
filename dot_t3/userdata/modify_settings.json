@@ -7,7 +7,19 @@
 {{- $instancePatch := dict -}}
 {{- $legacyPatch := dict -}}
 {{- $instances := index $existing "providerInstances" | default dict -}}
-{{- range $id, $enabled := dict "cursor" true "codex" false "claudeAgent" true "grok" false "opencode" true -}}
+{{- $isT3Server := eq .chezmoi.hostname "t3code" -}}
+{{- $providerStates := dict "cursor" true "codex" false "claudeAgent" true "grok" false "opencode" true -}}
+{{- if $isT3Server -}}
+{{- $providerStates = dict "cursor" false "codex" false "claudeAgent" false "grok" false "antigravity" false "muse" false "opencode" true "pi" true -}}
+{{- range $id, $instance := $instances -}}
+{{- $driver := index $instance "driver" | default $id -}}
+{{- $_ := set $providerStates $id (or (eq $driver "pi") (eq $driver "opencode")) -}}
+{{- end -}}
+{{- range $id, $_ := index $existing "providers" | default dict -}}
+{{- $_ := set $legacyPatch $id (dict "enabled" (or (eq $id "pi") (eq $id "opencode"))) -}}
+{{- end -}}
+{{- end -}}
+{{- range $id, $enabled := $providerStates -}}
 {{- if hasKey $instances $id -}}
 {{- $patch := dict "enabled" $enabled -}}
 {{- $config := index $instances $id "config" -}}
@@ -15,6 +27,8 @@
 {{- $_ := set $patch "config" (dict "enabled" $enabled) -}}
 {{- end -}}
 {{- $_ := set $instancePatch $id $patch -}}
+{{- else if $isT3Server -}}
+{{- $_ := set $instancePatch $id (dict "driver" $id "enabled" $enabled) -}}
 {{- else -}}
 {{- $_ := set $legacyPatch $id (dict "enabled" $enabled) -}}
 {{- end -}}
@@ -72,6 +86,18 @@
   "pullRequestMergeMethod" "squash"
   "cursorKeychainUsageEnabled" true
 -}}
+{{- if $isT3Server -}}
+{{- $_ := set $managed "defaultModelSelection" (dict
+  "instanceId" "pi"
+  "model" "openai-codex/gpt-6.1-sol"
+  "options" (list (dict "id" "thinking" "value" "medium"))
+) -}}
+{{- $_ := set $managed "textGenerationModelSelection" (dict
+  "instanceId" "pi"
+  "model" "openai-codex/gpt-6-luna"
+  "options" (list (dict "id" "thinking" "value" "high"))
+) -}}
+{{- end -}}
 {{- if $instancePatch -}}
 {{- $_ := set $managed "providerInstances" $instancePatch -}}
 {{- end -}}

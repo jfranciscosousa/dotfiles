@@ -38,10 +38,17 @@ and `claude-opus-5-5` uses `xhigh`. Other models use the top-level `effortLevel`
 `Remote-` machines, the top-level value and the `modelSettings` entries for the four available
 models are `medium`. `CLAUDE_CODE_EFFORT_LEVEL` overrides these values, so do not set it.
 
-T3 has no per-model default. Its server `defaultModelSelection` sets one model and effort:
-`claude-opus-5-5` with `xhigh` (`medium` on `Remote-` machines) and a 1M context window. T3 sends
-the effort with each session, so `modelSettings` does not apply there. To use another model in T3,
-choose its effort in the model picker. T3 text generation uses `claude-sonnet-5-5` with `high`
+On hostname `t3code`, T3 enables only Pi and OpenCode provider instances. The chezmoi settings
+modifier overrides stored enablement, including custom instances, and disables instances with other
+drivers. New threads use Pi with `openai-codex/gpt-6.1-sol` and `medium` thinking. Text generation
+uses Pi with `openai-codex/gpt-6-luna` and `high` thinking. These settings affect all clients
+connected to that server. They do not restrict programs outside T3 or prevent later settings changes
+in T3.
+
+On other hosts, T3 has no per-model default. Its server `defaultModelSelection` sets one model and
+effort: `claude-opus-5-5` with `xhigh` (`medium` on `Remote-` machines) and a 1M context window. T3
+sends the effort with each session, so `modelSettings` does not apply there. To use another model in
+T3, choose its effort in the model picker. T3 text generation uses `claude-sonnet-5-5` with `high`
 effort and a 1M context window. Source-control text uses the T3 default.
 
 On `Remote-` machines, T3 lists `litellm/gpt-6.1-sol` as an OpenCode custom model. T3 drops gateway
