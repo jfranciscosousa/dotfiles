@@ -18,8 +18,8 @@ credential_command = 'gh auth token --hostname github.com'
 [tools]
 {{ if hasPrefix "Remote-" .chezmoi.hostname -}}
 remotectl = "latest"
-"npm:@anthropic-ai/claude-code" = { version = "latest", allow_builds = ["@anthropic-ai/claude-code"] }
 {{ end -}}
+"npm:@anthropic-ai/claude-code" = { version = "latest", allow_builds = ["@anthropic-ai/claude-code"] }
 node = "26.12.0"
 rust = "stable"
 "cargo:https://github.com/rtk-ai/rtk" = "branch:master"

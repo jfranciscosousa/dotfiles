@@ -25,7 +25,9 @@ install or configure Codex.
 AI-enabled Git scripts use `gpt-6.1-sol` by default and `gpt-6-luna` for fast requests. On `Remote-`
 machines, they use `litellm/gpt-6-sol` and `litellm/gpt-6-luna`.
 
-## Claude models on Remote machines
+## Claude availability and models
+
+The global mise configuration installs Claude Code on personal and work machines.
 
 On `Remote-` machines, Claude Code defaults to `claude-sonnet-5-5`. Its `availableModels` setting
 lists only `claude-sonnet-5-5`, `claude-opus-5-5`, `claude-fable-5-1`, and `claude-haiku-5-5`. T3
@@ -38,12 +40,12 @@ and `claude-opus-5-5` uses `xhigh`. Other models use the top-level `effortLevel`
 `Remote-` machines, the top-level value and the `modelSettings` entries for the four available
 models are `medium`. `CLAUDE_CODE_EFFORT_LEVEL` overrides these values, so do not set it.
 
-On hostname `t3code`, T3 enables only Pi and OpenCode provider instances. The chezmoi settings
-modifier overrides stored enablement, including custom instances, and disables instances with other
-drivers. New threads use Pi with `openai-codex/gpt-6.1-sol` and `medium` thinking. Text generation
-uses Pi with `openai-codex/gpt-6-luna` and `high` thinking. These settings affect all clients
-connected to that server. They do not restrict programs outside T3 or prevent later settings changes
-in T3.
+On hostname `t3code`, T3 enables only Pi, OpenCode, and Claude Agent provider instances. The chezmoi
+settings modifier overrides stored enablement, including custom instances, and disables instances
+with other drivers. New threads use Pi with `openai-codex/gpt-6.1-sol` and `medium` thinking. Text
+generation uses Pi with `openai-codex/gpt-6-luna` and `high` thinking. These settings affect all
+clients connected to that server. They do not restrict programs outside T3 or prevent later settings
+changes in T3.
 
 On other hosts, T3 has no per-model default. Its server `defaultModelSelection` sets one model and
 effort: `claude-opus-5-5` with `xhigh` (`medium` on `Remote-` machines) and a 1M context window. T3
