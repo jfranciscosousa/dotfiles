@@ -16,7 +16,9 @@ restrictions of the repository authorization.
 Recover autonomously when the fix is clear and preserves user work. Never force-push, discard user
 changes, disable security checks, or blindly select an entire conflict side. Allow at most two
 recovery attempts per operation. If SSH authentication fails, stop and ask the user to approve the
-1Password prompt. Do not retry or investigate unless the user asks.
+1Password prompt. Do not retry or investigate unless the user asks. Exception: if SSH authentication
+fails during the fetch or pull in section 1, do not stop. Follow the offline fallback in that
+section.
 
 A failure blocks dependent steps, not independent work. Always produce the final summary. Ask for
 guidance only when required authorization is missing, authentication requires user action, intent is
@@ -52,6 +54,12 @@ Before changing Git state:
   excludes untracked files and can conflict during restoration. If temporary stashing is necessary,
   record the stash identity, include affected untracked files, and preserve the original index.
   Retain the recovery copy until restoration is verified. Do not delete obstructing files.
+
+Offline fallback: this workflow can run unattended. If the fetch or pull fails because SSH
+authentication fails, do not retry or investigate. Skip the rest of synchronization, continue with
+the current checkout, and report in the final summary that the checkout may be stale. Do not push in
+this run. Treat the current HEAD as the synchronized state for the later steps. Other fetch or pull
+failures, such as conflicts, are not covered by this fallback.
 
 Fast-forward when possible; otherwise rebase unpublished workflow commits onto the configured
 upstream. Resolve conflicts only when both sides' intent is clear. Inspect base, local, and remote
