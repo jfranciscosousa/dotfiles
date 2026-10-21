@@ -1,0 +1,19 @@
+{{- $model := dict
+  "reasoning" true
+  "input" (list "text" "image")
+  "contextWindow" 1050000
+  "maxTokens" 128000
+-}}
+{{- $models := list
+  (merge (dict "id" "gpt-6.1-sol" "name" "GPT-6.1 Sol" "cost" (dict "input" 2 "output" 10 "cacheRead" 0.1 "cacheWrite" 2.5 "tiers" (list (dict "inputTokensAbove" 272000 "input" 4 "output" 15 "cacheRead" 0.2 "cacheWrite" 5)))) $model)
+  (merge (dict "id" "gpt-6-luna" "name" "GPT-6 Luna" "cost" (dict "input" 0.1 "output" 0.5 "cacheRead" 0.01 "cacheWrite" 0.125 "tiers" (list (dict "inputTokensAbove" 272000 "input" 0.2 "output" 0.75 "cacheRead" 0.02 "cacheWrite" 0.25)))) $model)
+  (merge (dict "id" "gpt-6-astra" "name" "GPT-6 Astra" "cost" (dict "input" 10 "output" 50 "cacheRead" 1 "cacheWrite" 12.5 "tiers" (list (dict "inputTokensAbove" 272000 "input" 20 "output" 75 "cacheRead" 2 "cacheWrite" 25)))) $model)
+-}}
+{{- /* Reuse the Remote AI Gateway key that OpenCode's /connect stores. */ -}}
+{{- $authFile := joinPath (env "XDG_DATA_HOME" | default (joinPath .chezmoi.homeDir ".local/share")) "opencode/auth.json" -}}
+{{ dict "providers" (dict "litellm" (dict
+  "baseUrl" "https://ai-gateway-internal.eu-west-1.remote.com/v1"
+  "api" "openai-responses"
+  "apiKey" (printf "!jq -r '.litellm.key // empty' %s" (squote $authFile))
+  "models" $models
+)) | toPrettyJson }}

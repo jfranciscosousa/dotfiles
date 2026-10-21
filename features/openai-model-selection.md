@@ -15,9 +15,10 @@ for `Other` in `/connect`, select it, then enter `litellm` as the provider ID an
 Searching for `litellm` before adding the key returns no results. Restart OpenCode to refresh the
 model list.
 
-Pi runs only on personal machines. Its model picker and cycling list the same three OpenAI models.
-Pi uses `gpt-6.1-sol` by default. Its image-generation tool uses `gpt-6-astra`. Pi's `enabledModels`
-setting controls selection in the UI, not explicit CLI model arguments.
+Pi's model picker and cycling list the same three OpenAI models, with `gpt-6.1-sol` as the default.
+Personal machines use the `openai-codex` provider. `Remote-` machines use the `litellm` provider.
+See [Pi](pi.md). Pi's image-generation tool uses `gpt-6-astra` on personal machines. Pi's
+`enabledModels` setting controls selection in the UI, not explicit CLI model arguments.
 
 On personal machines, Codex defaults to `gpt-6.1-sol`. Codex has no local model allowlist setting,
 so users can select other models with `--model` or project configuration. Remote machines do not
@@ -40,6 +41,10 @@ Claude Code sets the default effort per model with `modelSettings`: `claude-sonn
 and `claude-opus-5-5` uses `xhigh`. Other models use the top-level `effortLevel` (`xhigh`). On
 `Remote-` machines, the top-level value and the `modelSettings` entries for the four available
 models are `medium`. `CLAUDE_CODE_EFFORT_LEVEL` overrides these values, so do not set it.
+
+On machines other than `t3code`, T3 enables the Pi, Cursor, OpenCode, and Claude Agent providers and
+disables Codex and Grok. Pi uses the machine's Pi configuration, so `Remote-` machines get the
+LiteLLM models.
 
 On hostname `t3code`, T3 enables only Pi, OpenCode, and Claude Agent provider instances. The chezmoi
 settings modifier overrides stored enablement, including custom instances, and disables instances

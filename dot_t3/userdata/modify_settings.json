@@ -8,7 +8,7 @@
 {{- $legacyPatch := dict -}}
 {{- $instances := index $existing "providerInstances" | default dict -}}
 {{- $isT3Server := eq .chezmoi.hostname "t3code" -}}
-{{- $providerStates := dict "cursor" true "codex" false "claudeAgent" true "grok" false "opencode" true -}}
+{{- $providerStates := dict "cursor" true "codex" false "claudeAgent" true "grok" false "opencode" true "pi" true -}}
 {{- if $isT3Server -}}
 {{- $providerStates = dict "cursor" false "codex" false "claudeAgent" true "grok" false "antigravity" false "muse" false "opencode" true "pi" true -}}
 {{- range $id, $instance := $instances -}}

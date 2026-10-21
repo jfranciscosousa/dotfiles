@@ -1,0 +1,15 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+# ~/.pi becomes a symlink to the variant directory. Move a real directory first so
+# chezmoi does not replace sessions, auth, and packages with the symlink.
+variant="$HOME/{{ if hasPrefix "Remote-" .chezmoi.hostname }}.pi-work{{ else }}.pi-personal{{ end }}"
+
+[[ -d "$HOME/.pi" && ! -L "$HOME/.pi" ]] || exit 0
+
+if [[ -e "$variant" ]]; then
+  printf 'warning: %s and a real ~/.pi both exist; merge them manually before chezmoi replaces ~/.pi\n' "$variant" >&2
+  exit 1
+fi
+
+mv "$HOME/.pi" "$variant"
