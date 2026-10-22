@@ -2,7 +2,7 @@
 
 [Context Mode](https://github.com/mksglu/context-mode) indexes large tool outputs in local SQLite
 and retrieves relevant sections. Chezmoi configures it on personal and `Remote-*` work machines, on
-macOS and Linux. Codex remains excluded on work machines. Zed AI remains disabled.
+macOS and Linux. Pi and Codex remain excluded on work machines. Zed AI remains disabled.
 
 ## Installation
 
@@ -12,13 +12,13 @@ resolves that installation through mise and runs its `start.mjs` entry point. No
 The global mise configuration also installs Bun. Context Mode detects Bun on PATH and uses it to run
 JavaScript and TypeScript in `ctx_execute`. The server itself still runs on Node.
 
-| Agent       | Integration                                                         | Lifecycle hooks     |
-| ----------- | ------------------------------------------------------------------- | ------------------- |
-| Claude Code | User-scoped marketplace plugin, installed when its CLI is available | Plugin hooks        |
-| Codex       | User-scoped marketplace plugin, personal machines only              | Requires hook trust |
-| OpenCode 2  | Global MCP server and scoped routing instructions                   | None                |
-| Pi 1        | Built-in global MCP server with codemode exposure                   | None                |
-| Cursor      | Global MCP server, routing rule, and hooks alongside RTK            | Tool and stop hooks |
+| Agent       | Integration                                                               | Lifecycle hooks     |
+| ----------- | ------------------------------------------------------------------------- | ------------------- |
+| Claude Code | User-scoped marketplace plugin, installed when its CLI is available       | Plugin hooks        |
+| Codex       | User-scoped marketplace plugin, personal machines only                    | Requires hook trust |
+| OpenCode 2  | Global MCP server and scoped routing instructions                         | None                |
+| Pi 1        | Built-in global MCP server with codemode exposure, personal machines only | None                |
+| Cursor      | Global MCP server, routing rule, and hooks alongside RTK                  | Tool and stop hooks |
 
 The apply script installs missing Claude Code and Codex plugins. It preserves installed plugins and
 enabled states. It skips unavailable CLIs and reports installation failures as warnings. A later

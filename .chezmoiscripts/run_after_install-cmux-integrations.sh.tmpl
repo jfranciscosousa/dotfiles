@@ -3,7 +3,9 @@ set -euo pipefail
 
 command -v cmux >/dev/null 2>&1 || exit 0
 
+{{- if not (hasPrefix "Remote-" .chezmoi.hostname) }}
 cmux hooks pi install --yes
+{{- end }}
 
 opencode_config="${XDG_CONFIG_HOME:-$HOME/.config}/opencode/opencode.json"
 if [[ -f "$opencode_config" ]]; then

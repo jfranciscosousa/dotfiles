@@ -1,0 +1,48 @@
+{{- /* chezmoi:modify-template */ -}}
+{{- $provider := "openai" -}}
+{{- $defaultModel := "gpt-6-astra" -}}
+{{- $defaultThinkingLevel := "high" -}}
+{{- if not (hasPrefix "Remote-" .chezmoi.hostname) -}}
+{{- $provider = "openai-codex" -}}
+{{- $defaultModel = "gpt-6.1-sol" -}}
+{{- $defaultThinkingLevel = "medium" -}}
+{{- end -}}
+
+{{- $existing := dict -}}
+{{- if .chezmoi.stdin -}}
+{{- $existing = .chezmoi.stdin | fromJson -}}
+{{- end -}}
+
+{{- $enabledModels := list
+  (printf "%s/gpt-6.1-sol" $provider)
+  (printf "%s/gpt-6-luna" $provider)
+  (printf "%s/gpt-6-astra" $provider)
+  "openrouter/deepseek/deepseek-v4.1-flash"
+-}}
+{{- if hasPrefix "Remote-" .chezmoi.hostname -}}
+{{- $anthropicModels := list
+  "anthropic/claude-fable-5"
+  "anthropic/claude-opus-5"
+  "anthropic/claude-sonnet-5"
+-}}
+{{- range $anthropicModels -}}
+{{- $enabledModels = append $enabledModels . -}}
+{{- end -}}
+{{- end -}}
+{{- $_ := unset $existing "subagents" -}}
+{{- $_ := unset $existing "npmCommand" -}}
+{{- $managed := dict
+  "theme" "dark"
+  "defaultProvider" $provider
+  "defaultModel" $defaultModel
+  "defaultThinkingLevel" $defaultThinkingLevel
+  "hideThinkingBlock" true
+  "enabledModels" $enabledModels
+  "packages" (list
+    "git:github.com/sting8k/pi-vcc@f16600028524581faf9c3b2e0e99fa7931bbe2d2"
+    "npm:@dietrichgebert/ponytail"
+  )
+  "shellPath" "/bin/zsh"
+-}}
+
+{{ mergeOverwrite $existing $managed | toPrettyJson }}

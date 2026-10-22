@@ -33,13 +33,10 @@ Library
 {{- end }}
 
 {{- if not (hasPrefix "Remote-" .chezmoi.hostname) }}
-.pi-work
-.pi-work/**
 .zsh/remote.sh
 {{- else }}
 .codex/**
-.pi-personal
-.pi-personal/**
+.pi/**
 .zsh/personal.sh
 {{- end }}
 

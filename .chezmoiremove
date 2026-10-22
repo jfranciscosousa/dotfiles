@@ -1,7 +1,8 @@
-.pi-personal/agent/missions
-.pi-personal/agent/extensions/critical.ts
+.pi/agent/missions
+.pi/agent/extensions/critical.ts
 {{- if hasPrefix "Remote-" .chezmoi.hostname }}
 .codex
+.pi
 {{- end }}
 .config/opencode/prompts
 .config/opencode/plugins/critical.ts
