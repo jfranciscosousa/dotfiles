@@ -9,6 +9,8 @@ the current prompt.
 - If SSH authentication fails, stop and ask me to approve the 1Password prompt. Retry only when I
   ask. Do not investigate SSH failures unless I explicitly ask.
 - Prefix new branches and worktrees with `fs/`.
+- Create worktrees in `~/.worktrees/<repo>/<name>`, never inside or next to the checkout. Tools that
+  choose their own worktree location, such as T3 Code, keep it.
 - Do not stage or commit generated demo artifacts, screenshots, or screen recordings unless I
   explicitly request their inclusion in the repository. Save them outside the checkout by default.
   When I request a demo, include its artifacts in the PR or MR description as essential code review
