@@ -40,16 +40,27 @@
 {{- $effort = "medium" -}}
 {{- $workspace = "local" -}}
 {{- /* T3 drops plugin models from its OpenCode 2 catalog: https://github.com/pingdotgg/t3code/issues/15155 */ -}}
-{{- $gatewayModel := "litellm/gpt-6.1-sol" -}}
-{{- if hasKey $instancePatch "opencode" -}}
 {{- $customModels := dig "opencode" "config" "customModels" list $instances -}}
-{{- if not (has $gatewayModel $customModels) -}}
-{{- $patchConfig := index $instancePatch "opencode" "config" | default dict -}}
-{{- $_ := set $patchConfig "customModels" (append $customModels $gatewayModel) -}}
-{{- $_ := set (index $instancePatch "opencode") "config" $patchConfig -}}
-{{- end -}}
+{{- $otherModels := list -}}
+{{- $oldGatewayModels := list -}}
+{{- range $customModels -}}
+{{- if hasPrefix "litellm/" . -}}
+{{- $oldGatewayModels = append $oldGatewayModels . -}}
 {{- else -}}
-{{- $_ := set (index $legacyPatch "opencode") "customModels" (list $gatewayModel) -}}
+{{- $otherModels = append $otherModels . -}}
+{{- end -}}
+{{- end -}}
+{{- /* Offline or no key: keep the gateway models T3 already lists. */ -}}
+{{- $gatewayModels := splitList "\n" (output "bash" (joinPath .chezmoi.sourceDir ".chezmoitemplates/t3/gateway-models.sh") | trim) | compact -}}
+{{- if not $gatewayModels -}}
+{{- $gatewayModels = $oldGatewayModels | default (list "litellm/gpt-6.1-sol") -}}
+{{- end -}}
+{{- if hasKey $instancePatch "opencode" -}}
+{{- $patchConfig := index $instancePatch "opencode" "config" | default dict -}}
+{{- $_ := set $patchConfig "customModels" (concat $otherModels $gatewayModels) -}}
+{{- $_ := set (index $instancePatch "opencode") "config" $patchConfig -}}
+{{- else -}}
+{{- $_ := set (index $legacyPatch "opencode") "customModels" $gatewayModels -}}
 {{- end -}}
 {{- end -}}
 

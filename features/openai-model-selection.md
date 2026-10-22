@@ -54,7 +54,12 @@ sends the effort with each session, so `modelSettings` does not apply there. To 
 T3, choose its effort in the model picker. T3 text generation uses `claude-sonnet-5-5` with `high`
 effort and a 1M context window. Source-control text uses the T3 default.
 
-On `Remote-` machines, T3 lists `litellm/gpt-6.1-sol` as an OpenCode custom model. T3 drops gateway
-models from its OpenCode 2 catalog
-([t3code#15155](https://github.com/pingdotgg/t3code/issues/15155)). Remove the custom model when a
-T3 release fixes this issue.
+On `Remote-` machines, T3 lists every AI Gateway chat model as an OpenCode custom model. T3 drops
+gateway models from its OpenCode 2 catalog
+([t3code#15155](https://github.com/pingdotgg/t3code/issues/15155)). Remove this workaround when a T3
+release fixes the issue.
+
+`.chezmoitemplates/t3/gateway-models.sh` reads the model list from the gateway with the key from
+`~/.local/share/opencode/auth.json`. `chezmoi apply` replaces the `litellm/` entries in
+`customModels` with that list and keeps other entries. If the key or network is missing, it keeps
+the existing `litellm/` entries.
