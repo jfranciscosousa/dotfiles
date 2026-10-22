@@ -12,7 +12,7 @@
     }
   },
   "automation": {
-    "claudeCodeIntegration": true,
+    "claudeCodeIntegration": false,
     "workspaceAutoNaming": true
   },
   "sidebar": {
