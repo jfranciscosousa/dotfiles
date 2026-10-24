@@ -1,5 +1,15 @@
 .pi/agent/missions
 .pi/agent/extensions/critical.ts
+.pi/agent/npm/node_modules/@dietrichgebert/ponytail
+.claude/plugins/cache/ponytail
+.claude/plugins/marketplaces/ponytail
+.codex/.tmp/marketplaces/ponytail
+.codex/plugins/cache/ponytail
+.codex/plugins/data/ponytail-ponytail
+.config/opencode/node_modules/@dietrichgebert/ponytail
+.cache/opencode/packages/@dietrichgebert/ponytail
+.cache/opencode/packages/@dietrichgebert/ponytail@latest
+.cache/opencode/npm/@dietrichgebert/ponytail@latest
 {{- if hasPrefix "Remote-" .chezmoi.hostname }}
 .codex
 .pi

@@ -40,7 +40,6 @@
   "enabledModels" $enabledModels
   "packages" (list
     "git:github.com/sting8k/pi-vcc@f16600028524581faf9c3b2e0e99fa7931bbe2d2"
-    "npm:@dietrichgebert/ponytail"
   )
   "shellPath" "/bin/zsh"
 -}}

@@ -31,7 +31,7 @@ and the MCP fallback. Existing Remote MCP servers remain in the same server map.
 
 Pi uses its built-in MCP support instead of Context Mode's Pi package. That package registers its
 own tools through a legacy bridge; adding it alongside the managed MCP server creates duplicate
-integrations. Pi's existing VCC and Ponytail packages remain unchanged.
+integrations. Pi retains its existing VCC package.
 
 ## Security and limitations
 
